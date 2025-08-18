@@ -5,6 +5,7 @@ interface StatusBarProps {
   status: ProcessStatus;
   completedSteps?: ProcessStatus[];
   onRestartFrom?: (step: ProcessStatus) => void;
+  hasFeedback?: boolean;
 }
 
 const steps = [
@@ -16,7 +17,7 @@ const steps = [
   { id: ProcessStatus.FEEDBACK, label: 'Feedback' },
 ];
 
-const StatusBar: React.FC<StatusBarProps> = ({ status, completedSteps = [], onRestartFrom }) => {
+const StatusBar: React.FC<StatusBarProps> = ({ status, completedSteps = [], onRestartFrom, hasFeedback = false }) => {
   const [hoveredStep, setHoveredStep] = useState<ProcessStatus | null>(null);
   const getStatusIndex = () => {
     switch(status) {
@@ -58,6 +59,7 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, completedSteps = [], onRe
         {steps.map((step, index) => {
           const { isCompleted, isCurrent, isHovered, willRerun } = getStepState(step, index);
           const canRestart = isCompleted && onRestartFrom;
+          const showFeedbackGlow = hasFeedback && isCompleted && !isCurrent;
           
           return (
             <React.Fragment key={step.id}>
@@ -68,14 +70,20 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, completedSteps = [], onRe
                 onClick={() => canRestart && onRestartFrom(step.id)}
               >
                 <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 
+                  w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 relative
                   ${isCompleted && !isHovered && !willRerun ? 'bg-green-500' : ''}
                   ${isCompleted && isHovered ? 'bg-blue-500 ring-2 ring-blue-300 scale-110' : ''}
                   ${isCurrent ? 'bg-blue-500 animate-pulse' : ''}
                   ${willRerun && !isHovered ? 'bg-gray-400 dark:bg-gray-600' : ''}
                   ${!isCompleted && !isCurrent ? 'bg-gray-400 dark:bg-gray-600' : ''}
                   ${canRestart ? 'hover:scale-110' : ''}
+                  ${showFeedbackGlow ? 'ring-2 ring-blue-200 dark:ring-blue-400 ring-opacity-50 shadow-lg shadow-blue-200/30 dark:shadow-blue-400/20' : ''}
                 `}>
+                  {/* Restart indicator badge when feedback is present */}
+                  {showFeedbackGlow && (
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 rounded-full animate-pulse border-2 border-white dark:border-gray-800">
+                    </div>
+                  )}
                   {isCompleted ? (
                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
@@ -96,7 +104,7 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, completedSteps = [], onRe
                 {/* Restart Tooltip */}
                 {canRestart && (
                   <div className="opacity-0 group-hover:opacity-100 absolute -top-10 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap transition-opacity z-10">
-                    Restart from here
+                    {hasFeedback ? 'Restart from here with feedback' : 'Restart from here'}
                   </div>
                 )}
               </div>
@@ -117,6 +125,16 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, completedSteps = [], onRe
       {hoveredStep && onRestartFrom && (
         <div className="mt-2 text-xs text-gray-600 dark:text-gray-400 text-center">
           Will rerun: {getAffectedSteps(hoveredStep).join(' → ')}
+        </div>
+      )}
+      
+      {/* Feedback hint */}
+      {hasFeedback && completedSteps.length > 0 && !hoveredStep && (
+        <div className="mt-2 text-xs text-blue-600 dark:text-blue-400 text-center flex items-center justify-center gap-1">
+          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+          </svg>
+          💡 Click completed steps to restart from there
         </div>
       )}
     </div>

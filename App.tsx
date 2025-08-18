@@ -149,6 +149,7 @@ export default function App() {
     aggregatorSentPrompt: string;
     stylizedFacts: StylizedFact[];
     stylizedQuestions: string[];
+    completedSteps: ProcessStatus[];
   };
 
   const LAST_RUN_KEY = 'mars:lastRun';
@@ -172,6 +173,7 @@ export default function App() {
         aggregatorSentPrompt,
         stylizedFacts,
         stylizedQuestions,
+        completedSteps,
       };
       localStorage.setItem(LAST_RUN_KEY, JSON.stringify(payload));
     } catch {}
@@ -185,6 +187,20 @@ export default function App() {
     } catch {
       return null;
     }
+  };
+
+  // Helper function to determine completed steps based on current state (for backward compatibility)
+  const deriveCompletedSteps = (data: Partial<SavedRun>): ProcessStatus[] => {
+    const steps: ProcessStatus[] = [];
+    if (data.researchSummary) steps.push(ProcessStatus.RESEARCHING);
+    if (data.generatedAnalysis) steps.push(ProcessStatus.GENERATING);
+    if (data.critique) steps.push(ProcessStatus.EVALUATING);
+    if (data.proposal) steps.push(ProcessStatus.PROPOSING);
+    if (data.finalReport) steps.push(ProcessStatus.AGGREGATING);
+    if (data.stylizedFacts && data.stylizedFacts.length > 0) steps.push(ProcessStatus.GENERATING_FACTS);
+    if (data.stylizedQuestions && data.stylizedQuestions.length > 0) steps.push(ProcessStatus.GENERATING_QUESTIONS);
+    if (steps.length > 0) steps.push(ProcessStatus.FEEDBACK);
+    return steps;
   };
 
   const isOutputsEmpty = () => (
@@ -213,6 +229,7 @@ export default function App() {
         setAggregatorSentPrompt(data.aggregatorSentPrompt || '');
         setStylizedFacts(data.stylizedFacts || []);
         setStylizedQuestions(data.stylizedQuestions || []);
+        setCompletedSteps(data.completedSteps || deriveCompletedSteps(data));
         setStatus(ProcessStatus.FEEDBACK);
         // Optionally clear the hash to avoid repeated restores
         history.replaceState(null, '', window.location.pathname);
@@ -256,6 +273,7 @@ export default function App() {
     setAggregatorSentPrompt(data.aggregatorSentPrompt);
     setStylizedFacts(data.stylizedFacts || []);
     setStylizedQuestions(data.stylizedQuestions || []);
+    setCompletedSteps(data.completedSteps || deriveCompletedSteps(data));
     setStatus(ProcessStatus.FEEDBACK);
     setShowRestoreToast(false);
   };
@@ -275,6 +293,7 @@ export default function App() {
     setAggregatorSentPrompt('');
     setStylizedFacts([]);
     setStylizedQuestions([]);
+    setCompletedSteps([]);
     setError(null);
   };
 
@@ -577,6 +596,7 @@ ${questionsText}
     aggregatorSentPrompt,
     stylizedFacts,
     stylizedQuestions,
+    completedSteps,
   });
 
   const handleExportJson = () => {
@@ -697,6 +717,7 @@ ${questionsText}
                 status={status} 
                 completedSteps={completedSteps}
                 onRestartFrom={handleRestartFrom}
+                hasFeedback={feedback.trim().length > 0}
               />
               
               {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-800 dark:text-red-200 p-4 rounded-lg">{error}</div>}
