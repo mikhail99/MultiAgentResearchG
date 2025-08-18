@@ -1,0 +1,4 @@
+{
+  "name": "Multi-Agent Research Assistant",
+  "description": "A web application demonstrating a multi-agent analysis workflow with a human-in-the-loop for feedback and iterative refinement. The system generates stylized facts and questions about a user-provided topic."
+}
