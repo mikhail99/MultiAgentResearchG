@@ -60,7 +60,7 @@ export const generateContentStream = async (
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'local-model',
+          model: 'qwen3:4b',
           messages: [{ role: 'user', content: fullPrompt }],
           temperature: 0.5,
           stream: true, // Enable streaming
@@ -154,7 +154,7 @@ export const generateContent = async (agentName: AgentName, fullPrompt: string, 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'local-model',
+          model: 'qwen3:4b',
           messages: [{ role: 'user', content: fullPrompt }],
           temperature: 0.5,
           stream: false,
@@ -269,7 +269,7 @@ export const generateFacts = async (finalReport: string, options: LlmOptions): P
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'local-model',
+          model: 'qwen3:4b',
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.5,
           stream: false,
@@ -351,7 +351,7 @@ export const generateQuestions = async (finalReport: string, options: LlmOptions
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'local-model',
+            model: 'qwen3:4b',
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.5,
             stream: false,

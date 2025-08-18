@@ -67,7 +67,9 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ facts, questions, isLoading
           </div>
         </div>
         <div className="p-4 overflow-y-auto flex-grow">
-          {isLoadingFacts ? <LoadingSpinner /> : (
+          {facts.length === 0 && isLoadingFacts ? (
+            <LoadingSpinner />
+          ) : (
             <div className="space-y-4">
               {facts.map((item, index) => (
                 <div key={index} className="bg-gray-100 dark:bg-gray-900/50 p-3 rounded-md">
@@ -75,6 +77,12 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ facts, questions, isLoading
                   <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{item.description}</p>
                 </div>
               ))}
+              {isLoadingFacts && (
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                  <span className="inline-block w-2 h-4 bg-blue-400 animate-pulse mr-2" />
+                  Streaming facts...
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -97,15 +105,25 @@ const ResultsPanel: React.FC<ResultsPanelProps> = ({ facts, questions, isLoading
           </div>
         </div>
         <div className="p-4 overflow-y-auto flex-grow">
-          {isLoadingQuestions ? <LoadingSpinner /> : (
-            <ul className="space-y-3 list-inside">
-              {questions.map((q, index) => (
-                <li key={index} className="text-purple-700 dark:text-purple-300 flex items-start">
-                  <svg className="w-4 h-4 mr-2 mt-1 text-purple-500 dark:text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0110 5a3 3 0 012.598 4.577 1 1 0 11-1.732.998A1 1 0 0010 9a1 1 0 000 2h.001a1 1 0 100 2H10a1 1 0 100-2H9a1 1 0 100 2h1a1 1 0 100-2h.001a1 1 0 100 2H10a3 3 0 01-2.598-4.577A1 1 0 118.268 9.423A1 1 0 0010 11a1 1 0 100-2h-.001a1 1 0 00-.002 0H10a1 1 0 000-2z" clipRule="evenodd"></path></svg>
-                  <span>{q}</span>
-                </li>
-              ))}
-            </ul>
+          {questions.length === 0 && isLoadingQuestions ? (
+            <LoadingSpinner />
+          ) : (
+            <>
+              <ul className="space-y-3 list-inside">
+                {questions.map((q, index) => (
+                  <li key={index} className="text-purple-700 dark:text-purple-300 flex items-start">
+                    <svg className="w-4 h-4 mr-2 mt-1 text-purple-500 dark:text-purple-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0110 5a3 3 0 012.598 4.577 1 1 0 11-1.732.998A1 1 0 0010 9a1 1 0 000 2h.001a1 1 0 100 2H10a1 1 0 100-2H9a1 1 0 100 2h1a1 1 0 100-2z" clipRule="evenodd"></path></svg>
+                    <span>{q}</span>
+                  </li>
+                ))}
+              </ul>
+              {isLoadingQuestions && (
+                <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  <span className="inline-block w-2 h-4 bg-purple-400 animate-pulse mr-2" />
+                  Streaming questions...
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

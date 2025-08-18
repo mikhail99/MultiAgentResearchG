@@ -36,6 +36,44 @@ const fillPromptTemplate = (template: string, data: Record<string, string>): str
   }, template);
 };
 
+// Incremental parsers for streaming facts/questions built on top of bullet lists
+const parseFactsFromBuffer = (buffer: string): StylizedFact[] => {
+  const lines = buffer.split(/\r?\n/);
+  const facts: StylizedFact[] = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line.startsWith('-')) continue;
+    const cleaned = line.replace(/^[-•]\s*/, '');
+    const parts = cleaned.split(/\s[—:-]\s|:\s|\s—\s/);
+    if (parts.length >= 2) {
+      const [fact, ...rest] = parts;
+      const description = rest.join(' ').trim();
+      if (fact && description) facts.push({ fact: fact.trim(), description });
+    }
+  }
+  const seen = new Set<string>();
+  return facts.filter(f => {
+    const key = `${f.fact}|||${f.description}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+const parseQuestionsFromBuffer = (buffer: string): string[] => {
+  const lines = buffer.split(/\r?\n/);
+  const out: string[] = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (line.startsWith('-')) {
+      const cleaned = line.replace(/^[-•]\s*/, '').trim();
+      if (cleaned) out.push(cleaned);
+    }
+  }
+  const seen = new Set<string>();
+  return out.filter(q => (seen.has(q) ? false : (seen.add(q), true)));
+};
+
 
 export default function App() {
   const [topic, setTopic] = useState<string>('');
@@ -66,6 +104,8 @@ export default function App() {
   const [stylizedQuestions, setStylizedQuestions] = useState<string[]>([]);
 
   const [error, setError] = useState<string | null>(null);
+  const [showRestoreToast, setShowRestoreToast] = useState<boolean>(false);
+  const [showLinkToast, setShowLinkToast] = useState<boolean>(false);
   
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('theme')) {
@@ -79,13 +119,145 @@ export default function App() {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
+    // Ensure Tailwind's class-based dark mode toggles reliably
+    root.classList.toggle('dark', theme === 'dark');
+    // Help native form controls match theme in some browsers
+    (root as HTMLElement).style.colorScheme = theme;
+    // Also toggle on body for components that might scope styles there
+    document.body.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // --- Autosave / Restore last run ---
+  type SavedRun = {
+    timestamp: string;
+    topic: string;
+    iteration: number;
+    modelProvider: ModelProvider;
+    researchSummary: string;
+    researcherSentPrompt: string;
+    generatedAnalysis: string;
+    generatorSentPrompt: string;
+    critique: string;
+    evaluatorSentPrompt: string;
+    proposal: string;
+    proposerSentPrompt: string;
+    finalReport: string;
+    aggregatorSentPrompt: string;
+    stylizedFacts: StylizedFact[];
+    stylizedQuestions: string[];
+  };
+
+  const LAST_RUN_KEY = 'mars:lastRun';
+
+  const saveLastRun = () => {
+    try {
+      const payload: SavedRun = {
+        timestamp: new Date().toISOString(),
+        topic,
+        iteration,
+        modelProvider,
+        researchSummary,
+        researcherSentPrompt,
+        generatedAnalysis,
+        generatorSentPrompt,
+        critique,
+        evaluatorSentPrompt,
+        proposal,
+        proposerSentPrompt,
+        finalReport,
+        aggregatorSentPrompt,
+        stylizedFacts,
+        stylizedQuestions,
+      };
+      localStorage.setItem(LAST_RUN_KEY, JSON.stringify(payload));
+    } catch {}
+  };
+
+  const tryGetSavedRun = (): SavedRun | null => {
+    try {
+      const raw = localStorage.getItem(LAST_RUN_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw) as SavedRun;
+    } catch {
+      return null;
+    }
+  };
+
+  const isOutputsEmpty = () => (
+    !researchSummary && !generatedAnalysis && !critique && !proposal && !finalReport && stylizedFacts.length === 0 && stylizedQuestions.length === 0
+  );
+
+  useEffect(() => {
+    // If a share link is provided, restore from URL hash
+    if (typeof window !== 'undefined' && window.location.hash.startsWith('#s=')) {
+      try {
+        const encoded = window.location.hash.substring(3);
+        const json = decodeURIComponent(encoded);
+        const data = JSON.parse(json) as SavedRun & { v?: number };
+        setTopic(data.topic || '');
+        setIteration(data.iteration || 1);
+        setModelProvider(data.modelProvider || ModelProvider.GEMINI);
+        setResearchSummary(data.researchSummary || '');
+        setResearcherSentPrompt(data.researcherSentPrompt || '');
+        setGeneratedAnalysis(data.generatedAnalysis || '');
+        setGeneratorSentPrompt(data.generatorSentPrompt || '');
+        setCritique(data.critique || '');
+        setEvaluatorSentPrompt(data.evaluatorSentPrompt || '');
+        setProposal(data.proposal || '');
+        setProposerSentPrompt(data.proposerSentPrompt || '');
+        setFinalReport(data.finalReport || '');
+        setAggregatorSentPrompt(data.aggregatorSentPrompt || '');
+        setStylizedFacts(data.stylizedFacts || []);
+        setStylizedQuestions(data.stylizedQuestions || []);
+        setStatus(ProcessStatus.FEEDBACK);
+        // Optionally clear the hash to avoid repeated restores
+        history.replaceState(null, '', window.location.pathname);
+        return; // Skip autosave toast if we restored from hash
+      } catch {
+        // Ignore malformed hashes
+      }
+    }
+
+    // On first load, if there's a saved run and current state is empty, offer restore
+    const hasSaved = !!tryGetSavedRun();
+    if (hasSaved && !topic && isOutputsEmpty()) {
+      setShowRestoreToast(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Persist once a run completes
+    if (status === ProcessStatus.FEEDBACK) {
+      saveLastRun();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status]);
+
+  const restoreLastRun = () => {
+    const data = tryGetSavedRun();
+    if (!data) return;
+    setTopic(data.topic);
+    setIteration(data.iteration);
+    setModelProvider(data.modelProvider);
+    setResearchSummary(data.researchSummary);
+    setResearcherSentPrompt(data.researcherSentPrompt);
+    setGeneratedAnalysis(data.generatedAnalysis);
+    setGeneratorSentPrompt(data.generatorSentPrompt);
+    setCritique(data.critique);
+    setEvaluatorSentPrompt(data.evaluatorSentPrompt);
+    setProposal(data.proposal);
+    setProposerSentPrompt(data.proposerSentPrompt);
+    setFinalReport(data.finalReport);
+    setAggregatorSentPrompt(data.aggregatorSentPrompt);
+    setStylizedFacts(data.stylizedFacts || []);
+    setStylizedQuestions(data.stylizedQuestions || []);
+    setStatus(ProcessStatus.FEEDBACK);
+    setShowRestoreToast(false);
+  };
+
+  const dismissRestoreToast = () => setShowRestoreToast(false);
 
   const clearOutputs = () => {
     setResearchSummary('');
@@ -162,16 +334,36 @@ export default function App() {
       const finalReportResult = await generateContentStream(AgentName.AGGREGATOR, aggregatorPrompt, llmOptions, (chunk) => setFinalReport(prev => prev + chunk));
       await simulateDelay();
 
-      // 6. Generate Facts
+      // 6. Generate Facts (reusing shared stream)
       setStatus(ProcessStatus.GENERATING_FACTS);
-      const facts = await generateFacts(finalReportResult, llmOptions);
-      setStylizedFacts(facts);
+      setStylizedFacts([]);
+      let factsBuffer = '';
+      const factsPrompt = `
+        Based on the final report below, emit 5-7 stylized facts as a bullet list only.\n
+        - Use the exact format "- Fact — Description" (em dash or colon are acceptable).\n
+        - No section headers, no JSON, no commentary.\n
+        Final Report:\n---\n${finalReportResult}\n---
+      `;
+      await generateContentStream(AgentName.GENERATOR, factsPrompt, llmOptions, (chunk) => {
+        factsBuffer += chunk;
+        setStylizedFacts(parseFactsFromBuffer(factsBuffer));
+      });
       await simulateDelay();
 
-      // 7. Generate Questions
+      // 7. Generate Questions (reusing shared stream)
       setStatus(ProcessStatus.GENERATING_QUESTIONS);
-      const questions = await generateQuestions(finalReportResult, llmOptions);
-      setStylizedQuestions(questions);
+      setStylizedQuestions([]);
+      let questionsBuffer = '';
+      const questionsPrompt = `
+        Based on the final report below, emit 5 insightful questions as a bullet list only.\n
+        - Use the exact format "- question text".\n
+        - No section headers, no JSON, no commentary.\n
+        Final Report:\n---\n${finalReportResult}\n---
+      `;
+      await generateContentStream(AgentName.GENERATOR, questionsPrompt, llmOptions, (chunk) => {
+        questionsBuffer += chunk;
+        setStylizedQuestions(parseQuestionsFromBuffer(questionsBuffer));
+      });
 
       // 8. Ready for Feedback
       setStatus(ProcessStatus.FEEDBACK);
@@ -316,6 +508,55 @@ ${questionsText}
     URL.revokeObjectURL(url);
   };
 
+  const buildSessionSnapshot = () => ({
+    v: 1,
+    timestamp: new Date().toISOString(),
+    topic,
+    iteration,
+    modelProvider,
+    researchSummary,
+    researcherSentPrompt,
+    generatedAnalysis,
+    generatorSentPrompt,
+    critique,
+    evaluatorSentPrompt,
+    proposal,
+    proposerSentPrompt,
+    finalReport,
+    aggregatorSentPrompt,
+    stylizedFacts,
+    stylizedQuestions,
+  });
+
+  const handleExportJson = () => {
+    const snapshot = buildSessionSnapshot();
+    const formattedTopic = (snapshot.topic || 'session').replace(/\s+/g, '_').toLowerCase();
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const fileName = `run_${formattedTopic}_${timestamp}.json`;
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleCopyLinkToSession = async () => {
+    try {
+      const snapshot = buildSessionSnapshot();
+      const encoded = encodeURIComponent(JSON.stringify(snapshot));
+      const shareUrl = `${window.location.origin}${window.location.pathname}#s=${encoded}`;
+      await navigator.clipboard.writeText(shareUrl);
+      setShowLinkToast(true);
+      setTimeout(() => setShowLinkToast(false), 2000);
+    } catch (e) {
+      console.error('Failed to copy link:', e);
+    }
+  };
+
 
   const isLoading = status !== ProcessStatus.IDLE && status !== ProcessStatus.FEEDBACK;
   const llmOptions: LlmOptions = { provider: modelProvider, url: localLlmUrl };
@@ -353,6 +594,8 @@ ${questionsText}
                   setFiles={setFiles}
                   onStart={handleStart}
                   onExport={handleExportRun}
+                  onExportJson={handleExportJson}
+                  onCopyLink={handleCopyLinkToSession}
                   isLoading={isLoading}
                   iteration={iteration}
                   modelProvider={modelProvider}
@@ -399,6 +642,26 @@ ${questionsText}
           </main>
         </div>
       </div>
+
+      {showRestoreToast && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+          <div className="bg-gray-900 text-white dark:bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4">
+            <p className="text-sm font-semibold">Restore last session?</p>
+            <p className="text-xs text-gray-300 mt-1">A previous run was found from local storage. You can restore it now.</p>
+            <div className="mt-3 flex items-center gap-2">
+              <button onClick={restoreLastRun} className="px-3 py-1.5 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-xs">Restore</button>
+              <button onClick={dismissRestoreToast} className="px-3 py-1.5 rounded-md bg-gray-700 hover:bg-gray-600 text-white text-xs">Dismiss</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showLinkToast && (
+        <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+          <div className="bg-gray-900 text-white dark:bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-3 text-sm">
+            Link copied to clipboard
+          </div>
+        </div>
+      )}
       <PromptEditorModal
         isOpen={isPromptEditorOpen}
         onClose={handleClosePromptEditor}

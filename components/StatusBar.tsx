@@ -34,7 +34,7 @@ const StatusBar: React.FC<StatusBarProps> = ({ status }) => {
   const currentIndex = getStatusIndex();
 
   return (
-    <div className="w-full p-4 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg">
+    <div className="w-full p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40 border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg">
       <div className="flex items-center">
         {steps.map((step, index) => {
           const isCompleted = index < currentIndex;

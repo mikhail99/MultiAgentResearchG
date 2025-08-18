@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileUploadIcon, StartIcon, ExportIcon } from './Icons';
+import { FileUploadIcon, StartIcon, ExportIcon, CopyIcon, SaveIcon } from './Icons';
 import { ModelProvider } from '../types';
 
 interface ControlPanelProps {
@@ -9,6 +9,8 @@ interface ControlPanelProps {
   setFiles: (files: File[]) => void;
   onStart: () => void;
   onExport: () => void;
+  onExportJson: () => void;
+  onCopyLink: () => void;
   isLoading: boolean;
   iteration: number;
   modelProvider: ModelProvider;
@@ -19,7 +21,7 @@ interface ControlPanelProps {
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({ 
-    topic, setTopic, files, setFiles, onStart, onExport, isLoading, iteration, 
+    topic, setTopic, files, setFiles, onStart, onExport, onExportJson, onCopyLink, isLoading, iteration, 
     modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, isRunComplete
 }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,6 +131,24 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <ExportIcon />
           <span className="ml-2">Export Run</span>
         </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={onExportJson}
+            disabled={isLoading || !isRunComplete}
+            className="w-full flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg shadow-sm transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <SaveIcon />
+            <span className="ml-2 text-sm">Export JSON</span>
+          </button>
+          <button
+            onClick={onCopyLink}
+            disabled={isLoading || !isRunComplete}
+            className="w-full flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg shadow-sm transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <CopyIcon />
+            <span className="ml-2 text-sm">Copy Link</span>
+          </button>
+        </div>
       </div>
     </div>
   );
