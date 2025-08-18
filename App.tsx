@@ -106,6 +106,9 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [showRestoreToast, setShowRestoreToast] = useState<boolean>(false);
   const [showLinkToast, setShowLinkToast] = useState<boolean>(false);
+  const [completedSteps, setCompletedSteps] = useState<ProcessStatus[]>([]);
+  const [showRestartConfirm, setShowRestartConfirm] = useState<boolean>(false);
+  const [restartFromStep, setRestartFromStep] = useState<ProcessStatus | null>(null);
   
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('theme')) {
@@ -285,7 +288,7 @@ export default function App() {
     setTimeout(() => setEditingAgent(null), 300);
   };
   
-  const runWorkflow = async (currentFeedback = '') => {
+  const runWorkflow = async (currentFeedback = '', startFromStep: ProcessStatus = ProcessStatus.RESEARCHING) => {
     const fileNames = files.map(f => f.name).join(', ') || 'No files provided';
     const fileContents = (await Promise.all(files.map(readFileContent))).join('\n\n---\n\n');
 
@@ -293,80 +296,128 @@ export default function App() {
     
     const simulateDelay = () => new Promise(resolve => setTimeout(resolve, 250));
 
+    // Define step order for comparisons
+    const stepOrder = [
+      ProcessStatus.RESEARCHING,
+      ProcessStatus.GENERATING,
+      ProcessStatus.EVALUATING,
+      ProcessStatus.PROPOSING,
+      ProcessStatus.AGGREGATING,
+      ProcessStatus.GENERATING_FACTS,
+      ProcessStatus.GENERATING_QUESTIONS,
+      ProcessStatus.FEEDBACK
+    ];
+
+    const getStepIndex = (step: ProcessStatus) => stepOrder.indexOf(step);
+    const shouldRunStep = (step: ProcessStatus) => getStepIndex(step) >= getStepIndex(startFromStep);
+
+    // Clear completed steps when starting fresh
+    if (startFromStep === ProcessStatus.RESEARCHING) {
+      setCompletedSteps([]);
+    }
+
     try {
+      let researchResult = researchSummary;
+      let analysisResult = generatedAnalysis;
+      let critiqueResult = critique;
+      let proposalResult = proposal;
+      let finalReportResult = finalReport;
+
       // 1. Researcher
-      setStatus(ProcessStatus.RESEARCHING);
-      setResearchSummary('');
-      const researcherPrompt = fillPromptTemplate(agentPrompts.Researcher, { topic });
-      setResearcherSentPrompt(researcherPrompt);
-      const researchResult = await generateContentStream(AgentName.RESEARCHER, researcherPrompt, llmOptions, (chunk) => setResearchSummary(prev => prev + chunk));
-      await simulateDelay();
+      if (shouldRunStep(ProcessStatus.RESEARCHING)) {
+        setStatus(ProcessStatus.RESEARCHING);
+        setResearchSummary('');
+        const researcherPrompt = fillPromptTemplate(agentPrompts.Researcher, { topic });
+        setResearcherSentPrompt(researcherPrompt);
+        researchResult = await generateContentStream(AgentName.RESEARCHER, researcherPrompt, llmOptions, (chunk) => setResearchSummary(prev => prev + chunk));
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.RESEARCHING), ProcessStatus.RESEARCHING]);
+        await simulateDelay();
+      }
 
       // 2. Generator
-      setStatus(ProcessStatus.GENERATING);
-      setGeneratedAnalysis('');
-      const generatorPrompt = fillPromptTemplate(agentPrompts.Generator, { topic, researchSummary: researchResult, fileNames, fileContents, feedback: currentFeedback });
-      setGeneratorSentPrompt(generatorPrompt);
-      const analysisResult = await generateContentStream(AgentName.GENERATOR, generatorPrompt, llmOptions, (chunk) => setGeneratedAnalysis(prev => prev + chunk));
-      await simulateDelay();
+      if (shouldRunStep(ProcessStatus.GENERATING)) {
+        setStatus(ProcessStatus.GENERATING);
+        setGeneratedAnalysis('');
+        const generatorPrompt = fillPromptTemplate(agentPrompts.Generator, { topic, researchSummary: researchResult, fileNames, fileContents, feedback: currentFeedback });
+        setGeneratorSentPrompt(generatorPrompt);
+        analysisResult = await generateContentStream(AgentName.GENERATOR, generatorPrompt, llmOptions, (chunk) => setGeneratedAnalysis(prev => prev + chunk));
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.GENERATING), ProcessStatus.GENERATING]);
+        await simulateDelay();
+      }
 
       // 3. Evaluator
-      setStatus(ProcessStatus.EVALUATING);
-      setCritique('');
-      const evaluatorPrompt = fillPromptTemplate(agentPrompts.Evaluator, { topic, generatedAnalysis: analysisResult });
-      setEvaluatorSentPrompt(evaluatorPrompt);
-      const critiqueResult = await generateContentStream(AgentName.EVALUATOR, evaluatorPrompt, llmOptions, (chunk) => setCritique(prev => prev + chunk));
-      await simulateDelay();
+      if (shouldRunStep(ProcessStatus.EVALUATING)) {
+        setStatus(ProcessStatus.EVALUATING);
+        setCritique('');
+        const evaluatorPrompt = fillPromptTemplate(agentPrompts.Evaluator, { topic, generatedAnalysis: analysisResult });
+        setEvaluatorSentPrompt(evaluatorPrompt);
+        critiqueResult = await generateContentStream(AgentName.EVALUATOR, evaluatorPrompt, llmOptions, (chunk) => setCritique(prev => prev + chunk));
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.EVALUATING), ProcessStatus.EVALUATING]);
+        await simulateDelay();
+      }
 
       // 4. Proposer
-      setStatus(ProcessStatus.PROPOSING);
-      setProposal('');
-      const proposerPrompt = fillPromptTemplate(agentPrompts.Proposer, { topic, generatedAnalysis: analysisResult, critique: critiqueResult });
-      setProposerSentPrompt(proposerPrompt);
-      const proposalResult = await generateContentStream(AgentName.PROPOSER, proposerPrompt, llmOptions, (chunk) => setProposal(prev => prev + chunk));
-      await simulateDelay();
+      if (shouldRunStep(ProcessStatus.PROPOSING)) {
+        setStatus(ProcessStatus.PROPOSING);
+        setProposal('');
+        const proposerPrompt = fillPromptTemplate(agentPrompts.Proposer, { topic, generatedAnalysis: analysisResult, critique: critiqueResult });
+        setProposerSentPrompt(proposerPrompt);
+        proposalResult = await generateContentStream(AgentName.PROPOSER, proposerPrompt, llmOptions, (chunk) => setProposal(prev => prev + chunk));
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING]);
+        await simulateDelay();
+      }
       
       // 5. Aggregator
-      setStatus(ProcessStatus.AGGREGATING);
-      setFinalReport('');
-      const aggregatorPrompt = fillPromptTemplate(agentPrompts.Aggregator, { topic, researchSummary: researchResult, generatedAnalysis: analysisResult, critique: critiqueResult, proposal: proposalResult, feedback: currentFeedback, fileContents });
-      setAggregatorSentPrompt(aggregatorPrompt);
-      const finalReportResult = await generateContentStream(AgentName.AGGREGATOR, aggregatorPrompt, llmOptions, (chunk) => setFinalReport(prev => prev + chunk));
-      await simulateDelay();
+      if (shouldRunStep(ProcessStatus.AGGREGATING)) {
+        setStatus(ProcessStatus.AGGREGATING);
+        setFinalReport('');
+        const aggregatorPrompt = fillPromptTemplate(agentPrompts.Aggregator, { topic, researchSummary: researchResult, generatedAnalysis: analysisResult, critique: critiqueResult, proposal: proposalResult, feedback: currentFeedback, fileContents });
+        setAggregatorSentPrompt(aggregatorPrompt);
+        finalReportResult = await generateContentStream(AgentName.AGGREGATOR, aggregatorPrompt, llmOptions, (chunk) => setFinalReport(prev => prev + chunk));
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING]);
+        await simulateDelay();
+      }
 
       // 6. Generate Facts (reusing shared stream)
-      setStatus(ProcessStatus.GENERATING_FACTS);
-      setStylizedFacts([]);
-      let factsBuffer = '';
-      const factsPrompt = `
-        Based on the final report below, emit 5-7 stylized facts as a bullet list only.\n
-        - Use the exact format "- Fact — Description" (em dash or colon are acceptable).\n
-        - No section headers, no JSON, no commentary.\n
-        Final Report:\n---\n${finalReportResult}\n---
-      `;
-      await generateContentStream(AgentName.GENERATOR, factsPrompt, llmOptions, (chunk) => {
-        factsBuffer += chunk;
-        setStylizedFacts(parseFactsFromBuffer(factsBuffer));
-      });
-      await simulateDelay();
+      if (shouldRunStep(ProcessStatus.GENERATING_FACTS)) {
+        setStatus(ProcessStatus.GENERATING_FACTS);
+        setStylizedFacts([]);
+        let factsBuffer = '';
+        const factsPrompt = `
+          Based on the final report below, emit 5-7 stylized facts as a bullet list only.\n
+          - Use the exact format "- Fact — Description" (em dash or colon are acceptable).\n
+          - No section headers, no JSON, no commentary.\n
+          Final Report:\n---\n${finalReportResult}\n---
+        `;
+        await generateContentStream(AgentName.GENERATOR, factsPrompt, llmOptions, (chunk) => {
+          factsBuffer += chunk;
+          setStylizedFacts(parseFactsFromBuffer(factsBuffer));
+        });
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.GENERATING_FACTS), ProcessStatus.GENERATING_FACTS]);
+        await simulateDelay();
+      }
 
       // 7. Generate Questions (reusing shared stream)
-      setStatus(ProcessStatus.GENERATING_QUESTIONS);
-      setStylizedQuestions([]);
-      let questionsBuffer = '';
-      const questionsPrompt = `
-        Based on the final report below, emit 5 insightful questions as a bullet list only.\n
-        - Use the exact format "- question text".\n
-        - No section headers, no JSON, no commentary.\n
-        Final Report:\n---\n${finalReportResult}\n---
-      `;
-      await generateContentStream(AgentName.GENERATOR, questionsPrompt, llmOptions, (chunk) => {
-        questionsBuffer += chunk;
-        setStylizedQuestions(parseQuestionsFromBuffer(questionsBuffer));
-      });
+      if (shouldRunStep(ProcessStatus.GENERATING_QUESTIONS)) {
+        setStatus(ProcessStatus.GENERATING_QUESTIONS);
+        setStylizedQuestions([]);
+        let questionsBuffer = '';
+        const questionsPrompt = `
+          Based on the final report below, emit 5 insightful questions as a bullet list only.\n
+          - Use the exact format "- question text".\n
+          - No section headers, no JSON, no commentary.\n
+          Final Report:\n---\n${finalReportResult}\n---
+        `;
+        await generateContentStream(AgentName.GENERATOR, questionsPrompt, llmOptions, (chunk) => {
+          questionsBuffer += chunk;
+          setStylizedQuestions(parseQuestionsFromBuffer(questionsBuffer));
+        });
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.GENERATING_QUESTIONS), ProcessStatus.GENERATING_QUESTIONS]);
+      }
 
       // 8. Ready for Feedback
       setStatus(ProcessStatus.FEEDBACK);
+      setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.FEEDBACK), ProcessStatus.FEEDBACK]);
     } catch (e) {
       console.error(e);
       const errorMessage = `Error during analysis: ${e instanceof Error ? e.message : String(e)}`;
@@ -557,6 +608,41 @@ ${questionsText}
     }
   };
 
+  const handleRestartFrom = (stepId: ProcessStatus) => {
+    setRestartFromStep(stepId);
+    setShowRestartConfirm(true);
+  };
+
+  const confirmRestart = () => {
+    if (restartFromStep) {
+      runWorkflow(feedback, restartFromStep);
+    }
+    setShowRestartConfirm(false);
+    setRestartFromStep(null);
+  };
+
+  const cancelRestart = () => {
+    setShowRestartConfirm(false);
+    setRestartFromStep(null);
+  };
+
+  const getAffectedSteps = (fromStep: ProcessStatus): string[] => {
+    const allSteps = [
+      { id: ProcessStatus.RESEARCHING, label: 'Research' },
+      { id: ProcessStatus.GENERATING, label: 'Generate' },
+      { id: ProcessStatus.EVALUATING, label: 'Evaluate' },
+      { id: ProcessStatus.PROPOSING, label: 'Propose' },
+      { id: ProcessStatus.AGGREGATING, label: 'Aggregate' },
+      { id: ProcessStatus.GENERATING_FACTS, label: 'Facts' },
+      { id: ProcessStatus.GENERATING_QUESTIONS, label: 'Questions' },
+    ];
+    
+    const fromIndex = allSteps.findIndex(step => step.id === fromStep);
+    if (fromIndex === -1) return [];
+    
+    return allSteps.slice(fromIndex).map(step => step.label);
+  };
+
 
   const isLoading = status !== ProcessStatus.IDLE && status !== ProcessStatus.FEEDBACK;
   const llmOptions: LlmOptions = { provider: modelProvider, url: localLlmUrl };
@@ -607,7 +693,11 @@ ${questionsText}
             </div>
 
             <div className="lg:col-span-9 space-y-6">
-              <StatusBar status={status} />
+              <StatusBar 
+                status={status} 
+                completedSteps={completedSteps}
+                onRestartFrom={handleRestartFrom}
+              />
               
               {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-800 dark:text-red-200 p-4 rounded-lg">{error}</div>}
 
@@ -659,6 +749,39 @@ ${questionsText}
         <div className="fixed bottom-4 right-4 z-50 max-w-sm">
           <div className="bg-gray-900 text-white dark:bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-3 text-sm">
             Link copied to clipboard
+          </div>
+        </div>
+      )}
+
+      {/* Restart Confirmation Modal */}
+      {showRestartConfirm && restartFromStep && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                Restart Analysis
+              </h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-2">
+                This will restart the analysis from <strong>{restartFromStep.replace('_', ' ').toLowerCase()}</strong> onwards.
+              </p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                <strong>Steps that will be rerun:</strong> {getAffectedSteps(restartFromStep).join(' → ')}
+              </p>
+              <div className="flex items-center justify-end space-x-3">
+                <button
+                  onClick={cancelRestart}
+                  className="px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmRestart}
+                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+                >
+                  Restart from {restartFromStep.replace('_', ' ').toLowerCase()}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
