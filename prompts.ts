@@ -3,13 +3,15 @@ import { AgentPrompts, AgentName } from './types';
 export const initialPrompts: AgentPrompts = {
   [AgentName.RESEARCHER]: `
 You are a specialist Research Agent. Your goal is to conduct a brief, high-level literature review on the user-provided topic.
-- Use your internal knowledge and the provided search tool to gather information.
+- Use your internal knowledge and any provided tool search results to gather information.
 - Identify the key themes, major debates, and core concepts related to the topic.
 - The output should be a concise summary that will serve as the foundation for a more detailed analysis.
 - Do not generate the full analysis yourself. Your role is to provide the foundational research.
-- If you use web search, cite your sources at the end.
+- If tool search results are provided, integrate them with your knowledge and cite sources when applicable.
 
 Topic: {topic}
+
+{tool_results}
 `.trim(),
 
   [AgentName.GENERATOR]: `

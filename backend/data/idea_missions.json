@@ -1,0 +1,171 @@
+[
+  {
+    "id": "idea_5538aa9d",
+    "userId": "mcp",
+    "title": "MCP E2E Mission",
+    "description": null,
+    "status": "CREATED",
+    "documentGroupIds": [
+      "e2e_group_mcp"
+    ],
+    "createdAt": "2025-08-11T15:33:25.600367",
+    "updatedAt": "2025-08-11T15:33:25.600367",
+    "completedAt": null
+  },
+  {
+    "id": "idea_830a420c",
+    "userId": "e2e",
+    "title": "E2E Mission",
+    "description": null,
+    "status": "CREATED",
+    "documentGroupIds": [
+      "e2e_group_1"
+    ],
+    "createdAt": "2025-08-11T15:24:18.620943",
+    "updatedAt": "2025-08-11T15:24:18.620943",
+    "completedAt": null
+  },
+  {
+    "id": "idea_c08bba78",
+    "userId": "e2e",
+    "title": "E2E Mission",
+    "description": null,
+    "status": "CREATED",
+    "documentGroupIds": [
+      "e2e_group_1"
+    ],
+    "createdAt": "2025-08-11T15:05:45.357710",
+    "updatedAt": "2025-08-11T15:05:45.357710",
+    "completedAt": null
+  },
+  {
+    "id": "idea_1944213e",
+    "userId": "e2e",
+    "title": "E2E Mission",
+    "description": null,
+    "status": "CREATED",
+    "documentGroupIds": [
+      "e2e_group_1"
+    ],
+    "createdAt": "2025-08-11T14:53:22.848996",
+    "updatedAt": "2025-08-11T14:53:22.848996",
+    "completedAt": null
+  },
+  {
+    "id": "idea_07e60708",
+    "userId": "e2e",
+    "title": "E2E Mission",
+    "description": null,
+    "status": "CREATED",
+    "documentGroupIds": [
+      "e2e_group_1"
+    ],
+    "createdAt": "2025-08-11T14:50:35.952126",
+    "updatedAt": "2025-08-11T14:50:35.952126",
+    "completedAt": null
+  },
+  {
+    "id": "idea_c7af38a4",
+    "userId": "e2e",
+    "title": "E2E Mission",
+    "description": null,
+    "status": "CREATED",
+    "documentGroupIds": [
+      "e2e_group_1"
+    ],
+    "createdAt": "2025-08-11T14:48:20.032450",
+    "updatedAt": "2025-08-11T14:48:20.032450",
+    "completedAt": null
+  },
+  {
+    "id": "idea_4db5df2b",
+    "userId": "e2e",
+    "title": "E2E Mission",
+    "description": null,
+    "status": "CREATED",
+    "documentGroupIds": [
+      "e2e_group_1"
+    ],
+    "createdAt": "2025-08-11T14:46:00.449603",
+    "updatedAt": "2025-08-11T14:46:00.449603",
+    "completedAt": null
+  },
+  {
+    "id": "idea_55a2f2a7",
+    "userId": "e2e",
+    "title": "To Delete",
+    "description": null,
+    "status": "CREATED",
+    "documentGroupIds": [
+      "e2e_group_2"
+    ],
+    "createdAt": "2025-08-11T14:41:28.732535",
+    "updatedAt": "2025-08-11T14:41:28.732535",
+    "completedAt": null
+  },
+  {
+    "id": "idea_b9d227f6",
+    "userId": "e2e",
+    "title": "E2E Mission",
+    "description": null,
+    "status": "CREATED",
+    "documentGroupIds": [
+      "e2e_group_1"
+    ],
+    "createdAt": "2025-08-11T14:40:27.932154",
+    "updatedAt": "2025-08-11T14:40:27.932154",
+    "completedAt": null
+  },
+  {
+    "id": "idea_46f334b2",
+    "userId": "demo-user",
+    "title": "LLM for math 2",
+    "description": "use lean 4",
+    "status": "CREATED",
+    "documentGroupIds": [
+      "LLM_Reasoning_Agents"
+    ],
+    "createdAt": "2025-08-11T13:50:19.081280",
+    "updatedAt": "2025-08-11T13:50:19.081280",
+    "completedAt": null
+  },
+  {
+    "id": "idea_e392e3e4",
+    "userId": "demo-user",
+    "title": "LLM for math",
+    "description": "use lean 4",
+    "status": "CREATED",
+    "documentGroupIds": [
+      "LLM_Reasoning_Agents"
+    ],
+    "createdAt": "2025-08-11T09:22:18.128282",
+    "updatedAt": "2025-08-11T09:22:18.128282",
+    "completedAt": null
+  },
+  {
+    "id": "idea_ad1d10ed",
+    "userId": "demo-user",
+    "title": "test2",
+    "description": "test2",
+    "status": "CREATED",
+    "documentGroupIds": [
+      "LLM_Reasoning_Agents"
+    ],
+    "createdAt": "2025-08-08T13:55:35.525595",
+    "updatedAt": "2025-08-08T13:55:35.525595",
+    "completedAt": null
+  },
+  {
+    "id": "idea_3fffb89b",
+    "userId": "demo-user",
+    "title": "test",
+    "description": "test",
+    "status": "CREATED",
+    "documentGroupIds": [
+      "LLM_Reasoning_Agents"
+    ],
+    "createdAt": "2025-08-08T13:43:42.504486",
+    "updatedAt": "2025-08-08T13:43:42.504486",
+    "completedAt": null
+  }
+]

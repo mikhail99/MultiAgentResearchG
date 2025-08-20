@@ -1,0 +1,20 @@
+[
+  {
+    "id": "preset_research",
+    "name": "Research Agent",
+    "agentType": "research",
+    "icon": "brain",
+    "temperature": 0.25,
+    "systemPrompt": "",
+    "styleLevel": 50
+  },
+  {
+    "id": "preset_planning",
+    "name": "Planning Agent",
+    "agentType": "planning",
+    "icon": "target",
+    "temperature": 0.7,
+    "systemPrompt": "always answer Yes/No",
+    "styleLevel": 50
+  }
+]

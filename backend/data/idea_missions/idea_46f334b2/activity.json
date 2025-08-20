@@ -1,0 +1,458 @@
+[
+  {
+    "timestamp": "2025-08-11T13:51:44.785029",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "using llm for math",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 0
+    }
+  },
+  {
+    "timestamp": "2025-08-11T16:18:52.931160",
+    "operation": "idea.search.semantic.execute",
+    "userId": "u-test",
+    "args": {
+      "query": "llm for math",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  },
+  {
+    "timestamp": "2025-08-11T17:02:00.403436",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "llm for math",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  },
+  {
+    "timestamp": "2025-08-11T17:04:02.869070",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "llm for math",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 5
+    }
+  },
+  {
+    "timestamp": "2025-08-11T17:06:21.947853",
+    "operation": "idea.artifacts.save",
+    "userId": "demo-user",
+    "args": {
+      "messageId": "msg_09c4fadf",
+      "hint": null
+    },
+    "result": {
+      "artifactId": "file_2dc5b9a5"
+    }
+  },
+  {
+    "timestamp": "2025-08-11T17:07:45.690731",
+    "operation": "idea.artifacts.save",
+    "userId": "demo-user",
+    "args": {
+      "messageId": "msg_b00d2c19",
+      "hint": "llm-for-math-2"
+    },
+    "result": {
+      "artifactId": "file_e8d3044a"
+    }
+  },
+  {
+    "timestamp": "2025-08-11T17:09:28.836681",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "llm for physics",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  },
+  {
+    "timestamp": "2025-08-11T17:10:34.476075",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "llm for physics",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 5
+    }
+  },
+  {
+    "timestamp": "2025-08-11T17:12:43.522338",
+    "operation": "idea.artifacts.save",
+    "userId": "demo-user",
+    "args": {
+      "messageId": "msg_574b3734",
+      "hint": "llm-for-physics-search-results"
+    },
+    "result": {
+      "artifactId": "file_bd6b3386"
+    }
+  },
+  {
+    "timestamp": "2025-08-11T17:32:35.502083",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "machine learning agents",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 3
+    }
+  },
+  {
+    "timestamp": "2025-08-11T20:44:26.701110",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "llm for programming",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  },
+  {
+    "timestamp": "2025-08-11T20:50:33.512854",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "neural networks",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T20:53:14.070572",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "deep learning",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T21:01:41.370433",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "artificial intelligence",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T21:05:53.517205",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "reinforcement learning",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T21:23:50.179359",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "llm for games",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  },
+  {
+    "timestamp": "2025-08-11T21:29:58.002766",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "llm for math",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  },
+  {
+    "timestamp": "2025-08-11T21:40:38.779490",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "llm for testing",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  },
+  {
+    "timestamp": "2025-08-11T21:41:49.197478",
+    "operation": "idea.artifacts.save",
+    "userId": "demo-user",
+    "args": {
+      "messageId": "msg_59c79860",
+      "hint": "llm for testing"
+    },
+    "result": {
+      "artifactId": "file_8fd595fc"
+    }
+  },
+  {
+    "timestamp": "2025-08-11T22:11:55.192958",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "machine learning",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T22:31:50.617673",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "artificial intelligence",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T22:34:43.302718",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "deep learning",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T22:38:36.917971",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "neural networks",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T22:51:16.152577",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "machine learning",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T22:57:41.988558",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "neural networks",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T22:58:54.856791",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "test query",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 1
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:00:26.529652",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "test query",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 1
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:02:41.131439",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "deep learning",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:05:13.330379",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "artificial intelligence",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:09:23.309528",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "machine learning",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:12:01.515944",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "test query",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 1
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:15:10.280381",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "test query",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 1
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:20:24.232713",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "test query",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 1
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:22:39.846937",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "test query",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 1
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:29:12.667351",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "neural networks",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 2
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:34:00.986025",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "llm for playing games",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:38:30.731209",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "hello can you check how llm are used in differential equations",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  },
+  {
+    "timestamp": "2025-08-11T23:49:02.953307",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "helloo, how about papers on chaain of thought",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 10
+    }
+  }
+]

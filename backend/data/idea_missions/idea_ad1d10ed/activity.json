@@ -1,0 +1,46 @@
+[
+  {
+    "timestamp": "2025-08-10T00:15:27.121830",
+    "operation": "idea.planning.execute",
+    "userId": "demo-user",
+    "args": {
+      "message": "do you like apples?"
+    },
+    "result": {
+      "assistantMessageId": "msg_dd6a3c26"
+    }
+  },
+  {
+    "timestamp": "2025-08-10T00:18:03.500560",
+    "operation": "idea.planning.execute",
+    "userId": "demo-user",
+    "args": {
+      "message": "is paris capital of london"
+    },
+    "result": {
+      "assistantMessageId": "msg_968bf785"
+    }
+  },
+  {
+    "timestamp": "2025-08-10T01:34:18.528071",
+    "operation": "idea.planning.execute",
+    "userId": "demo-user",
+    "args": {
+      "message": "test"
+    },
+    "result": {
+      "assistantMessageId": "msg_25d9374d"
+    }
+  },
+  {
+    "timestamp": "2025-08-10T01:37:51.180957",
+    "operation": "idea.planning.execute",
+    "userId": "demo-user",
+    "args": {
+      "message": "is is late now"
+    },
+    "result": {
+      "assistantMessageId": "msg_c12264ce"
+    }
+  }
+]

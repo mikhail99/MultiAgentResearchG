@@ -1,0 +1,55 @@
+[
+  {
+    "id": "file_8fd595fc",
+    "name": "planning_llm for testing.md",
+    "type": "markdown",
+    "size": 10913,
+    "createdAt": "2025-08-11T21:41:49.196242",
+    "path": "artifacts/2025-08-11_21-41-49_planning_llm for testing.md",
+    "agent": "planning",
+    "messageId": "msg_59c79860",
+    "metadata": {
+      "agentId": "semantic",
+      "agentName": "Semantic Search"
+    }
+  },
+  {
+    "id": "file_bd6b3386",
+    "name": "planning_llm-for-physics-search-results.md",
+    "type": "markdown",
+    "size": 517,
+    "createdAt": "2025-08-11T17:12:43.521361",
+    "path": "artifacts/2025-08-11_17-12-43_planning_llm-for-physics-search-results.md",
+    "agent": "planning",
+    "messageId": "msg_574b3734",
+    "metadata": {
+      "agentId": "semantic",
+      "agentName": "Semantic Search"
+    }
+  },
+  {
+    "id": "file_e8d3044a",
+    "name": "planning_llm-for-math-2.md",
+    "type": "markdown",
+    "size": 28,
+    "createdAt": "2025-08-11T17:07:45.689743",
+    "path": "artifacts/2025-08-11_17-07-45_planning_llm-for-math-2.md",
+    "agent": "planning",
+    "messageId": "msg_b00d2c19",
+    "metadata": {
+      "agentId": "semantic",
+      "agentName": "Semantic Search"
+    }
+  },
+  {
+    "id": "file_2dc5b9a5",
+    "name": "planning_idea-plan.md",
+    "type": "markdown",
+    "size": 12,
+    "createdAt": "2025-08-11T17:06:21.947091",
+    "path": "artifacts/2025-08-11_17-06-21_planning_idea-plan.md",
+    "agent": "planning",
+    "messageId": "msg_09c4fadf",
+    "metadata": {}
+  }
+]

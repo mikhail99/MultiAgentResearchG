@@ -1,0 +1,26 @@
+[
+  {
+    "timestamp": "2025-08-11T13:25:14.623384",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "how to use llm for math",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 0
+    }
+  },
+  {
+    "timestamp": "2025-08-11T13:33:05.522042",
+    "operation": "idea.search.semantic.execute",
+    "userId": "demo-user",
+    "args": {
+      "query": "how to use llm for math",
+      "groupId": "LLM_Reasoning_Agents"
+    },
+    "result": {
+      "count": 0
+    }
+  }
+]

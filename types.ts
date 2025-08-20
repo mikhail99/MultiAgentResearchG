@@ -46,3 +46,17 @@ export interface LlmOptions {
 export type AgentPrompts = {
     [key in AgentName]: string;
 };
+
+// Tool-related types
+export interface ToolResults {
+  webResults?: string;
+  localResults?: string;
+  errors: string[];
+  timestamp: string;
+}
+
+export interface AgentToolConfig {
+  enableWebSearch: boolean;
+  enableLocalSearch: boolean;
+  toolServiceUrl: string;
+}

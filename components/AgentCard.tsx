@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { AgentName } from '../types';
+import { AgentName, ToolResults } from '../types';
 import { 
     AggregatorIcon, EvaluatorIcon, GeneratorIcon, ProposerIcon, ResearcherIcon, 
     EditIcon, CopyIcon, SaveIcon, CheckIcon, PromptIcon 
@@ -14,6 +14,8 @@ interface AgentCardProps {
   isLoading: boolean;
   agent: AgentName;
   onEditPrompt: () => void;
+  toolResults?: ToolResults | null;
+  toolServiceAvailable?: boolean;
 }
 
 const agentIcons: Record<AgentName, React.ReactNode> = {
@@ -66,7 +68,7 @@ const MarkdownComponents = {
 };
 
 
-const AgentCard: React.FC<AgentCardProps> = ({ title, content, sentPrompt, isLoading, agent, onEditPrompt }) => {
+const AgentCard: React.FC<AgentCardProps> = ({ title, content, sentPrompt, isLoading, agent, onEditPrompt, toolResults, toolServiceAvailable }) => {
   const [copied, setCopied] = useState(false);
   const [showSentPrompt, setShowSentPrompt] = useState(false);
 
@@ -158,6 +160,53 @@ const AgentCard: React.FC<AgentCardProps> = ({ title, content, sentPrompt, isLoa
             </button>
         </div>
       </div>
+      
+      {/* Tool Results Section (only for Researcher Agent) */}
+      {agent === AgentName.RESEARCHER && (
+        <div className="px-4 pt-2 pb-1 border-b border-gray-200 dark:border-gray-700">
+          {toolServiceAvailable ? (
+            <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+              {toolResults ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    <span>Tools executed: {new Date(toolResults.timestamp).toLocaleTimeString()}</span>
+                  </div>
+                  
+                  {toolResults.webResults && (
+                    <div className="text-blue-600 dark:text-blue-400">
+                      🔍 Web search: ✅ ({toolResults.webResults.length > 100 ? `${toolResults.webResults.substring(0, 100)}...` : toolResults.webResults.substring(0, 50)}...)
+                    </div>
+                  )}
+                  
+                  {toolResults.localResults && (
+                    <div className="text-purple-600 dark:text-purple-400">
+                      📁 Local search: ✅ ({toolResults.localResults.length > 100 ? `${toolResults.localResults.substring(0, 100)}...` : toolResults.localResults.substring(0, 50)}...)
+                    </div>
+                  )}
+                  
+                  {toolResults.errors.length > 0 && (
+                    <div className="text-red-600 dark:text-red-400">
+                      ⚠️ Errors: {toolResults.errors.length}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></span>
+                  <span>🔧 Tools ready</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-xs text-gray-500 dark:text-gray-500 flex items-center gap-2">
+              <span className="w-2 h-2 bg-gray-400 rounded-full"></span>
+              <span>⚠️ Tool service unavailable</span>
+            </div>
+          )}
+        </div>
+      )}
+      
       <div className="p-4 overflow-y-auto flex-grow text-sm text-gray-700 dark:text-gray-300">
         {renderBody()}
       </div>

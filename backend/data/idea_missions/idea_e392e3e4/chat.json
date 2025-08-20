@@ -1,0 +1,40 @@
+[
+  {
+    "id": "msg_d4a98213",
+    "role": "user",
+    "content": "[Semantic Search] how to use llm for math",
+    "timestamp": "2025-08-11T13:25:14.622178"
+  },
+  {
+    "id": "msg_2bf8dc5e",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n",
+    "timestamp": "2025-08-11T13:25:14.622196",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "error",
+      "count": 0
+    }
+  },
+  {
+    "id": "msg_7abbf3eb",
+    "role": "user",
+    "content": "[Semantic Search] how to use llm for math",
+    "timestamp": "2025-08-11T13:33:05.520020"
+  },
+  {
+    "id": "msg_b16d25a5",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n",
+    "timestamp": "2025-08-11T13:33:05.520036",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "error",
+      "count": 0
+    }
+  }
+]

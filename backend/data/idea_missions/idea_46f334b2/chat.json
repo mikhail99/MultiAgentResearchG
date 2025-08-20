@@ -1,0 +1,1290 @@
+[
+  {
+    "id": "msg_c3175b12",
+    "role": "user",
+    "content": "[Semantic Search] using llm for math",
+    "timestamp": "2025-08-11T13:51:44.783028"
+  },
+  {
+    "id": "msg_b00d2c19",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n",
+    "timestamp": "2025-08-11T13:51:44.783055",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "error",
+      "count": 0
+    }
+  },
+  {
+    "id": "msg_653f6a18",
+    "role": "user",
+    "content": "[Semantic Search] llm for math",
+    "timestamp": "2025-08-11T16:18:52.928287"
+  },
+  {
+    "id": "msg_3d6ea516",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem\n2. Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers\n3. Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression\n4. Knowledge Augmented Complex Problem Solving with Large Language Models: A Survey\n5. Flow-DPO: Improving LLM Mathematical Reasoning through Online Multi-Agent Learning\n6. Self-Discover: Large Language Models Self-Compose Reasoning Structures\n7. Distilling LLM Agent into Small Models with Retrieval and Code Tools\n8. MALT: Improving Reasoning with Multi-Agent LLM Training\n9. From MOOC to MAIC: Reshaping Online Teaching and Learning through LLM-driven Agents\n10. Simulating Classroom Education with LLM-Empowered Agents",
+    "timestamp": "2025-08-11T16:18:52.928321",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "direct",
+      "count": 10
+    }
+  },
+  {
+    "id": "msg_a454b0ac",
+    "role": "user",
+    "content": "[Semantic Search] llm for math",
+    "timestamp": "2025-08-11T17:02:00.399735"
+  },
+  {
+    "id": "msg_e427813a",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem\n2. Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers\n3. Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression\n4. Knowledge Augmented Complex Problem Solving with Large Language Models: A Survey\n5. Flow-DPO: Improving LLM Mathematical Reasoning through Online Multi-Agent Learning\n6. Self-Discover: Large Language Models Self-Compose Reasoning Structures\n7. Distilling LLM Agent into Small Models with Retrieval and Code Tools\n8. MALT: Improving Reasoning with Multi-Agent LLM Training\n9. From MOOC to MAIC: Reshaping Online Teaching and Learning through LLM-driven Agents\n10. Simulating Classroom Education with LLM-Empowered Agents",
+    "timestamp": "2025-08-11T17:02:00.399751",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 10
+    }
+  },
+  {
+    "id": "msg_4831adf3",
+    "role": "user",
+    "content": "[Semantic Search] llm for math",
+    "timestamp": "2025-08-11T17:04:02.868377"
+  },
+  {
+    "id": "msg_09c4fadf",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem\n2. Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers\n3. Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression\n4. Knowledge Augmented Complex Problem Solving with Large Language Models: A Survey\n5. Flow-DPO: Improving LLM Mathematical Reasoning through Online Multi-Agent Learning",
+    "timestamp": "2025-08-11T17:04:02.868382",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 5
+    }
+  },
+  {
+    "id": "msg_dbf4c65a",
+    "role": "user",
+    "content": "[Semantic Search] llm for physics",
+    "timestamp": "2025-08-11T17:09:28.835035"
+  },
+  {
+    "id": "msg_5f611a53",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem\n2. Can LLMs Generate Novel Research Ideas? A Large-Scale Human Study with 100+ NLP Researchers\n3. LLM-Agent-UMF: LLM-based Agent Unified Modeling Framework for Seamless Integration of Multi Active/Passive Core-Agents\n4. Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression\n5. Self-Discover: Large Language Models Self-Compose Reasoning Structures\n6. From MOOC to MAIC: Reshaping Online Teaching and Learning through LLM-driven Agents\n7. Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers\n8. WALL-E 2.0: World Alignment by NeuroSymbolic Learning improves World Model-based LLM Agents\n9. Agent Laboratory: Using LLM Agents as Research Assistants\n10. Simulating Classroom Education with LLM-Empowered Agents",
+    "timestamp": "2025-08-11T17:09:28.835047",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 10
+    }
+  },
+  {
+    "id": "msg_7bc6432b",
+    "role": "user",
+    "content": "[Semantic Search] llm for physics",
+    "timestamp": "2025-08-11T17:10:34.474864"
+  },
+  {
+    "id": "msg_574b3734",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem\n2. Can LLMs Generate Novel Research Ideas? A Large-Scale Human Study with 100+ NLP Researchers\n3. LLM-Agent-UMF: LLM-based Agent Unified Modeling Framework for Seamless Integration of Multi Active/Passive Core-Agents\n4. Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression\n5. Self-Discover: Large Language Models Self-Compose Reasoning Structures",
+    "timestamp": "2025-08-11T17:10:34.474869",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 5
+    }
+  },
+  {
+    "id": "msg_496d1d39",
+    "role": "user",
+    "content": "[Semantic Search] machine learning agents",
+    "timestamp": "2025-08-11T17:32:35.485030"
+  },
+  {
+    "id": "msg_e5cd0d9a",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Symbolic Learning Enables Self-Evolving Agents\n2. MLRC-Bench: Can Language Agents Solve Machine Learning Research Challenges?\n3. TheAgentCompany: Benchmarking LLM Agents on Consequential Real World Tasks",
+    "timestamp": "2025-08-11T17:32:35.485043",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "direct",
+      "count": 3
+    }
+  },
+  {
+    "id": "msg_b7eff56f",
+    "role": "user",
+    "content": "[Semantic Search] llm for programming",
+    "timestamp": "2025-08-11T20:44:26.699445"
+  },
+  {
+    "id": "msg_c01d4e31",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. DynaSaur: Large Language Agents Beyond Predefined Actions\n2. Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression\n3. MedAgentGym: Training LLM Agents for Code-Based Medical Reasoning at Scale\n4. Agentless: Demystifying LLM-based Software Engineering Agents\n5. Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers\n6. AutoAgent: A Fully-Automated and Zero-Code Framework for LLM Agents\n7. Is Your LLM Secretly a World Model of the Internet? Model-Based Planning for Web Agents\n8. CodeContests+: High-Quality Test Case Generation for Competitive Programming\n9. Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem\n10. API Agents vs. GUI Agents: Divergence and Convergence",
+    "timestamp": "2025-08-11T20:44:26.699452",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 10
+    }
+  },
+  {
+    "id": "msg_a9c9a109",
+    "role": "user",
+    "content": "[Semantic Search] neural networks",
+    "timestamp": "2025-08-11T20:50:33.507684"
+  },
+  {
+    "id": "msg_aa42b0d8",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Logical Reasoning in Large Language Models: A Survey\n2. Symbolic Learning Enables Self-Evolving Agents",
+    "timestamp": "2025-08-11T20:50:33.507692",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_1eb809aa",
+    "role": "user",
+    "content": "[Semantic Search] deep learning",
+    "timestamp": "2025-08-11T20:53:14.069430"
+  },
+  {
+    "id": "msg_0d068ea0",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Logical Reasoning in Large Language Models: A Survey\n2. MLRC-Bench: Can Language Agents Solve Machine Learning Research Challenges?",
+    "timestamp": "2025-08-11T20:53:14.069434",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_4456d3fb",
+    "role": "user",
+    "content": "[Semantic Search] artificial intelligence",
+    "timestamp": "2025-08-11T21:01:41.368462"
+  },
+  {
+    "id": "msg_7c18de35",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Superintelligent Agents Pose Catastrophic Risks: Can Scientist AI Offer a Safer Path?\n2. Advances and Challenges in Foundation Agents: From Brain-Inspired Intelligence to Evolutionary, Collaborative, and Safe Systems",
+    "timestamp": "2025-08-11T21:01:41.368467",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_2ab986dd",
+    "role": "user",
+    "content": "[Semantic Search] reinforcement learning",
+    "timestamp": "2025-08-11T21:05:53.515410"
+  },
+  {
+    "id": "msg_53982c4d",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Interpreting Emergent Planning in Model-Free Reinforcement Learning\n2. Unraveling the Complexity of Memory in RL Agents: an Approach for Classification and Evaluation",
+    "timestamp": "2025-08-11T21:05:53.515419",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_4ca20784",
+    "role": "user",
+    "content": "[Semantic Search] llm for games",
+    "timestamp": "2025-08-11T21:23:50.177901"
+  },
+  {
+    "id": "msg_f8b32b06",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem\n2. Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers\n3. DynaSaur: Large Language Agents Beyond Predefined Actions\n4. Is Your LLM Secretly a World Model of the Internet? Model-Based Planning for Web Agents\n5. WALL-E 2.0: World Alignment by NeuroSymbolic Learning improves World Model-based LLM Agents\n6. Agents of Change: Self-Evolving LLM Agents for Strategic Planning\n7. Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression\n8. AriGraph: Learning Knowledge Graph World Models with Episodic Memory for LLM Agents\n9. LLM-Agent-UMF: LLM-based Agent Unified Modeling Framework for Seamless Integration of Multi Active/Passive Core-Agents\n10. Reasoning Like an Economist: Post-Training on Economic Problems Induces Strategic Generalization in LLMs",
+    "timestamp": "2025-08-11T21:23:50.177911",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 10
+    }
+  },
+  {
+    "id": "msg_fbdeba4b",
+    "role": "user",
+    "content": "[Semantic Search] llm for math",
+    "timestamp": "2025-08-11T21:29:58.001671"
+  },
+  {
+    "id": "msg_c78b6612",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem\n2. Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers\n3. Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression\n4. Knowledge Augmented Complex Problem Solving with Large Language Models: A Survey\n5. Flow-DPO: Improving LLM Mathematical Reasoning through Online Multi-Agent Learning\n6. Self-Discover: Large Language Models Self-Compose Reasoning Structures\n7. Distilling LLM Agent into Small Models with Retrieval and Code Tools\n8. MALT: Improving Reasoning with Multi-Agent LLM Training\n9. From MOOC to MAIC: Reshaping Online Teaching and Learning through LLM-driven Agents\n10. Simulating Classroom Education with LLM-Empowered Agents",
+    "timestamp": "2025-08-11T21:29:58.001677",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 10
+    }
+  },
+  {
+    "id": "msg_fa0df86a",
+    "role": "user",
+    "content": "[Semantic Search] llm for testing",
+    "timestamp": "2025-08-11T21:40:38.777273"
+  },
+  {
+    "id": "msg_59c79860",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. CodeContests+: High-Quality Test Case Generation for Competitive Programming\n2. Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem\n3. Can LLMs Generate Novel Research Ideas? A Large-Scale Human Study with 100+ NLP Researchers\n4. Agentless: Demystifying LLM-based Software Engineering Agents\n5. Is Your LLM Secretly a World Model of the Internet? Model-Based Planning for Web Agents\n6. Agent Laboratory: Using LLM Agents as Research Assistants\n7. Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers\n8. Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression\n9. Survey on Evaluation of LLM-based Agents\n10. Which Agent Causes Task Failures and When? On Automated Failure Attribution of LLM Multi-Agent Systems",
+    "timestamp": "2025-08-11T21:40:38.777278",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "direct",
+      "count": 10
+    }
+  },
+  {
+    "id": "msg_9003028b",
+    "role": "user",
+    "content": "[Semantic Search] machine learning",
+    "timestamp": "2025-08-11T22:11:55.190337"
+  },
+  {
+    "id": "msg_f76a1ddd",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. MLRC-Bench: Can Language Agents Solve Machine Learning Research Challenges?\n2. Agent Laboratory: Using LLM Agents as Research Assistants",
+    "timestamp": "2025-08-11T22:11:55.190341",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_1d055a39",
+    "role": "user",
+    "content": "[Semantic Search] artificial intelligence",
+    "timestamp": "2025-08-11T22:31:50.615637"
+  },
+  {
+    "id": "msg_920dff89",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Superintelligent Agents Pose Catastrophic Risks: Can Scientist AI Offer a Safer Path?\n2. Advances and Challenges in Foundation Agents: From Brain-Inspired Intelligence to Evolutionary, Collaborative, and Safe Systems",
+    "timestamp": "2025-08-11T22:31:50.615642",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_b84b9a48",
+    "role": "user",
+    "content": "[Semantic Search] deep learning",
+    "timestamp": "2025-08-11T22:34:43.300562"
+  },
+  {
+    "id": "msg_27ffe6db",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Logical Reasoning in Large Language Models: A Survey\n2. MLRC-Bench: Can Language Agents Solve Machine Learning Research Challenges?",
+    "timestamp": "2025-08-11T22:34:43.300574",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_b2602f07",
+    "role": "user",
+    "content": "[Semantic Search] neural networks",
+    "timestamp": "2025-08-11T22:38:36.916373"
+  },
+  {
+    "id": "msg_3a3f4442",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Logical Reasoning in Large Language Models: A Survey\n2. Symbolic Learning Enables Self-Evolving Agents",
+    "timestamp": "2025-08-11T22:38:36.916378",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_0db2b0c7",
+    "role": "user",
+    "content": "[Semantic Search] machine learning",
+    "timestamp": "2025-08-11T22:51:16.150661"
+  },
+  {
+    "id": "msg_3c75ea54",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. MLRC-Bench: Can Language Agents Solve Machine Learning Research Challenges?\n2. Agent Laboratory: Using LLM Agents as Research Assistants",
+    "timestamp": "2025-08-11T22:51:16.150666",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_67e49e44",
+    "role": "user",
+    "content": "[Semantic Search] neural networks",
+    "timestamp": "2025-08-11T22:57:41.985454"
+  },
+  {
+    "id": "msg_056f178c",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Logical Reasoning in Large Language Models: A Survey\n2. Symbolic Learning Enables Self-Evolving Agents",
+    "timestamp": "2025-08-11T22:57:41.985459",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_b1db5907",
+    "role": "user",
+    "content": "[Semantic Search] test query",
+    "timestamp": "2025-08-11T22:58:54.855318"
+  },
+  {
+    "id": "msg_8f3ea4ff",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. CodeContests+: High-Quality Test Case Generation for Competitive Programming",
+    "timestamp": "2025-08-11T22:58:54.855328",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "direct",
+      "count": 1
+    }
+  },
+  {
+    "id": "msg_a8db0aaf",
+    "role": "user",
+    "content": "[Semantic Search] test query",
+    "timestamp": "2025-08-11T23:00:26.528093"
+  },
+  {
+    "id": "msg_d080d10b",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. CodeContests+: High-Quality Test Case Generation for Competitive Programming",
+    "timestamp": "2025-08-11T23:00:26.528096",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "direct",
+      "count": 1
+    }
+  },
+  {
+    "id": "msg_801cc201",
+    "role": "user",
+    "content": "[Semantic Search] deep learning",
+    "timestamp": "2025-08-11T23:02:41.130241"
+  },
+  {
+    "id": "msg_cf29004b",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Logical Reasoning in Large Language Models: A Survey\n2. MLRC-Bench: Can Language Agents Solve Machine Learning Research Challenges?",
+    "timestamp": "2025-08-11T23:02:41.130244",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_6e181234",
+    "role": "user",
+    "content": "[Semantic Search] artificial intelligence",
+    "timestamp": "2025-08-11T23:05:13.328587"
+  },
+  {
+    "id": "msg_047e0a10",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. Superintelligent Agents Pose Catastrophic Risks: Can Scientist AI Offer a Safer Path?\n2. Advances and Challenges in Foundation Agents: From Brain-Inspired Intelligence to Evolutionary, Collaborative, and Safe Systems",
+    "timestamp": "2025-08-11T23:05:13.328593",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_1569e66a",
+    "role": "user",
+    "content": "[Semantic Search] machine learning",
+    "timestamp": "2025-08-11T23:09:23.304646"
+  },
+  {
+    "id": "msg_20904dd9",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. MLRC-Bench: Can Language Agents Solve Machine Learning Research Challenges?\n2. Agent Laboratory: Using LLM Agents as Research Assistants",
+    "timestamp": "2025-08-11T23:09:23.304666",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2
+    }
+  },
+  {
+    "id": "msg_b47a9417",
+    "role": "user",
+    "content": "[Semantic Search] test query",
+    "timestamp": "2025-08-11T23:12:01.514197"
+  },
+  {
+    "id": "msg_0b3947d9",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. CodeContests+: High-Quality Test Case Generation for Competitive Programming",
+    "timestamp": "2025-08-11T23:12:01.514202",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 1
+    }
+  },
+  {
+    "id": "msg_529fec4e",
+    "role": "user",
+    "content": "[Semantic Search] test query",
+    "timestamp": "2025-08-11T23:15:10.278463"
+  },
+  {
+    "id": "msg_56a651c3",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. CodeContests+: High-Quality Test Case Generation for Competitive Programming",
+    "timestamp": "2025-08-11T23:15:10.278470",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "direct",
+      "count": 1
+    }
+  },
+  {
+    "id": "msg_94fe7611",
+    "role": "user",
+    "content": "[Semantic Search] test query",
+    "timestamp": "2025-08-11T23:20:24.231093"
+  },
+  {
+    "id": "msg_37076a9c",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. CodeContests+: High-Quality Test Case Generation for Competitive Programming",
+    "timestamp": "2025-08-11T23:20:24.231097",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 1
+    }
+  },
+  {
+    "id": "msg_043efd28",
+    "role": "user",
+    "content": "[Semantic Search] test query",
+    "timestamp": "2025-08-11T23:22:39.844459"
+  },
+  {
+    "id": "msg_437b48fc",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. CodeContests+: High-Quality Test Case Generation for Competitive Programming",
+    "timestamp": "2025-08-11T23:22:39.844463",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 1
+    }
+  },
+  {
+    "id": "msg_e4bcd46d",
+    "role": "user",
+    "content": "[Semantic Search] neural networks",
+    "timestamp": "2025-08-11T23:29:12.664330"
+  },
+  {
+    "id": "msg_a3352ebd",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. **Logical Reasoning in Large Language Models: A Survey**\n   **Authors:** Hanmeng Liu, Zhizhang Fu, Mengru Ding, Ruoxi Ning, Chaoli Zhang, Xiaozhang Liu, Yue Zhang\n   **Abstract:** With the emergence of advanced reasoning models like OpenAI o3 and\nDeepSeek-R1, large language models (LLMs) have demonstrated remarkable\nreasoning capabilities. However, their ability to perform rigorous logical\nreasoning remains an open question. This survey synthesizes recent advancements\nin logi...\n\n2. **Symbolic Learning Enables Self-Evolving Agents**\n   **Authors:** Wangchunshu Zhou, Yixin Ou, Shengwei Ding, Long Li, Jialong Wu, Tiannan Wang, Jiamin Chen, Shuai Wang, Xiaohua Xu, Ningyu Zhang, Huajun Chen, Yuchen Eleanor Jiang\n   **Abstract:** The AI community has been exploring a pathway to artificial general\nintelligence (AGI) by developing \"language agents\", which are complex large\nlanguage models (LLMs) pipelines involving both prompting techniques and tool\nusage methods. While language agents have demonstrated impressive capabilities...\n",
+    "timestamp": "2025-08-11T23:29:12.664626",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 2,
+      "semanticResults": [
+        {
+          "id": "2502.09100",
+          "title": "Logical Reasoning in Large Language Models: A Survey",
+          "abstract": "With the emergence of advanced reasoning models like OpenAI o3 and\nDeepSeek-R1, large language models (LLMs) have demonstrated remarkable\nreasoning capabilities. However, their ability to perform rigorous logical\nreasoning remains an open question. This survey synthesizes recent advancements\nin logical reasoning within LLMs, a critical area of AI research. It outlines\nthe scope of logical reasoning in LLMs, its theoretical foundations, and the\nbenchmarks used to evaluate reasoning proficiency. We analyze existing\ncapabilities across different reasoning paradigms - deductive, inductive,\nabductive, and analogical - and assess strategies to enhance reasoning\nperformance, including data-centric tuning, reinforcement learning, decoding\nstrategies, and neuro-symbolic approaches. The review concludes with future\ndirections, emphasizing the need for further exploration to strengthen logical\nreasoning in AI systems.",
+          "metadata": {
+            "authors": [
+              "Hanmeng Liu",
+              "Zhizhang Fu",
+              "Mengru Ding",
+              "Ruoxi Ning",
+              "Chaoli Zhang",
+              "Xiaozhang Liu",
+              "Yue Zhang"
+            ],
+            "publication_date": "2025-02-13T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2406.18532",
+          "title": "Symbolic Learning Enables Self-Evolving Agents",
+          "abstract": "The AI community has been exploring a pathway to artificial general\nintelligence (AGI) by developing \"language agents\", which are complex large\nlanguage models (LLMs) pipelines involving both prompting techniques and tool\nusage methods. While language agents have demonstrated impressive capabilities\nfor many real-world tasks, a fundamental limitation of current language agents\nresearch is that they are model-centric, or engineering-centric. That's to say,\nthe progress on prompts, tools, and pipelines of language agents requires\nsubstantial manual engineering efforts from human experts rather than\nautomatically learning from data. We believe the transition from model-centric,\nor engineering-centric, to data-centric, i.e., the ability of language agents\nto autonomously learn and evolve in environments, is the key for them to\npossibly achieve AGI.\n  In this work, we introduce agent symbolic learning, a systematic framework\nthat enables language agents to optimize themselves on their own in a\ndata-centric way using symbolic optimizers. Specifically, we consider agents as\nsymbolic networks where learnable weights are defined by prompts, tools, and\nthe way they are stacked together. Agent symbolic learning is designed to\noptimize the symbolic network within language agents by mimicking two\nfundamental algorithms in connectionist learning: back-propagation and gradient\ndescent. Instead of dealing with numeric weights, agent symbolic learning works\nwith natural language simulacrums of weights, loss, and gradients. We conduct\nproof-of-concept experiments on both standard benchmarks and complex real-world\ntasks and show that agent symbolic learning enables language agents to update\nthemselves after being created and deployed in the wild, resulting in\n\"self-evolving agents\".",
+          "metadata": {
+            "authors": [
+              "Wangchunshu Zhou",
+              "Yixin Ou",
+              "Shengwei Ding",
+              "Long Li",
+              "Jialong Wu",
+              "Tiannan Wang",
+              "Jiamin Chen",
+              "Shuai Wang",
+              "Xiaohua Xu",
+              "Ningyu Zhang",
+              "Huajun Chen",
+              "Yuchen Eleanor Jiang"
+            ],
+            "publication_date": "2024-06-26T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "msg_841ebc80",
+    "role": "user",
+    "content": "[Semantic Search] llm for playing games",
+    "timestamp": "2025-08-11T23:34:00.981771"
+  },
+  {
+    "id": "msg_37995453",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. **Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers**\n   **Authors:** Zhenting Qi, Mingyuan Ma, Jiahang Xu, Li Lyna Zhang, Fan Yang, Mao Yang\n   **Abstract:** This paper introduces rStar, a self-play mutual reasoning approach that\nsignificantly improves reasoning capabilities of small language models (SLMs)\nwithout fine-tuning or superior models. rStar decouples reasoning into a\nself-play mutual generation-discrimination process. First, a target SLM\naugme...\n\n2. **Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem**\n   **Authors:** Yubo Wang, Ping Nie, Kai Zou, Lijun Wu, Wenhu Chen\n   **Abstract:** We have witnessed that strong LLMs like Qwen-Math, MiMo, and Phi-4 possess\nimmense reasoning potential inherited from the pre-training stage. With\nreinforcement learning (RL), these models can improve dramatically on reasoning\ntasks. Recent studies have shown that even RL on a single problem can unl...\n\n3. **LARP: Language-Agent Role Play for Open-World Games**\n   **Authors:** Ming Yan, Ruihao Li, Hao Zhang, Hao Wang, Zhilan Yang, Ji Yan\n   **Abstract:** Language agents have shown impressive problem-solving skills within defined\nsettings and brief timelines. Yet, with the ever-evolving complexities of\nopen-world simulations, there's a pressing need for agents that can flexibly\nadapt to complex environments and consistently maintain a long-term memor...\n\n4. **DynaSaur: Large Language Agents Beyond Predefined Actions**\n   **Authors:** Dang Nguyen, Viet Dac Lai, Seunghyun Yoon, Ryan A. Rossi, Handong Zhao, Ruiyi Zhang, Puneet Mathur, Nedim Lipka, Yu Wang, Trung Bui, Franck Dernoncourt, Tianyi Zhou\n   **Abstract:** Existing LLM agent systems typically select actions from a fixed and\npredefined set at every step. While this approach is effective in closed,\nnarrowly-scoped environments, we argue that it presents two major challenges\nwhen deploying LLM agents in real-world scenarios: (1) selecting from a fixed\nse...\n\n5. **Agents of Change: Self-Evolving LLM Agents for Strategic Planning**\n   **Authors:** Nikolas Belle, Dakota Barnes, Alfonso Amayuelas, Ivan Bercovich, Xin Eric Wang, William Wang\n   **Abstract:** Recent advances in LLMs have enabled their use as autonomous agents across a\nrange of tasks, yet they continue to struggle with formulating and adhering to\ncoherent long-term strategies. In this paper, we investigate whether LLM agents\ncan self-improve when placed in environments that explicitly cha...\n\n6. **AriGraph: Learning Knowledge Graph World Models with Episodic Memory for LLM Agents**\n   **Authors:** Petr Anokhin, Nikita Semenov, Artyom Sorokin, Dmitry Evseev, Mikhail Burtsev, Evgeny Burnaev\n   **Abstract:** Advancements in the capabilities of Large Language Models (LLMs) have created\na promising foundation for developing autonomous agents. With the right tools,\nthese agents could learn to solve tasks in new environments by accumulating and\nupdating their knowledge. Current LLM-based agents process past...\n\n7. **Is Your LLM Secretly a World Model of the Internet? Model-Based Planning for Web Agents**\n   **Authors:** Yu Gu, Kai Zhang, Yuting Ning, Boyuan Zheng, Boyu Gou, Tianci Xue, Cheng Chang, Sanjari Srivastava, Yanan Xie, Peng Qi, Huan Sun, Yu Su\n   **Abstract:** Language agents based on large language models (LLMs) have demonstrated great\npromise in automating web-based tasks. Recent work has shown that incorporating\nadvanced planning algorithms, e.g., tree search, is advantageous over reactive\nplanning for web agents. However, unlike simulated sandbox envi...\n\n8. **From MOOC to MAIC: Reshaping Online Teaching and Learning through LLM-driven Agents**\n   **Authors:** Jifan Yu, Zheyuan Zhang, Daniel Zhang-li, Shangqing Tu, Zhanxin Hao, Rui Miao Li, Haoxuan Li, Yuanchun Wang, Hanming Li, Linlu Gong, Jie Cao, Jiayin Lin, Jinchang Zhou, Fei Qin, Haohua Wang, Jianxiao Jiang, Lijun Deng, Yisi Zhan, Chaojun Xiao, Xusheng Dai, Xuan Yan, Nianyi Lin, Nan Zhang, Ruixin Ni, Yang Dang, Lei Hou, Yu Zhang, Xu Han, Manli Li, Juanzi Li, Zhiyuan Liu, Huiqin Liu, Maosong Sun\n   **Abstract:** Since the first instances of online education, where courses were uploaded to\naccessible and shared online platforms, this form of scaling the dissemination\nof human knowledge to reach a broader audience has sparked extensive discussion\nand widespread adoption. Recognizing that personalized learning...\n\n9. **WALL-E 2.0: World Alignment by NeuroSymbolic Learning improves World Model-based LLM Agents**\n   **Authors:** Siyu Zhou, Tianyi Zhou, Yijun Yang, Guodong Long, Deheng Ye, Jing Jiang, Chengqi Zhang\n   **Abstract:** Can we build accurate world models out of large language models (LLMs)? How\ncan world models benefit LLM agents? The gap between the prior knowledge of\nLLMs and the specified environment's dynamics usually bottlenecks LLMs'\nperformance as world models. To bridge the gap, we propose a training-free\n\"...\n\n10. **LLM-Agent-UMF: LLM-based Agent Unified Modeling Framework for Seamless Integration of Multi Active/Passive Core-Agents**\n   **Authors:** Amine Ben Hassouna, Hana Chaari, Ines Belhaj\n   **Abstract:** In an era where vast amounts of data are collected and processed from diverse\nsources, there is a growing demand to develop sophisticated AI systems capable\nof intelligently fusing and analyzing this information. To address these\nchallenges, researchers have turned towards integrating tools into LLM...\n",
+    "timestamp": "2025-08-11T23:34:00.982227",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 10,
+      "semanticResults": [
+        {
+          "id": "2408.06195",
+          "title": "Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers",
+          "abstract": "This paper introduces rStar, a self-play mutual reasoning approach that\nsignificantly improves reasoning capabilities of small language models (SLMs)\nwithout fine-tuning or superior models. rStar decouples reasoning into a\nself-play mutual generation-discrimination process. First, a target SLM\naugments the Monte Carlo Tree Search (MCTS) with a rich set of human-like\nreasoning actions to construct higher quality reasoning trajectories. Next,\nanother SLM, with capabilities similar to the target SLM, acts as a\ndiscriminator to verify each trajectory generated by the target SLM. The\nmutually agreed reasoning trajectories are considered mutual consistent, thus\nare more likely to be correct. Extensive experiments across five SLMs\ndemonstrate rStar can effectively solve diverse reasoning problems, including\nGSM8K, GSM-Hard, MATH, SVAMP, and StrategyQA. Remarkably, rStar boosts GSM8K\naccuracy from 12.51% to 63.91% for LLaMA2-7B, from 36.46% to 81.88% for\nMistral-7B, from 74.53% to 91.13% for LLaMA3-8B-Instruct. Code will be\navailable at https://github.com/zhentingqi/rStar.",
+          "metadata": {
+            "authors": [
+              "Zhenting Qi",
+              "Mingyuan Ma",
+              "Jiahang Xu",
+              "Li Lyna Zhang",
+              "Fan Yang",
+              "Mao Yang"
+            ],
+            "publication_date": "2024-08-12T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2506.03295",
+          "title": "Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem",
+          "abstract": "We have witnessed that strong LLMs like Qwen-Math, MiMo, and Phi-4 possess\nimmense reasoning potential inherited from the pre-training stage. With\nreinforcement learning (RL), these models can improve dramatically on reasoning\ntasks. Recent studies have shown that even RL on a single problem can unleash\nthese models' reasoning capabilities. However, RL is not only expensive but\nalso unstable. Even one-shot RL requires hundreds of GPU hours. This raises a\ncritical question: Is there a more efficient way to unleash the reasoning\npotential of these powerful base LLMs? In this work, we demonstrate that\nCritique Fine-Tuning (CFT) on only one problem can effectively unleash the\nreasoning potential of LLMs. Our method constructs critique data by collecting\ndiverse model-generated solutions to a single problem and using teacher LLMs to\nprovide detailed critiques. We fine-tune Qwen and Llama family models, ranging\nfrom 1.5B to 14B parameters, on the CFT data and observe significant\nperformance gains across diverse reasoning tasks. For example, with just 5 GPU\nhours of training, Qwen-Math-7B-CFT show an average improvement of 15% on six\nmath benchmarks and 16% on three logic reasoning benchmarks. These results are\ncomparable to or even surpass the results from RL with 20x less compute.\nAblation studies reveal the robustness of one-shot CFT across different prompt\nproblems. These results highlight one-shot CFT as a simple, general, and\ncompute-efficient approach to unleashing the reasoning capabilities of modern\nLLMs.",
+          "metadata": {
+            "authors": [
+              "Yubo Wang",
+              "Ping Nie",
+              "Kai Zou",
+              "Lijun Wu",
+              "Wenhu Chen"
+            ],
+            "publication_date": "2025-06-03T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2312.17653",
+          "title": "LARP: Language-Agent Role Play for Open-World Games",
+          "abstract": "Language agents have shown impressive problem-solving skills within defined\nsettings and brief timelines. Yet, with the ever-evolving complexities of\nopen-world simulations, there's a pressing need for agents that can flexibly\nadapt to complex environments and consistently maintain a long-term memory to\nensure coherent actions. To bridge the gap between language agents and\nopen-world games, we introduce Language Agent for Role-Playing (LARP), which\nincludes a cognitive architecture that encompasses memory processing and a\ndecision-making assistant, an environment interaction module with a\nfeedback-driven learnable action space, and a postprocessing method that\npromotes the alignment of various personalities. The LARP framework refines\ninteractions between users and agents, predefined with unique backgrounds and\npersonalities, ultimately enhancing the gaming experience in open-world\ncontexts. Furthermore, it highlights the diverse uses of language models in a\nrange of areas such as entertainment, education, and various simulation\nscenarios. The project page is released at https://miao-ai-lab.github.io/LARP/.",
+          "metadata": {
+            "authors": [
+              "Ming Yan",
+              "Ruihao Li",
+              "Hao Zhang",
+              "Hao Wang",
+              "Zhilan Yang",
+              "Ji Yan"
+            ],
+            "publication_date": "2023-12-24T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2411.01747",
+          "title": "DynaSaur: Large Language Agents Beyond Predefined Actions",
+          "abstract": "Existing LLM agent systems typically select actions from a fixed and\npredefined set at every step. While this approach is effective in closed,\nnarrowly-scoped environments, we argue that it presents two major challenges\nwhen deploying LLM agents in real-world scenarios: (1) selecting from a fixed\nset of actions significantly restricts the planning and acting capabilities of\nLLM agents, and (2) this approach requires substantial human effort to\nenumerate and implement all possible actions, which becomes impractical in\ncomplex environments with a vast number of potential actions. In this work, we\npropose an LLM agent framework that enables the dynamic creation and\ncomposition of actions in an online manner. In this framework, the agent\ninteracts with the environment by generating and executing programs written in\na general-purpose programming language at each step. Furthermore, generated\nactions are accumulated over time for future reuse. Our extensive experiments\non the GAIA benchmark demonstrate that this framework offers significantly\ngreater flexibility and outperforms previous methods. Notably, it allows an LLM\nagent to recover in scenarios where no relevant action exists in the predefined\nset or when existing actions fail due to unforeseen edge cases. At the time of\nwriting, we hold the top position on the GAIA public leaderboard. Our code can\nbe found in\n\\href{https://github.com/adobe-research/dynasaur}{https://github.com/adobe-research/dynasaur}.",
+          "metadata": {
+            "authors": [
+              "Dang Nguyen",
+              "Viet Dac Lai",
+              "Seunghyun Yoon",
+              "Ryan A. Rossi",
+              "Handong Zhao",
+              "Ruiyi Zhang",
+              "Puneet Mathur",
+              "Nedim Lipka",
+              "Yu Wang",
+              "Trung Bui",
+              "Franck Dernoncourt",
+              "Tianyi Zhou"
+            ],
+            "publication_date": "2024-11-04T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2506.04651",
+          "title": "Agents of Change: Self-Evolving LLM Agents for Strategic Planning",
+          "abstract": "Recent advances in LLMs have enabled their use as autonomous agents across a\nrange of tasks, yet they continue to struggle with formulating and adhering to\ncoherent long-term strategies. In this paper, we investigate whether LLM agents\ncan self-improve when placed in environments that explicitly challenge their\nstrategic planning abilities. Using the board game Settlers of Catan, accessed\nthrough the open-source Catanatron framework, we benchmark a progression of\nLLM-based agents, from a simple game-playing agent to systems capable of\nautonomously rewriting their own prompts and their player agent's code. We\nintroduce a multi-agent architecture in which specialized roles (Analyzer,\nResearcher, Coder, and Player) collaborate to iteratively analyze gameplay,\nresearch new strategies, and modify the agent's logic or prompt. By comparing\nmanually crafted agents to those evolved entirely by LLMs, we evaluate how\neffectively these systems can diagnose failure and adapt over time. Our results\nshow that self-evolving agents, particularly when powered by models like Claude\n3.7 and GPT-4o, outperform static baselines by autonomously adopting their\nstrategies, passing along sample behavior to game-playing agents, and\ndemonstrating adaptive reasoning over multiple iterations.",
+          "metadata": {
+            "authors": [
+              "Nikolas Belle",
+              "Dakota Barnes",
+              "Alfonso Amayuelas",
+              "Ivan Bercovich",
+              "Xin Eric Wang",
+              "William Wang"
+            ],
+            "publication_date": "2025-06-05T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2407.04363",
+          "title": "AriGraph: Learning Knowledge Graph World Models with Episodic Memory for LLM Agents",
+          "abstract": "Advancements in the capabilities of Large Language Models (LLMs) have created\na promising foundation for developing autonomous agents. With the right tools,\nthese agents could learn to solve tasks in new environments by accumulating and\nupdating their knowledge. Current LLM-based agents process past experiences\nusing a full history of observations, summarization, retrieval augmentation.\nHowever, these unstructured memory representations do not facilitate the\nreasoning and planning essential for complex decision-making. In our study, we\nintroduce AriGraph, a novel method wherein the agent constructs and updates a\nmemory graph that integrates semantic and episodic memories while exploring the\nenvironment. We demonstrate that our Ariadne LLM agent, consisting of the\nproposed memory architecture augmented with planning and decision-making,\neffectively handles complex tasks within interactive text game environments\ndifficult even for human players. Results show that our approach markedly\noutperforms other established memory methods and strong RL baselines in a range\nof problems of varying complexity. Additionally, AriGraph demonstrates\ncompetitive performance compared to dedicated knowledge graph-based methods in\nstatic multi-hop question-answering.",
+          "metadata": {
+            "authors": [
+              "Petr Anokhin",
+              "Nikita Semenov",
+              "Artyom Sorokin",
+              "Dmitry Evseev",
+              "Mikhail Burtsev",
+              "Evgeny Burnaev"
+            ],
+            "publication_date": "2024-07-05T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2411.06559",
+          "title": "Is Your LLM Secretly a World Model of the Internet? Model-Based Planning for Web Agents",
+          "abstract": "Language agents based on large language models (LLMs) have demonstrated great\npromise in automating web-based tasks. Recent work has shown that incorporating\nadvanced planning algorithms, e.g., tree search, is advantageous over reactive\nplanning for web agents. However, unlike simulated sandbox environments,\nreal-world environments such as the web are rife with irreversible actions.\nThis undermines the feasibility of backtracking, a cornerstone of (tree)\nsearch. Overly relying on test-time search also hurts efficiency. We advocate\nmodel-based planning for web agents that employs a world model to simulate and\ndeliberate over the outcome of each candidate action before committing to one.\nWe systematically explore this paradigm by (1) Proposing a model-based planning\nframework, WebDreamer, which employs LLMs to serve as both world models and\nvalue functions; (2) Training specialized LLMs as world models with a scalable\ndata synthesis pipeline. Empirical results demonstrate that WebDreamer achieves\nsubstantial performance improvements over reactive baselines. It is\ncompetitive, while being 4-5 times more efficient, with tree search in sandbox\nenvironments (VisualWebArena) and also works effectively on real-world websites\n(Online-Mind2Web and Mind2Web-Live). Furthermore, our trained world model,\nDreamer-7B, performs comparable to GPT-4o, highlighting the potential of\nspecialized world models for efficient and effective planning in complex web\nenvironments.",
+          "metadata": {
+            "authors": [
+              "Yu Gu",
+              "Kai Zhang",
+              "Yuting Ning",
+              "Boyuan Zheng",
+              "Boyu Gou",
+              "Tianci Xue",
+              "Cheng Chang",
+              "Sanjari Srivastava",
+              "Yanan Xie",
+              "Peng Qi",
+              "Huan Sun",
+              "Yu Su"
+            ],
+            "publication_date": "2024-11-10T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2409.03512",
+          "title": "From MOOC to MAIC: Reshaping Online Teaching and Learning through LLM-driven Agents",
+          "abstract": "Since the first instances of online education, where courses were uploaded to\naccessible and shared online platforms, this form of scaling the dissemination\nof human knowledge to reach a broader audience has sparked extensive discussion\nand widespread adoption. Recognizing that personalized learning still holds\nsignificant potential for improvement, new AI technologies have been\ncontinuously integrated into this learning format, resulting in a variety of\neducational AI applications such as educational recommendation and intelligent\ntutoring. The emergence of intelligence in large language models (LLMs) has\nallowed for these educational enhancements to be built upon a unified\nfoundational model, enabling deeper integration. In this context, we propose\nMAIC (Massive AI-empowered Course), a new form of online education that\nleverages LLM-driven multi-agent systems to construct an AI-augmented\nclassroom, balancing scalability with adaptivity. Beyond exploring the\nconceptual framework and technical innovations, we conduct preliminary\nexperiments at Tsinghua University, one of China's leading universities.\nDrawing from over 100,000 learning records of more than 500 students, we obtain\na series of valuable observations and initial analyses. This project will\ncontinue to evolve, ultimately aiming to establish a comprehensive open\nplatform that supports and unifies research, technology, and applications in\nexploring the possibilities of online education in the era of large model AI.\nWe envision this platform as a collaborative hub, bringing together educators,\nresearchers, and innovators to collectively explore the future of AI-driven\nonline education.",
+          "metadata": {
+            "authors": [
+              "Jifan Yu",
+              "Zheyuan Zhang",
+              "Daniel Zhang-li",
+              "Shangqing Tu",
+              "Zhanxin Hao",
+              "Rui Miao Li",
+              "Haoxuan Li",
+              "Yuanchun Wang",
+              "Hanming Li",
+              "Linlu Gong",
+              "Jie Cao",
+              "Jiayin Lin",
+              "Jinchang Zhou",
+              "Fei Qin",
+              "Haohua Wang",
+              "Jianxiao Jiang",
+              "Lijun Deng",
+              "Yisi Zhan",
+              "Chaojun Xiao",
+              "Xusheng Dai",
+              "Xuan Yan",
+              "Nianyi Lin",
+              "Nan Zhang",
+              "Ruixin Ni",
+              "Yang Dang",
+              "Lei Hou",
+              "Yu Zhang",
+              "Xu Han",
+              "Manli Li",
+              "Juanzi Li",
+              "Zhiyuan Liu",
+              "Huiqin Liu",
+              "Maosong Sun"
+            ],
+            "publication_date": "2024-09-05T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2504.15785",
+          "title": "WALL-E 2.0: World Alignment by NeuroSymbolic Learning improves World Model-based LLM Agents",
+          "abstract": "Can we build accurate world models out of large language models (LLMs)? How\ncan world models benefit LLM agents? The gap between the prior knowledge of\nLLMs and the specified environment's dynamics usually bottlenecks LLMs'\nperformance as world models. To bridge the gap, we propose a training-free\n\"world alignment\" that learns an environment's symbolic knowledge complementary\nto LLMs. The symbolic knowledge covers action rules, knowledge graphs, and\nscene graphs, which are extracted by LLMs from exploration trajectories and\nencoded into executable codes to regulate LLM agents' policies. We further\npropose an RL-free, model-based agent \"WALL-E 2.0\" through the model-predictive\ncontrol (MPC) framework. Unlike classical MPC requiring costly optimization on\nthe fly, we adopt an LLM agent as an efficient look-ahead optimizer of future\nsteps' actions by interacting with the neurosymbolic world model. While the LLM\nagent's strong heuristics make it an efficient planner in MPC, the quality of\nits planned actions is also secured by the accurate predictions of the aligned\nworld model. They together considerably improve learning efficiency in a new\nenvironment. On open-world challenges in Mars (Minecraft like) and ALFWorld\n(embodied indoor environments), WALL-E 2.0 significantly outperforms existing\nmethods, e.g., surpassing baselines in Mars by 16.1%-51.6% of success rate and\nby at least 61.7% in score. In ALFWorld, it achieves a new record 98% success\nrate after only 4 iterations.",
+          "metadata": {
+            "authors": [
+              "Siyu Zhou",
+              "Tianyi Zhou",
+              "Yijun Yang",
+              "Guodong Long",
+              "Deheng Ye",
+              "Jing Jiang",
+              "Chengqi Zhang"
+            ],
+            "publication_date": "2025-04-22T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2409.11393",
+          "title": "LLM-Agent-UMF: LLM-based Agent Unified Modeling Framework for Seamless Integration of Multi Active/Passive Core-Agents",
+          "abstract": "In an era where vast amounts of data are collected and processed from diverse\nsources, there is a growing demand to develop sophisticated AI systems capable\nof intelligently fusing and analyzing this information. To address these\nchallenges, researchers have turned towards integrating tools into LLM-powered\nagents to enhance the overall information fusion process. However, the\nconjunction of these technologies and the proposed enhancements in several\nstate-of-the-art works followed a non-unified software architecture resulting\nin a lack of modularity and terminological inconsistencies among researchers.\nTo address these issues, we propose a novel LLM-based Agent Unified Modeling\nFramework (LLM-Agent-UMF) that aims to establish a clear foundation for agent\ndevelopment from both functional and software architectural perspectives. Our\nframework distinguishes between the different components of an LLM-based agent,\nsetting LLMs, and tools apart from a new element, the core-agent, playing the\nrole of the central coordinator of the agent. This pivotal entity comprises\nfive modules: planning, memory, profile, action, and security - the latter\noften neglected in previous works. By classifying core-agents into passive and\nactive types based on their authoritative natures, we propose various\nmulti-core agent architectures that combine unique characteristics of\ndistinctive agents to tackle complex tasks more efficiently. We evaluate our\nframework by applying it to thirteen state-of-the-art agents, thereby\ndemonstrating its alignment with their functionalities and clarifying the\noverlooked architectural aspects. Moreover, we thoroughly assess five of our\nproposed architectures through the integration of existing agents into new\nhybrid active/passive core-agents architectures. This analysis provides\ninsights into potential improvements and highlights challenges involved in\ncombining specific agents.",
+          "metadata": {
+            "authors": [
+              "Amine Ben Hassouna",
+              "Hana Chaari",
+              "Ines Belhaj"
+            ],
+            "publication_date": "2024-09-17T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "msg_83475b3f",
+    "role": "user",
+    "content": "[Semantic Search] hello can you check how llm are used in differential equations",
+    "timestamp": "2025-08-11T23:38:30.728237"
+  },
+  {
+    "id": "msg_75ce5b8f",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. **Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression**\n   **Authors:** Peijie Dong, Zhenheng Tang, Xiang Liu, Lujun Li, Xiaowen Chu, Bo Li\n   **Abstract:** Post-training compression reduces the computational and memory costs of large\nlanguage models (LLMs), enabling resource-efficient deployment. However,\nexisting compression benchmarks only focus on language modeling (e.g.,\nperplexity) and natural language understanding tasks (e.g., GLUE accuracy),\nig...\n\n2. **LLM-Agent-UMF: LLM-based Agent Unified Modeling Framework for Seamless Integration of Multi Active/Passive Core-Agents**\n   **Authors:** Amine Ben Hassouna, Hana Chaari, Ines Belhaj\n   **Abstract:** In an era where vast amounts of data are collected and processed from diverse\nsources, there is a growing demand to develop sophisticated AI systems capable\nof intelligently fusing and analyzing this information. To address these\nchallenges, researchers have turned towards integrating tools into LLM...\n\n3. **Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem**\n   **Authors:** Yubo Wang, Ping Nie, Kai Zou, Lijun Wu, Wenhu Chen\n   **Abstract:** We have witnessed that strong LLMs like Qwen-Math, MiMo, and Phi-4 possess\nimmense reasoning potential inherited from the pre-training stage. With\nreinforcement learning (RL), these models can improve dramatically on reasoning\ntasks. Recent studies have shown that even RL on a single problem can unl...\n\n4. **Simulating Classroom Education with LLM-Empowered Agents**\n   **Authors:** Zheyuan Zhang, Daniel Zhang-Li, Jifan Yu, Linlu Gong, Jinchang Zhou, Zhanxin Hao, Jianxiao Jiang, Jie Cao, Huiqin Liu, Zhiyuan Liu, Lei Hou, Juanzi Li\n   **Abstract:** Large language models (LLMs) have been applied across various intelligent\neducational tasks to assist teaching. While preliminary studies have focused on\ntask-specific, independent LLM-empowered agents, the potential of LLMs within a\nmulti-agent collaborative framework for classroom simulation with ...\n\n5. **Distilling LLM Agent into Small Models with Retrieval and Code Tools**\n   **Authors:** Minki Kang, Jongwon Jeong, Seanie Lee, Jaewoong Cho, Sung Ju Hwang\n   **Abstract:** Large language models (LLMs) excel at complex reasoning tasks but remain\ncomputationally expensive, limiting their practical deployment. To address\nthis, recent works have focused on distilling reasoning capabilities into\nsmaller language models (sLMs) using chain-of-thought (CoT) traces from teache...\n\n6. **NavGPT-2: Unleashing Navigational Reasoning Capability for Large Vision-Language Models**\n   **Authors:** Gengze Zhou, Yicong Hong, Zun Wang, Xin Eric Wang, Qi Wu\n   **Abstract:** Capitalizing on the remarkable advancements in Large Language Models (LLMs),\nthere is a burgeoning initiative to harness LLMs for instruction following\nrobotic navigation. Such a trend underscores the potential of LLMs to\ngeneralize navigational reasoning and diverse language understanding. However,...\n\n7. **Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers**\n   **Authors:** Zhenting Qi, Mingyuan Ma, Jiahang Xu, Li Lyna Zhang, Fan Yang, Mao Yang\n   **Abstract:** This paper introduces rStar, a self-play mutual reasoning approach that\nsignificantly improves reasoning capabilities of small language models (SLMs)\nwithout fine-tuning or superior models. rStar decouples reasoning into a\nself-play mutual generation-discrimination process. First, a target SLM\naugme...\n\n8. **WALL-E 2.0: World Alignment by NeuroSymbolic Learning improves World Model-based LLM Agents**\n   **Authors:** Siyu Zhou, Tianyi Zhou, Yijun Yang, Guodong Long, Deheng Ye, Jing Jiang, Chengqi Zhang\n   **Abstract:** Can we build accurate world models out of large language models (LLMs)? How\ncan world models benefit LLM agents? The gap between the prior knowledge of\nLLMs and the specified environment's dynamics usually bottlenecks LLMs'\nperformance as world models. To bridge the gap, we propose a training-free\n\"...\n\n9. **Flow-DPO: Improving LLM Mathematical Reasoning through Online Multi-Agent Learning**\n   **Authors:** Yihe Deng, Paul Mineiro\n   **Abstract:** Mathematical reasoning is a crucial capability for Large Language Models\n(LLMs), yet generating detailed and accurate reasoning traces remains a\nsignificant challenge. This paper introduces a novel approach to produce\nhigh-quality reasoning traces for LLM fine-tuning using online learning\n\\textbf{Fl...\n\n10. **Agentless: Demystifying LLM-based Software Engineering Agents**\n   **Authors:** Chunqiu Steven Xia, Yinlin Deng, Soren Dunn, Lingming Zhang\n   **Abstract:** Recent advancements in large language models (LLMs) have significantly\nadvanced the automation of software development tasks, including code\nsynthesis, program repair, and test generation. More recently, researchers and\nindustry practitioners have developed various autonomous LLM agents to perform\ne...\n",
+    "timestamp": "2025-08-11T23:38:30.728817",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 10,
+      "semanticResults": [
+        {
+          "id": "2505.19433",
+          "title": "Can Compressed LLMs Truly Act? An Empirical Evaluation of Agentic Capabilities in LLM Compression",
+          "abstract": "Post-training compression reduces the computational and memory costs of large\nlanguage models (LLMs), enabling resource-efficient deployment. However,\nexisting compression benchmarks only focus on language modeling (e.g.,\nperplexity) and natural language understanding tasks (e.g., GLUE accuracy),\nignoring the agentic capabilities - workflow, tool use/function call,\nlong-context understanding and real-world application. We introduce the Agent\nCompression Benchmark (ACBench), the first comprehensive benchmark for\nevaluating how compression impacts LLMs' agentic abilities. ACBench spans (1)\n12 tasks across 4 capabilities (e.g., WorfBench for workflow generation,\nNeedle-in-Haystack for long-context retrieval), (2) quantization (GPTQ, AWQ)\nand pruning (Wanda, SparseGPT), and (3) 15 models, including small (Gemma-2B),\nstandard (Qwen2.5 7B-32B), and distilled reasoning LLMs (DeepSeek-R1-Distill).\nOur experiments reveal compression tradeoffs: 4-bit quantization preserves\nworkflow generation and tool use (1%-3% drop) but degrades real-world\napplication accuracy by 10%-15%. We introduce ERank, Top-k Ranking Correlation\nand Energy to systematize analysis. ACBench provides actionable insights for\noptimizing LLM compression in agentic scenarios. The code can be found in\nhttps://github.com/pprp/ACBench.",
+          "metadata": {
+            "authors": [
+              "Peijie Dong",
+              "Zhenheng Tang",
+              "Xiang Liu",
+              "Lujun Li",
+              "Xiaowen Chu",
+              "Bo Li"
+            ],
+            "publication_date": "2025-05-26T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2409.11393",
+          "title": "LLM-Agent-UMF: LLM-based Agent Unified Modeling Framework for Seamless Integration of Multi Active/Passive Core-Agents",
+          "abstract": "In an era where vast amounts of data are collected and processed from diverse\nsources, there is a growing demand to develop sophisticated AI systems capable\nof intelligently fusing and analyzing this information. To address these\nchallenges, researchers have turned towards integrating tools into LLM-powered\nagents to enhance the overall information fusion process. However, the\nconjunction of these technologies and the proposed enhancements in several\nstate-of-the-art works followed a non-unified software architecture resulting\nin a lack of modularity and terminological inconsistencies among researchers.\nTo address these issues, we propose a novel LLM-based Agent Unified Modeling\nFramework (LLM-Agent-UMF) that aims to establish a clear foundation for agent\ndevelopment from both functional and software architectural perspectives. Our\nframework distinguishes between the different components of an LLM-based agent,\nsetting LLMs, and tools apart from a new element, the core-agent, playing the\nrole of the central coordinator of the agent. This pivotal entity comprises\nfive modules: planning, memory, profile, action, and security - the latter\noften neglected in previous works. By classifying core-agents into passive and\nactive types based on their authoritative natures, we propose various\nmulti-core agent architectures that combine unique characteristics of\ndistinctive agents to tackle complex tasks more efficiently. We evaluate our\nframework by applying it to thirteen state-of-the-art agents, thereby\ndemonstrating its alignment with their functionalities and clarifying the\noverlooked architectural aspects. Moreover, we thoroughly assess five of our\nproposed architectures through the integration of existing agents into new\nhybrid active/passive core-agents architectures. This analysis provides\ninsights into potential improvements and highlights challenges involved in\ncombining specific agents.",
+          "metadata": {
+            "authors": [
+              "Amine Ben Hassouna",
+              "Hana Chaari",
+              "Ines Belhaj"
+            ],
+            "publication_date": "2024-09-17T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2506.03295",
+          "title": "Unleashing the Reasoning Potential of Pre-trained LLMs by Critique Fine-Tuning on One Problem",
+          "abstract": "We have witnessed that strong LLMs like Qwen-Math, MiMo, and Phi-4 possess\nimmense reasoning potential inherited from the pre-training stage. With\nreinforcement learning (RL), these models can improve dramatically on reasoning\ntasks. Recent studies have shown that even RL on a single problem can unleash\nthese models' reasoning capabilities. However, RL is not only expensive but\nalso unstable. Even one-shot RL requires hundreds of GPU hours. This raises a\ncritical question: Is there a more efficient way to unleash the reasoning\npotential of these powerful base LLMs? In this work, we demonstrate that\nCritique Fine-Tuning (CFT) on only one problem can effectively unleash the\nreasoning potential of LLMs. Our method constructs critique data by collecting\ndiverse model-generated solutions to a single problem and using teacher LLMs to\nprovide detailed critiques. We fine-tune Qwen and Llama family models, ranging\nfrom 1.5B to 14B parameters, on the CFT data and observe significant\nperformance gains across diverse reasoning tasks. For example, with just 5 GPU\nhours of training, Qwen-Math-7B-CFT show an average improvement of 15% on six\nmath benchmarks and 16% on three logic reasoning benchmarks. These results are\ncomparable to or even surpass the results from RL with 20x less compute.\nAblation studies reveal the robustness of one-shot CFT across different prompt\nproblems. These results highlight one-shot CFT as a simple, general, and\ncompute-efficient approach to unleashing the reasoning capabilities of modern\nLLMs.",
+          "metadata": {
+            "authors": [
+              "Yubo Wang",
+              "Ping Nie",
+              "Kai Zou",
+              "Lijun Wu",
+              "Wenhu Chen"
+            ],
+            "publication_date": "2025-06-03T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2406.19226",
+          "title": "Simulating Classroom Education with LLM-Empowered Agents",
+          "abstract": "Large language models (LLMs) have been applied across various intelligent\neducational tasks to assist teaching. While preliminary studies have focused on\ntask-specific, independent LLM-empowered agents, the potential of LLMs within a\nmulti-agent collaborative framework for classroom simulation with real user\nparticipation remains unexplored. In this work, we propose SimClass, a\nmulti-agent classroom simulation teaching framework. We recognize\nrepresentative class roles and introduce a novel class control mechanism for\nautomatic classroom teaching, and conduct user experiments in two real-world\ncourses. Using the Flanders Interactive Analysis System and Community of\nInquiry theoretical frameworks from educational analysis, we demonstrate that\nLLMs can simulate a dynamic learning environment for users with active\nteacher-student and student-student interactions. We also observe group\nbehaviors among agents in SimClass, where agents collaborate to create\nenlivening interactions in classrooms to improve user learning process. We hope\nthis work pioneers the application of LLM-empowered multi-agent systems in\nvirtual classroom teaching.",
+          "metadata": {
+            "authors": [
+              "Zheyuan Zhang",
+              "Daniel Zhang-Li",
+              "Jifan Yu",
+              "Linlu Gong",
+              "Jinchang Zhou",
+              "Zhanxin Hao",
+              "Jianxiao Jiang",
+              "Jie Cao",
+              "Huiqin Liu",
+              "Zhiyuan Liu",
+              "Lei Hou",
+              "Juanzi Li"
+            ],
+            "publication_date": "2024-06-27T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2505.17612",
+          "title": "Distilling LLM Agent into Small Models with Retrieval and Code Tools",
+          "abstract": "Large language models (LLMs) excel at complex reasoning tasks but remain\ncomputationally expensive, limiting their practical deployment. To address\nthis, recent works have focused on distilling reasoning capabilities into\nsmaller language models (sLMs) using chain-of-thought (CoT) traces from teacher\nLLMs. However, this approach struggles in scenarios requiring rare factual\nknowledge or precise computation, where sLMs often hallucinate due to limited\ncapability. In this work, we propose Agent Distillation, a framework for\ntransferring not only reasoning capability but full task-solving behavior from\nLLM-based agents into sLMs with retrieval and code tools. We improve agent\ndistillation along two complementary axes: (1) we introduce a prompting method\ncalled first-thought prefix to enhance the quality of teacher-generated\ntrajectories; and (2) we propose a self-consistent action generation for\nimproving test-time robustness of small agents. We evaluate our method on eight\nreasoning tasks across factual and mathematical domains, covering both\nin-domain and out-of-domain generalization. Our results show that sLMs as small\nas 0.5B, 1.5B, 3B parameters can achieve performance competitive with next-tier\nlarger 1.5B, 3B, 7B models fine-tuned using CoT distillation, demonstrating the\npotential of agent distillation for building practical, tool-using small\nagents. Our code is available at https://github.com/Nardien/agent-distillation.",
+          "metadata": {
+            "authors": [
+              "Minki Kang",
+              "Jongwon Jeong",
+              "Seanie Lee",
+              "Jaewoong Cho",
+              "Sung Ju Hwang"
+            ],
+            "publication_date": "2025-05-23T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2407.12366",
+          "title": "NavGPT-2: Unleashing Navigational Reasoning Capability for Large Vision-Language Models",
+          "abstract": "Capitalizing on the remarkable advancements in Large Language Models (LLMs),\nthere is a burgeoning initiative to harness LLMs for instruction following\nrobotic navigation. Such a trend underscores the potential of LLMs to\ngeneralize navigational reasoning and diverse language understanding. However,\na significant discrepancy in agent performance is observed when integrating\nLLMs in the Vision-and-Language navigation (VLN) tasks compared to previous\ndownstream specialist models. Furthermore, the inherent capacity of language to\ninterpret and facilitate communication in agent interactions is often\nunderutilized in these integrations. In this work, we strive to bridge the\ndivide between VLN-specialized models and LLM-based navigation paradigms, while\nmaintaining the interpretative prowess of LLMs in generating linguistic\nnavigational reasoning. By aligning visual content in a frozen LLM, we\nencompass visual observation comprehension for LLMs and exploit a way to\nincorporate LLMs and navigation policy networks for effective action\npredictions and navigational reasoning. We demonstrate the data efficiency of\nthe proposed methods and eliminate the gap between LM-based agents and\nstate-of-the-art VLN specialists.",
+          "metadata": {
+            "authors": [
+              "Gengze Zhou",
+              "Yicong Hong",
+              "Zun Wang",
+              "Xin Eric Wang",
+              "Qi Wu"
+            ],
+            "publication_date": "2024-07-17T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2408.06195",
+          "title": "Mutual Reasoning Makes Smaller LLMs Stronger Problem-Solvers",
+          "abstract": "This paper introduces rStar, a self-play mutual reasoning approach that\nsignificantly improves reasoning capabilities of small language models (SLMs)\nwithout fine-tuning or superior models. rStar decouples reasoning into a\nself-play mutual generation-discrimination process. First, a target SLM\naugments the Monte Carlo Tree Search (MCTS) with a rich set of human-like\nreasoning actions to construct higher quality reasoning trajectories. Next,\nanother SLM, with capabilities similar to the target SLM, acts as a\ndiscriminator to verify each trajectory generated by the target SLM. The\nmutually agreed reasoning trajectories are considered mutual consistent, thus\nare more likely to be correct. Extensive experiments across five SLMs\ndemonstrate rStar can effectively solve diverse reasoning problems, including\nGSM8K, GSM-Hard, MATH, SVAMP, and StrategyQA. Remarkably, rStar boosts GSM8K\naccuracy from 12.51% to 63.91% for LLaMA2-7B, from 36.46% to 81.88% for\nMistral-7B, from 74.53% to 91.13% for LLaMA3-8B-Instruct. Code will be\navailable at https://github.com/zhentingqi/rStar.",
+          "metadata": {
+            "authors": [
+              "Zhenting Qi",
+              "Mingyuan Ma",
+              "Jiahang Xu",
+              "Li Lyna Zhang",
+              "Fan Yang",
+              "Mao Yang"
+            ],
+            "publication_date": "2024-08-12T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2504.15785",
+          "title": "WALL-E 2.0: World Alignment by NeuroSymbolic Learning improves World Model-based LLM Agents",
+          "abstract": "Can we build accurate world models out of large language models (LLMs)? How\ncan world models benefit LLM agents? The gap between the prior knowledge of\nLLMs and the specified environment's dynamics usually bottlenecks LLMs'\nperformance as world models. To bridge the gap, we propose a training-free\n\"world alignment\" that learns an environment's symbolic knowledge complementary\nto LLMs. The symbolic knowledge covers action rules, knowledge graphs, and\nscene graphs, which are extracted by LLMs from exploration trajectories and\nencoded into executable codes to regulate LLM agents' policies. We further\npropose an RL-free, model-based agent \"WALL-E 2.0\" through the model-predictive\ncontrol (MPC) framework. Unlike classical MPC requiring costly optimization on\nthe fly, we adopt an LLM agent as an efficient look-ahead optimizer of future\nsteps' actions by interacting with the neurosymbolic world model. While the LLM\nagent's strong heuristics make it an efficient planner in MPC, the quality of\nits planned actions is also secured by the accurate predictions of the aligned\nworld model. They together considerably improve learning efficiency in a new\nenvironment. On open-world challenges in Mars (Minecraft like) and ALFWorld\n(embodied indoor environments), WALL-E 2.0 significantly outperforms existing\nmethods, e.g., surpassing baselines in Mars by 16.1%-51.6% of success rate and\nby at least 61.7% in score. In ALFWorld, it achieves a new record 98% success\nrate after only 4 iterations.",
+          "metadata": {
+            "authors": [
+              "Siyu Zhou",
+              "Tianyi Zhou",
+              "Yijun Yang",
+              "Guodong Long",
+              "Deheng Ye",
+              "Jing Jiang",
+              "Chengqi Zhang"
+            ],
+            "publication_date": "2025-04-22T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2410.22304",
+          "title": "Flow-DPO: Improving LLM Mathematical Reasoning through Online Multi-Agent Learning",
+          "abstract": "Mathematical reasoning is a crucial capability for Large Language Models\n(LLMs), yet generating detailed and accurate reasoning traces remains a\nsignificant challenge. This paper introduces a novel approach to produce\nhigh-quality reasoning traces for LLM fine-tuning using online learning\n\\textbf{Flows}. Our method employs an incremental output production Flow, where\ncomponent LLMs collaboratively construct solutions through iterative\ncommunication. We train the Flow using online Direct Preference Optimization\n(DPO) learning with rollouts, generating DPO pairs for each training example\nand updating models in real-time. We directly compare the quality of reasoning\ntraces generated by our method with those produced through direct model\ninference, demonstrating the effectiveness of our approach in improving LLM\nperformance in mathematical reasoning tasks.",
+          "metadata": {
+            "authors": [
+              "Yihe Deng",
+              "Paul Mineiro"
+            ],
+            "publication_date": "2024-10-29T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2407.01489",
+          "title": "Agentless: Demystifying LLM-based Software Engineering Agents",
+          "abstract": "Recent advancements in large language models (LLMs) have significantly\nadvanced the automation of software development tasks, including code\nsynthesis, program repair, and test generation. More recently, researchers and\nindustry practitioners have developed various autonomous LLM agents to perform\nend-to-end software development tasks. These agents are equipped with the\nability to use tools, run commands, observe feedback from the environment, and\nplan for future actions. However, the complexity of these agent-based\napproaches, together with the limited abilities of current LLMs, raises the\nfollowing question: Do we really have to employ complex autonomous software\nagents? To attempt to answer this question, we build Agentless -- an agentless\napproach to automatically solve software development problems. Compared to the\nverbose and complex setup of agent-based approaches, Agentless employs a\nsimplistic three-phase process of localization, repair, and patch validation,\nwithout letting the LLM decide future actions or operate with complex tools.\nOur results on the popular SWE-bench Lite benchmark show that surprisingly the\nsimplistic Agentless is able to achieve both the highest performance (32.00%,\n96 correct fixes) and low cost ($0.70) compared with all existing open-source\nsoftware agents! Furthermore, we manually classified the problems in SWE-bench\nLite and found problems with exact ground truth patch or\ninsufficient/misleading issue descriptions. As such, we construct SWE-bench\nLite-S by excluding such problematic issues to perform more rigorous evaluation\nand comparison. Our work highlights the current overlooked potential of a\nsimple, interpretable technique in autonomous software development. We hope\nAgentless will help reset the baseline, starting point, and horizon for\nautonomous software agents, and inspire future work along this crucial\ndirection.",
+          "metadata": {
+            "authors": [
+              "Chunqiu Steven Xia",
+              "Yinlin Deng",
+              "Soren Dunn",
+              "Lingming Zhang"
+            ],
+            "publication_date": "2024-07-01T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        }
+      ]
+    }
+  },
+  {
+    "id": "msg_a400f228",
+    "role": "user",
+    "content": "[Semantic Search] helloo, how about papers on chaain of thought",
+    "timestamp": "2025-08-11T23:49:02.950220"
+  },
+  {
+    "id": "msg_6dd5e911",
+    "role": "assistant",
+    "content": "### Semantic Search Results\n\n1. **ResearchTown: Simulator of Human Research Community**\n   **Authors:** Haofei Yu, Zhaochen Hong, Zirui Cheng, Kunlun Zhu, Keyang Xuan, Jinwei Yao, Tao Feng, Jiaxuan You\n   **Abstract:** Large Language Models (LLMs) have demonstrated remarkable potential in\nscientific domains, yet a fundamental question remains unanswered: Can we\nsimulate human research communities with LLMs? Addressing this question can\ndeepen our understanding of the processes behind idea brainstorming and inspire...\n\n2. **Can LLMs Generate Novel Research Ideas? A Large-Scale Human Study with 100+ NLP Researchers**\n   **Authors:** Chenglei Si, Diyi Yang, Tatsunori Hashimoto\n   **Abstract:** Recent advancements in large language models (LLMs) have sparked optimism\nabout their potential to accelerate scientific discovery, with a growing number\nof works proposing research agents that autonomously generate and validate new\nideas. Despite this, no evaluations have shown that LLM systems can...\n\n3. **Sibyl: Simple yet Effective Agent Framework for Complex Real-world Reasoning**\n   **Authors:** Yulong Wang, Tianhao Shen, Lifeng Liu, Jian Xie\n   **Abstract:** Existing agents based on large language models (LLMs) demonstrate robust\nproblem-solving capabilities by integrating LLMs' inherent knowledge, strong\nin-context learning and zero-shot capabilities, and the use of tools combined\nwith intricately designed LLM invocation workflows by humans. However, t...\n\n4. **Towards System 2 Reasoning in LLMs: Learning How to Think With Meta Chain-of-Thought**\n   **Authors:** Violet Xiang, Charlie Snell, Kanishk Gandhi, Alon Albalak, Anikait Singh, Chase Blagden, Duy Phung, Rafael Rafailov, Nathan Lile, Dakota Mahan, Louis Castricato, Jan-Philipp Franken, Nick Haber, Chelsea Finn\n   **Abstract:** We propose a novel framework, Meta Chain-of-Thought (Meta-CoT), which extends\ntraditional Chain-of-Thought (CoT) by explicitly modeling the underlying\nreasoning required to arrive at a particular CoT. We present empirical evidence\nfrom state-of-the-art models exhibiting behaviors consistent with in-...\n\n5. **Distilling LLM Agent into Small Models with Retrieval and Code Tools**\n   **Authors:** Minki Kang, Jongwon Jeong, Seanie Lee, Jaewoong Cho, Sung Ju Hwang\n   **Abstract:** Large language models (LLMs) excel at complex reasoning tasks but remain\ncomputationally expensive, limiting their practical deployment. To address\nthis, recent works have focused on distilling reasoning capabilities into\nsmaller language models (sLMs) using chain-of-thought (CoT) traces from teache...\n\n6. **MAPS: A Multi-Agent Framework Based on Big Seven Personality and Socratic Guidance for Multimodal Scientific Problem Solving**\n   **Authors:** Jian Zhang, Zhiyuan Wang, Zhangqi Wang, Xinyu Zhang, Fangzhi Xu, Qika Lin, Rui Mao, Erik Cambria, Jun Liu\n   **Abstract:** Multimodal scientific problems (MSPs) involve complex issues that require the\nintegration of multiple modalities, such as text and diagrams, presenting a\nsignificant challenge in artificial intelligence. While progress has been made\nin addressing traditional scientific problems, MSPs still face two ...\n\n7. **PaperBench: Evaluating AI's Ability to Replicate AI Research**\n   **Authors:** Giulio Starace, Oliver Jaffe, Dane Sherburn, James Aung, Jun Shern Chan, Leon Maksin, Rachel Dias, Evan Mays, Benjamin Kinsella, Wyatt Thompson, Johannes Heidecke, Amelia Glaese, Tejal Patwardhan\n   **Abstract:** We introduce PaperBench, a benchmark evaluating the ability of AI agents to\nreplicate state-of-the-art AI research. Agents must replicate 20 ICML 2024\nSpotlight and Oral papers from scratch, including understanding paper\ncontributions, developing a codebase, and successfully executing experiments.\nF...\n\n8. **MetaMind: Modeling Human Social Thoughts with Metacognitive Multi-Agent Systems**\n   **Authors:** Xuanming Zhang, Yuxuan Chen, Min-Hsuan Yeh, Yixuan Li\n   **Abstract:** Human social interactions depend on the ability to infer others' unspoken\nintentions, emotions, and beliefs-a cognitive skill grounded in the\npsychological concept of Theory of Mind (ToM). While large language models\n(LLMs) excel in semantic understanding tasks, they struggle with the ambiguity\nand ...\n\n9. **MLR-Bench: Evaluating AI Agents on Open-Ended Machine Learning Research**\n   **Authors:** Hui Chen, Miao Xiong, Yujie Lu, Wei Han, Ailin Deng, Yufei He, Jiaying Wu, Yibo Li, Yue Liu, Bryan Hooi\n   **Abstract:** Recent advancements in AI agents have demonstrated their growing potential to\ndrive and support scientific discovery. In this work, we introduce MLR-Bench, a\ncomprehensive benchmark for evaluating AI agents on open-ended machine learning\nresearch. MLR-Bench includes three key components: (1) 201 res...\n\n10. **Self-Discover: Large Language Models Self-Compose Reasoning Structures**\n   **Authors:** Pei Zhou, Jay Pujara, Xiang Ren, Xinyun Chen, Heng-Tze Cheng, Quoc V. Le, Ed H. Chi, Denny Zhou, Swaroop Mishra, Huaixiu Steven Zheng\n   **Abstract:** We introduce SELF-DISCOVER, a general framework for LLMs to self-discover the\ntask-intrinsic reasoning structures to tackle complex reasoning problems that\nare challenging for typical prompting methods. Core to the framework is a\nself-discovery process where LLMs select multiple atomic reasoning mod...\n",
+    "timestamp": "2025-08-11T23:49:02.950681",
+    "agentId": "semantic",
+    "agentName": "Semantic Search",
+    "agentIcon": "search",
+    "metadata": {
+      "mode": "agents_litellm_fallback",
+      "count": 10,
+      "semanticResults": [
+        {
+          "id": "2412.17767",
+          "title": "ResearchTown: Simulator of Human Research Community",
+          "abstract": "Large Language Models (LLMs) have demonstrated remarkable potential in\nscientific domains, yet a fundamental question remains unanswered: Can we\nsimulate human research communities with LLMs? Addressing this question can\ndeepen our understanding of the processes behind idea brainstorming and inspire\nthe automatic discovery of novel scientific insights. In this work, we propose\nResearchTown, a multi-agent framework for research community simulation. Within\nthis framework, the human research community is simplified and modeled as an\nagent-data graph, where researchers and papers are represented as agent-type\nand data-type nodes, respectively, and connected based on their collaboration\nrelationships. We also introduce TextGNN, a text-based inference framework that\nmodels various research activities (e.g., paper reading, paper writing, and\nreview writing) as special forms of a unified message-passing process on the\nagent-data graph. To evaluate the quality of the research simulation, we\npresent ResearchBench, a benchmark that uses a node-masking prediction task for\nscalable and objective assessment based on similarity. Our experiments reveal\nthree key findings: (1) ResearchTown can provide a realistic simulation of\ncollaborative research activities, including paper writing and review writing;\n(2) ResearchTown can maintain robust simulation with multiple researchers and\ndiverse papers; (3) ResearchTown can generate interdisciplinary research ideas\nthat potentially inspire novel research directions.",
+          "metadata": {
+            "authors": [
+              "Haofei Yu",
+              "Zhaochen Hong",
+              "Zirui Cheng",
+              "Kunlun Zhu",
+              "Keyang Xuan",
+              "Jinwei Yao",
+              "Tao Feng",
+              "Jiaxuan You"
+            ],
+            "publication_date": "2024-12-23T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2409.04109",
+          "title": "Can LLMs Generate Novel Research Ideas? A Large-Scale Human Study with 100+ NLP Researchers",
+          "abstract": "Recent advancements in large language models (LLMs) have sparked optimism\nabout their potential to accelerate scientific discovery, with a growing number\nof works proposing research agents that autonomously generate and validate new\nideas. Despite this, no evaluations have shown that LLM systems can take the\nvery first step of producing novel, expert-level ideas, let alone perform the\nentire research process. We address this by establishing an experimental design\nthat evaluates research idea generation while controlling for confounders and\nperforms the first head-to-head comparison between expert NLP researchers and\nan LLM ideation agent. By recruiting over 100 NLP researchers to write novel\nideas and blind reviews of both LLM and human ideas, we obtain the first\nstatistically significant conclusion on current LLM capabilities for research\nideation: we find LLM-generated ideas are judged as more novel (p < 0.05) than\nhuman expert ideas while being judged slightly weaker on feasibility. Studying\nour agent baselines closely, we identify open problems in building and\nevaluating research agents, including failures of LLM self-evaluation and their\nlack of diversity in generation. Finally, we acknowledge that human judgements\nof novelty can be difficult, even by experts, and propose an end-to-end study\ndesign which recruits researchers to execute these ideas into full projects,\nenabling us to study whether these novelty and feasibility judgements result in\nmeaningful differences in research outcome.",
+          "metadata": {
+            "authors": [
+              "Chenglei Si",
+              "Diyi Yang",
+              "Tatsunori Hashimoto"
+            ],
+            "publication_date": "2024-09-06T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2407.10718",
+          "title": "Sibyl: Simple yet Effective Agent Framework for Complex Real-world Reasoning",
+          "abstract": "Existing agents based on large language models (LLMs) demonstrate robust\nproblem-solving capabilities by integrating LLMs' inherent knowledge, strong\nin-context learning and zero-shot capabilities, and the use of tools combined\nwith intricately designed LLM invocation workflows by humans. However, these\nagents still exhibit shortcomings in long-term reasoning and under-use the\npotential of existing tools, leading to noticeable deficiencies in complex\nreal-world reasoning scenarios. To address these limitations, we introduce\nSibyl, a simple yet powerful LLM-based agent framework designed to tackle\ncomplex reasoning tasks by efficiently leveraging a minimal set of tools.\nDrawing inspiration from Global Workspace Theory, Sibyl incorporates a global\nworkspace to enhance the management and sharing of knowledge and conversation\nhistory throughout the system. Furthermore, guided by Society of Mind Theory,\nSibyl implements a multi-agent debate-based jury to self-refine the final\nanswers, ensuring a comprehensive and balanced approach. This approach aims to\nreduce system complexity while expanding the scope of problems solvable-from\nmatters typically resolved by humans in minutes to those requiring hours or\neven days, thus facilitating a shift from System-1 to System-2 thinking. Sibyl\nhas been designed with a focus on scalability and ease of debugging by\nincorporating the concept of reentrancy from functional programming from its\ninception, with the aim of seamless and low effort integration in other LLM\napplications to improve capabilities. Our experimental results on the GAIA\nbenchmark test set reveal that the Sibyl agent instantiated with GPT-4 achieves\nstate-of-the-art performance with an average score of 34.55%, compared to other\nagents based on GPT-4. We hope that Sibyl can inspire more reliable and\nreusable LLM-based agent solutions to address complex real-world reasoning\ntasks.",
+          "metadata": {
+            "authors": [
+              "Yulong Wang",
+              "Tianhao Shen",
+              "Lifeng Liu",
+              "Jian Xie"
+            ],
+            "publication_date": "2024-07-15T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2501.04682",
+          "title": "Towards System 2 Reasoning in LLMs: Learning How to Think With Meta Chain-of-Thought",
+          "abstract": "We propose a novel framework, Meta Chain-of-Thought (Meta-CoT), which extends\ntraditional Chain-of-Thought (CoT) by explicitly modeling the underlying\nreasoning required to arrive at a particular CoT. We present empirical evidence\nfrom state-of-the-art models exhibiting behaviors consistent with in-context\nsearch, and explore methods for producing Meta-CoT via process supervision,\nsynthetic data generation, and search algorithms. Finally, we outline a\nconcrete pipeline for training a model to produce Meta-CoTs, incorporating\ninstruction tuning with linearized search traces and reinforcement learning\npost-training. Finally, we discuss open research questions, including scaling\nlaws, verifier roles, and the potential for discovering novel reasoning\nalgorithms. This work provides a theoretical and practical roadmap to enable\nMeta-CoT in LLMs, paving the way for more powerful and human-like reasoning in\nartificial intelligence.",
+          "metadata": {
+            "authors": [
+              "Violet Xiang",
+              "Charlie Snell",
+              "Kanishk Gandhi",
+              "Alon Albalak",
+              "Anikait Singh",
+              "Chase Blagden",
+              "Duy Phung",
+              "Rafael Rafailov",
+              "Nathan Lile",
+              "Dakota Mahan",
+              "Louis Castricato",
+              "Jan-Philipp Franken",
+              "Nick Haber",
+              "Chelsea Finn"
+            ],
+            "publication_date": "2025-01-08T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2505.17612",
+          "title": "Distilling LLM Agent into Small Models with Retrieval and Code Tools",
+          "abstract": "Large language models (LLMs) excel at complex reasoning tasks but remain\ncomputationally expensive, limiting their practical deployment. To address\nthis, recent works have focused on distilling reasoning capabilities into\nsmaller language models (sLMs) using chain-of-thought (CoT) traces from teacher\nLLMs. However, this approach struggles in scenarios requiring rare factual\nknowledge or precise computation, where sLMs often hallucinate due to limited\ncapability. In this work, we propose Agent Distillation, a framework for\ntransferring not only reasoning capability but full task-solving behavior from\nLLM-based agents into sLMs with retrieval and code tools. We improve agent\ndistillation along two complementary axes: (1) we introduce a prompting method\ncalled first-thought prefix to enhance the quality of teacher-generated\ntrajectories; and (2) we propose a self-consistent action generation for\nimproving test-time robustness of small agents. We evaluate our method on eight\nreasoning tasks across factual and mathematical domains, covering both\nin-domain and out-of-domain generalization. Our results show that sLMs as small\nas 0.5B, 1.5B, 3B parameters can achieve performance competitive with next-tier\nlarger 1.5B, 3B, 7B models fine-tuned using CoT distillation, demonstrating the\npotential of agent distillation for building practical, tool-using small\nagents. Our code is available at https://github.com/Nardien/agent-distillation.",
+          "metadata": {
+            "authors": [
+              "Minki Kang",
+              "Jongwon Jeong",
+              "Seanie Lee",
+              "Jaewoong Cho",
+              "Sung Ju Hwang"
+            ],
+            "publication_date": "2025-05-23T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2503.16905",
+          "title": "MAPS: A Multi-Agent Framework Based on Big Seven Personality and Socratic Guidance for Multimodal Scientific Problem Solving",
+          "abstract": "Multimodal scientific problems (MSPs) involve complex issues that require the\nintegration of multiple modalities, such as text and diagrams, presenting a\nsignificant challenge in artificial intelligence. While progress has been made\nin addressing traditional scientific problems, MSPs still face two primary\nissues: the challenge of multi-modal comprehensive reasoning in scientific\nproblem-solving and the lack of reflective and rethinking capabilities. To\naddress these issues, we introduce a Multi-Agent framework based on the Big\nSeven Personality and Socratic guidance (MAPS). This framework employs seven\ndistinct agents that leverage feedback mechanisms and the Socratic method to\nguide the resolution of MSPs. To tackle the first issue, we propose a\nprogressive four-agent solving strategy, where each agent focuses on a specific\nstage of the problem-solving process. For the second issue, we introduce a\nCritic agent, inspired by Socratic questioning, which prompts critical thinking\nand stimulates autonomous learning. We conduct extensive experiments on the\nEMMA, Olympiad, and MathVista datasets, achieving promising results that\noutperform the current SOTA model by 15.84% across all tasks. Meanwhile, the\nadditional analytical experiments also verify the model's progress as well as\ngeneralization ability.",
+          "metadata": {
+            "authors": [
+              "Jian Zhang",
+              "Zhiyuan Wang",
+              "Zhangqi Wang",
+              "Xinyu Zhang",
+              "Fangzhi Xu",
+              "Qika Lin",
+              "Rui Mao",
+              "Erik Cambria",
+              "Jun Liu"
+            ],
+            "publication_date": "2025-03-21T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2504.01848",
+          "title": "PaperBench: Evaluating AI's Ability to Replicate AI Research",
+          "abstract": "We introduce PaperBench, a benchmark evaluating the ability of AI agents to\nreplicate state-of-the-art AI research. Agents must replicate 20 ICML 2024\nSpotlight and Oral papers from scratch, including understanding paper\ncontributions, developing a codebase, and successfully executing experiments.\nFor objective evaluation, we develop rubrics that hierarchically decompose each\nreplication task into smaller sub-tasks with clear grading criteria. In total,\nPaperBench contains 8,316 individually gradable tasks. Rubrics are co-developed\nwith the author(s) of each ICML paper for accuracy and realism. To enable\nscalable evaluation, we also develop an LLM-based judge to automatically grade\nreplication attempts against rubrics, and assess our judge's performance by\ncreating a separate benchmark for judges. We evaluate several frontier models\non PaperBench, finding that the best-performing tested agent, Claude 3.5 Sonnet\n(New) with open-source scaffolding, achieves an average replication score of\n21.0%. Finally, we recruit top ML PhDs to attempt a subset of PaperBench,\nfinding that models do not yet outperform the human baseline. We open-source\nour code (https://github.com/openai/preparedness) to facilitate future research\nin understanding the AI engineering capabilities of AI agents.",
+          "metadata": {
+            "authors": [
+              "Giulio Starace",
+              "Oliver Jaffe",
+              "Dane Sherburn",
+              "James Aung",
+              "Jun Shern Chan",
+              "Leon Maksin",
+              "Rachel Dias",
+              "Evan Mays",
+              "Benjamin Kinsella",
+              "Wyatt Thompson",
+              "Johannes Heidecke",
+              "Amelia Glaese",
+              "Tejal Patwardhan"
+            ],
+            "publication_date": "2025-04-02T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2505.18943",
+          "title": "MetaMind: Modeling Human Social Thoughts with Metacognitive Multi-Agent Systems",
+          "abstract": "Human social interactions depend on the ability to infer others' unspoken\nintentions, emotions, and beliefs-a cognitive skill grounded in the\npsychological concept of Theory of Mind (ToM). While large language models\n(LLMs) excel in semantic understanding tasks, they struggle with the ambiguity\nand contextual nuance inherent in human communication. To bridge this gap, we\nintroduce MetaMind, a multi-agent framework inspired by psychological theories\nof metacognition, designed to emulate human-like social reasoning. MetaMind\ndecomposes social understanding into three collaborative stages: (1) a\nTheory-of-Mind Agent generates hypotheses user mental states (e.g., intent,\nemotion), (2) a Domain Agent refines these hypotheses using cultural norms and\nethical constraints, and (3) a Response Agent generates contextually\nappropriate responses while validating alignment with inferred intent. Our\nframework achieves state-of-the-art performance across three challenging\nbenchmarks, with 35.7% improvement in real-world social scenarios and 6.2% gain\nin ToM reasoning. Notably, it enables LLMs to match human-level performance on\nkey ToM tasks for the first time. Ablation studies confirm the necessity of all\ncomponents, which showcase the framework's ability to balance contextual\nplausibility, social appropriateness, and user adaptation. This work advances\nAI systems toward human-like social intelligence, with applications in\nempathetic dialogue and culturally sensitive interactions. Code is available at\nhttps://github.com/XMZhangAI/MetaMind.",
+          "metadata": {
+            "authors": [
+              "Xuanming Zhang",
+              "Yuxuan Chen",
+              "Min-Hsuan Yeh",
+              "Yixuan Li"
+            ],
+            "publication_date": "2025-05-25T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2505.19955",
+          "title": "MLR-Bench: Evaluating AI Agents on Open-Ended Machine Learning Research",
+          "abstract": "Recent advancements in AI agents have demonstrated their growing potential to\ndrive and support scientific discovery. In this work, we introduce MLR-Bench, a\ncomprehensive benchmark for evaluating AI agents on open-ended machine learning\nresearch. MLR-Bench includes three key components: (1) 201 research tasks\nsourced from NeurIPS, ICLR, and ICML workshops covering diverse ML topics; (2)\nMLR-Judge, an automated evaluation framework combining LLM-based reviewers with\ncarefully designed review rubrics to assess research quality; and (3)\nMLR-Agent, a modular agent scaffold capable of completing research tasks\nthrough four stages: idea generation, proposal formulation, experimentation,\nand paper writing. Our framework supports both stepwise assessment across these\ndistinct research stages, and end-to-end evaluation of the final research\npaper. We then use MLR-Bench to evaluate six frontier LLMs and an advanced\ncoding agent, finding that while LLMs are effective at generating coherent\nideas and well-structured papers, current coding agents frequently (e.g., in\n80% of the cases) produce fabricated or invalidated experimental\nresults--posing a major barrier to scientific reliability. We validate\nMLR-Judge through human evaluation, showing high agreement with expert\nreviewers, supporting its potential as a scalable tool for research evaluation.\nWe open-source MLR-Bench to help the community benchmark, diagnose, and improve\nAI research agents toward trustworthy and transparent scientific discovery.",
+          "metadata": {
+            "authors": [
+              "Hui Chen",
+              "Miao Xiong",
+              "Yujie Lu",
+              "Wei Han",
+              "Ailin Deng",
+              "Yufei He",
+              "Jiaying Wu",
+              "Yibo Li",
+              "Yue Liu",
+              "Bryan Hooi"
+            ],
+            "publication_date": "2025-05-26T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        },
+        {
+          "id": "2402.03620",
+          "title": "Self-Discover: Large Language Models Self-Compose Reasoning Structures",
+          "abstract": "We introduce SELF-DISCOVER, a general framework for LLMs to self-discover the\ntask-intrinsic reasoning structures to tackle complex reasoning problems that\nare challenging for typical prompting methods. Core to the framework is a\nself-discovery process where LLMs select multiple atomic reasoning modules such\nas critical thinking and step-by-step thinking, and compose them into an\nexplicit reasoning structure for LLMs to follow during decoding. SELF-DISCOVER\nsubstantially improves GPT-4 and PaLM 2's performance on challenging reasoning\nbenchmarks such as BigBench-Hard, grounded agent reasoning, and MATH, by as\nmuch as 32% compared to Chain of Thought (CoT). Furthermore, SELF-DISCOVER\noutperforms inference-intensive methods such as CoT-Self-Consistency by more\nthan 20%, while requiring 10-40x fewer inference compute. Finally, we show that\nthe self-discovered reasoning structures are universally applicable across\nmodel families: from PaLM 2-L to GPT-4, and from GPT-4 to Llama2, and share\ncommonalities with human reasoning patterns.",
+          "metadata": {
+            "authors": [
+              "Pei Zhou",
+              "Jay Pujara",
+              "Xiang Ren",
+              "Xinyun Chen",
+              "Heng-Tze Cheng",
+              "Quoc V. Le",
+              "Ed H. Chi",
+              "Denny Zhou",
+              "Swaroop Mishra",
+              "Huaixiu Steven Zheng"
+            ],
+            "publication_date": "2024-02-06T00:00:00",
+            "url": null,
+            "relevance_score": 1.0
+          }
+        }
+      ]
+    }
+  }
+]

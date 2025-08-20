@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AgentName, ProcessStatus, StylizedFact, ModelProvider, LlmOptions, AgentPrompts } from './types';
+import { AgentName, ProcessStatus, StylizedFact, ModelProvider, LlmOptions, AgentPrompts, ToolResults } from './types';
 import { generateContentStream, generateFacts, generateQuestions } from './services/geminiService';
+import { executeResearcherTools, formatToolResultsForPrompt, checkToolServiceHealth } from './services/toolService';
 import { initialPrompts } from './prompts';
 import ControlPanel from './components/ControlPanel';
 import StatusBar from './components/StatusBar';
@@ -110,6 +111,12 @@ export default function App() {
   const [showRestartConfirm, setShowRestartConfirm] = useState<boolean>(false);
   const [restartFromStep, setRestartFromStep] = useState<ProcessStatus | null>(null);
   
+  // Tool-related state
+  const [toolResults, setToolResults] = useState<ToolResults | null>(null);
+  const [toolServiceAvailable, setToolServiceAvailable] = useState<boolean>(false);
+  const [enableWebSearch, setEnableWebSearch] = useState<boolean>(true);
+  const [enableLocalSearch, setEnableLocalSearch] = useState<boolean>(true);
+  
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('theme')) {
         return localStorage.getItem('theme') as 'light' | 'dark';
@@ -131,6 +138,18 @@ export default function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Check tool service health on load
+  useEffect(() => {
+    const checkTools = async () => {
+      const isAvailable = await checkToolServiceHealth();
+      setToolServiceAvailable(isAvailable);
+      if (!isAvailable) {
+        console.warn('⚠️ Tool service not available. Research agent will run without tools.');
+      }
+    };
+    checkTools();
+  }, []);
+
   // --- Autosave / Restore last run ---
   type SavedRun = {
     timestamp: string;
@@ -150,6 +169,7 @@ export default function App() {
     stylizedFacts: StylizedFact[];
     stylizedQuestions: string[];
     completedSteps: ProcessStatus[];
+    toolResults?: ToolResults;
   };
 
   const LAST_RUN_KEY = 'mars:lastRun';
@@ -174,6 +194,7 @@ export default function App() {
         stylizedFacts,
         stylizedQuestions,
         completedSteps,
+        toolResults,
       };
       localStorage.setItem(LAST_RUN_KEY, JSON.stringify(payload));
     } catch {}
@@ -230,6 +251,7 @@ export default function App() {
         setStylizedFacts(data.stylizedFacts || []);
         setStylizedQuestions(data.stylizedQuestions || []);
         setCompletedSteps(data.completedSteps || deriveCompletedSteps(data));
+        setToolResults(data.toolResults || null);
         setStatus(ProcessStatus.FEEDBACK);
         // Optionally clear the hash to avoid repeated restores
         history.replaceState(null, '', window.location.pathname);
@@ -274,6 +296,7 @@ export default function App() {
     setStylizedFacts(data.stylizedFacts || []);
     setStylizedQuestions(data.stylizedQuestions || []);
     setCompletedSteps(data.completedSteps || deriveCompletedSteps(data));
+    setToolResults(data.toolResults || null);
     setStatus(ProcessStatus.FEEDBACK);
     setShowRestoreToast(false);
   };
@@ -294,6 +317,7 @@ export default function App() {
     setStylizedFacts([]);
     setStylizedQuestions([]);
     setCompletedSteps([]);
+    setToolResults(null);
     setError(null);
   };
 
@@ -342,12 +366,51 @@ export default function App() {
       let proposalResult = proposal;
       let finalReportResult = finalReport;
 
-      // 1. Researcher
+      // 1. Researcher (with tools)
       if (shouldRunStep(ProcessStatus.RESEARCHING)) {
         setStatus(ProcessStatus.RESEARCHING);
         setResearchSummary('');
-        const researcherPrompt = fillPromptTemplate(agentPrompts.Researcher, { topic });
+        
+        // Execute research tools if available
+        let toolData = '';
+        if (toolServiceAvailable) {
+          console.log('🔧 Executing research tools...');
+          try {
+            const results = await executeResearcherTools(topic, {
+              includeWebSearch: enableWebSearch,
+              includeLocalSearch: enableLocalSearch,
+              metadata: { iteration, modelProvider }
+            });
+            
+            // Store tool results
+            setToolResults({
+              webResults: results.webResults,
+              localResults: results.localResults,
+              errors: results.errors,
+              timestamp: new Date().toISOString()
+            });
+            
+            // Format for prompt
+            toolData = formatToolResultsForPrompt(results.webResults, results.localResults);
+            
+            if (results.errors.length > 0) {
+              console.warn('⚠️ Tool errors:', results.errors);
+            }
+          } catch (error) {
+            console.error('💥 Tool execution failed:', error);
+            toolData = '**Tool Results:** Tools unavailable for this research.\n';
+          }
+        } else {
+          toolData = '**Tool Results:** Tool service not available. Proceeding with knowledge-based research.\n';
+        }
+        
+        // Build enhanced prompt with tool results
+        const researcherPrompt = fillPromptTemplate(agentPrompts.Researcher, { 
+          topic,
+          tool_results: toolData
+        });
         setResearcherSentPrompt(researcherPrompt);
+        
         researchResult = await generateContentStream(AgentName.RESEARCHER, researcherPrompt, llmOptions, (chunk) => setResearchSummary(prev => prev + chunk));
         setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.RESEARCHING), ProcessStatus.RESEARCHING]);
         await simulateDelay();
@@ -597,6 +660,7 @@ ${questionsText}
     stylizedFacts,
     stylizedQuestions,
     completedSteps,
+    toolResults,
   });
 
   const handleExportJson = () => {
@@ -723,7 +787,16 @@ ${questionsText}
               {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-800 dark:text-red-200 p-4 rounded-lg">{error}</div>}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <AgentCard title="Researcher Agent" content={researchSummary} sentPrompt={researcherSentPrompt} isLoading={status === ProcessStatus.RESEARCHING} agent={AgentName.RESEARCHER} onEditPrompt={() => handleOpenPromptEditor(AgentName.RESEARCHER)} />
+                  <AgentCard 
+                    title="Researcher Agent" 
+                    content={researchSummary} 
+                    sentPrompt={researcherSentPrompt} 
+                    isLoading={status === ProcessStatus.RESEARCHING} 
+                    agent={AgentName.RESEARCHER} 
+                    onEditPrompt={() => handleOpenPromptEditor(AgentName.RESEARCHER)}
+                    toolResults={toolResults}
+                    toolServiceAvailable={toolServiceAvailable}
+                  />
                   <AgentCard title="Generator Agent" content={generatedAnalysis} sentPrompt={generatorSentPrompt} isLoading={status === ProcessStatus.GENERATING} agent={AgentName.GENERATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.GENERATOR)} />
                   <AgentCard title="Evaluator Agent" content={critique} sentPrompt={evaluatorSentPrompt} isLoading={status === ProcessStatus.EVALUATING} agent={AgentName.EVALUATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.EVALUATOR)} />
                   <AgentCard title="Proposer Agent" content={proposal} sentPrompt={proposerSentPrompt} isLoading={status === ProcessStatus.PROPOSING} agent={AgentName.PROPOSER} onEditPrompt={() => handleOpenPromptEditor(AgentName.PROPOSER)} />

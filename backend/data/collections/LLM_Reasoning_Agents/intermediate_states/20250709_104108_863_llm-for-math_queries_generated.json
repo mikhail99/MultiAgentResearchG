@@ -1,0 +1,29 @@
+{
+  "topic": "llm for math",
+  "collection_name": "LLM_Reasoning_Agents",
+  "search_queries": [
+    "llm mathematical reasoning",
+    "llm solving word problems",
+    "llm symbolic math capabilities",
+    "llm error analysis in math",
+    "llm mathematical proofs"
+  ],
+  "literature_summaries": [],
+  "knowledge_gap": null,
+  "proposal_draft": "",
+  "review_team_feedback": {},
+  "is_approved": false,
+  "revision_cycles": 0,
+  "next_step_index": 0,
+  "last_interrupt_type": null,
+  "chat_queue": null,
+  "flow_queue": null,
+  "conversation_id": "a2d9c75f-dc90-431e-82ad-31c5bb247468",
+  "_last_user_input": null,
+  "thread_id": "cab2fd5c-6e5f-4ce5-b238-fce12d8dd33d",
+  "current_step": "queries_generated",
+  "saved_at": "2025-07-09T10:41:08.863991",
+  "workflow_completed": false,
+  "session_id": "cab2fd5c-6e5f-4ce5-b238-fce12d8dd33d",
+  "engine": "pocketflow"
+}

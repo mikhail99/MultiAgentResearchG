@@ -1,0 +1,30 @@
+[
+  {
+    "id": "file_628e5bf0",
+    "name": "planning_test2.md",
+    "type": "markdown",
+    "size": 1509,
+    "createdAt": "2025-08-08T21:38:51.519760",
+    "path": "artifacts/2025-08-08_21-38-51_planning_test2.md",
+    "agent": "planning",
+    "messageId": "msg_d986a221",
+    "metadata": {
+      "agentId": "planning",
+      "agentName": "Planning Agent"
+    }
+  },
+  {
+    "id": "file_05cfb7c4",
+    "name": "planning_test2.md",
+    "type": "markdown",
+    "size": 1509,
+    "createdAt": "2025-08-08T21:35:07.754700",
+    "path": "artifacts/2025-08-08_21-35-07_planning_test2.md",
+    "agent": "planning",
+    "messageId": "msg_d986a221",
+    "metadata": {
+      "agentId": "planning",
+      "agentName": "Planning Agent"
+    }
+  }
+]
