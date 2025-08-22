@@ -6,22 +6,17 @@ Usage: python load_to_chromadb.py
 
 import os
 import glob
-from pathlib import Path
-import chromadb
-from chromadb.config import Settings
+import re
 import hashlib
 from datetime import datetime
 from typing import List, Dict, Any
+from pathlib import Path
 
-# Import LangChain text splitter
-try:
-    from langchain.text_splitter import MarkdownTextSplitter
-    LANGCHAIN_AVAILABLE = True
-except ImportError:
-    LANGCHAIN_AVAILABLE = False
-    print("⚠️  LangChain not available. Install with: pip install langchain")
+import chromadb
+from chromadb.config import Settings
+from langchain.text_splitter import MarkdownTextSplitter
 
-def chunk_markdown_with_langchain(content: str, chunk_size: int = 1000, chunk_overlap: int = 200) -> List[Dict[str, Any]]:
+def chunk_markdown_document(content: str, chunk_size: int = 1000, chunk_overlap: int = 200) -> List[Dict[str, Any]]:
     """
     Chunk markdown document using LangChain's MarkdownTextSplitter
     
@@ -33,26 +28,10 @@ def chunk_markdown_with_langchain(content: str, chunk_size: int = 1000, chunk_ov
     Returns:
         List of chunks with metadata
     """
-    if not LANGCHAIN_AVAILABLE:
-        raise ImportError("LangChain is required for this function. Install with: pip install langchain")
-    
     # Initialize LangChain's MarkdownTextSplitter
     text_splitter = MarkdownTextSplitter(
         chunk_size=chunk_size,
-        chunk_overlap=chunk_overlap,
-        separators=[
-            # Markdown-specific separators (in order of preference)
-            "\n# ",      # Headers
-            "\n## ",
-            "\n### ",
-            "\n#### ",
-            "\n##### ",
-            "\n###### ",
-            "\n\n",      # Paragraphs
-            "\n",        # Lines
-            " ",         # Words
-            ""           # Characters
-        ]
+        chunk_overlap=chunk_overlap
     )
     
     # Split the text
@@ -61,8 +40,7 @@ def chunk_markdown_with_langchain(content: str, chunk_size: int = 1000, chunk_ov
     # Convert to our format with metadata
     chunk_data = []
     for i, chunk_text in enumerate(chunks):
-        # Extract headers from the chunk (simple regex for demo)
-        import re
+        # Extract headers from the chunk
         headers = re.findall(r'^(#{1,6}\s+.+)$', chunk_text, re.MULTILINE)
         
         chunk_metadata = {
@@ -78,97 +56,6 @@ def chunk_markdown_with_langchain(content: str, chunk_size: int = 1000, chunk_ov
         })
     
     return chunk_data
-
-def chunk_markdown_document(content: str, chunk_size: int = 1000, overlap: int = 200) -> List[Dict[str, Any]]:
-    """
-    Intelligently chunk a markdown document (fallback if LangChain not available)
-    
-    Args:
-        content: Full markdown content
-        chunk_size: Target chunk size in characters
-        overlap: Overlap between chunks in characters
-        
-    Returns:
-        List of chunks with metadata
-    """
-    if LANGCHAIN_AVAILABLE:
-        return chunk_markdown_with_langchain(content, chunk_size, overlap)
-    
-    # Fallback to simple chunking if LangChain not available
-    chunks = []
-    import re
-    
-    # Simple splitting by headers and size
-    header_pattern = r'^(#{1,6}\s+.+)$'
-    sections = re.split(header_pattern, content, flags=re.MULTILINE)
-    
-    current_chunk = ""
-    current_headers = []
-    chunk_id = 0
-    
-    for i, section in enumerate(sections):
-        # Check if this is a header
-        if re.match(header_pattern, section, re.MULTILINE):
-            current_headers.append(section.strip())
-            continue
-        
-        # Add section to current chunk
-        if current_chunk:
-            current_chunk += "\n\n" + section
-        else:
-            current_chunk = section
-        
-        # Check if chunk is ready to be saved
-        if len(current_chunk) >= chunk_size:
-            # Try to break at sentence boundaries
-            sentences = re.split(r'(?<=[.!?])\s+', current_chunk)
-            
-            if len(sentences) > 1:
-                # Find a good breaking point
-                break_point = len(sentences) // 2
-                chunk_text = ' '.join(sentences[:break_point])
-                remaining_text = ' '.join(sentences[break_point:])
-            else:
-                # No good sentence break, use character limit
-                chunk_text = current_chunk[:chunk_size]
-                remaining_text = current_chunk[chunk_size:]
-            
-            # Create chunk metadata
-            chunk_metadata = {
-                "chunk_id": chunk_id,
-                "chunk_size": len(chunk_text),
-                "headers": current_headers.copy(),
-                "section_type": "content"
-            }
-            
-            chunks.append({
-                "content": chunk_text.strip(),
-                "metadata": chunk_metadata
-            })
-            
-            # Keep overlap for next chunk
-            if overlap > 0 and len(chunk_text) > overlap:
-                current_chunk = chunk_text[-overlap:] + "\n\n" + remaining_text
-            else:
-                current_chunk = remaining_text
-            
-            chunk_id += 1
-    
-    # Add final chunk if there's content
-    if current_chunk.strip():
-        chunk_metadata = {
-            "chunk_id": chunk_id,
-            "chunk_size": len(current_chunk),
-            "headers": current_headers.copy(),
-            "section_type": "content"
-        }
-        
-        chunks.append({
-            "content": current_chunk.strip(),
-            "metadata": chunk_metadata
-        })
-    
-    return chunks
 
 def load_markdown_to_chromadb():
     """Load all Markdown files from the markdown directory into ChromaDB"""
@@ -186,12 +73,7 @@ def load_markdown_to_chromadb():
     os.makedirs(CHROMA_DB_PATH, exist_ok=True)
     
     print("🚀 Initializing ChromaDB...")
-    
-    # Check LangChain availability
-    if LANGCHAIN_AVAILABLE:
-        print("✅ Using LangChain MarkdownTextSplitter for intelligent chunking")
-    else:
-        print("⚠️  Using fallback chunking (install langchain for better results)")
+    print("✅ Using LangChain MarkdownTextSplitter for intelligent chunking")
     
     # Initialize ChromaDB client
     client = chromadb.PersistentClient(
@@ -213,14 +95,32 @@ def load_markdown_to_chromadb():
         )
         print(f"📚 Created new collection: {COLLECTION_NAME}")
     
-    # Find all markdown files
-    markdown_files = glob.glob(os.path.join(MARKDOWN_DIR, "*.md"))
+    # Find all paper directories
+    paper_dirs = [d for d in os.listdir(MARKDOWN_DIR) if os.path.isdir(os.path.join(MARKDOWN_DIR, d))]
     
-    if not markdown_files:
-        print(f"❌ No markdown files found in {MARKDOWN_DIR}")
+    if not paper_dirs:
+        print(f"❌ No paper directories found in {MARKDOWN_DIR}")
         return
     
-    print(f"📁 Found {len(markdown_files)} markdown files")
+    print(f"📁 Found {len(paper_dirs)} paper directories")
+    
+    # Find markdown files within each paper directory
+    markdown_files = []
+    for paper_dir in paper_dirs:
+        # Extract paper ID from folder name (remove .md extension)
+        paper_id = paper_dir.replace('.md', '')
+        # Expected path: {paper_dir}/{paper_id}/auto/{paper_id}.md
+        expected_md_path = os.path.join(MARKDOWN_DIR, paper_dir, paper_id, "auto", f"{paper_id}.md")
+        if os.path.exists(expected_md_path):
+            markdown_files.append(expected_md_path)
+        else:
+            print(f"⚠️  Expected markdown file not found: {expected_md_path}")
+    
+    if not markdown_files:
+        print(f"❌ No markdown files found in paper directories")
+        return
+    
+    print(f"📄 Found {len(markdown_files)} markdown files in paper directories")
     print(f"🔪 Chunking with size: {CHUNK_SIZE} chars, overlap: {CHUNK_OVERLAP} chars")
     print("🔄 Loading files into ChromaDB...")
     
@@ -241,9 +141,11 @@ def load_markdown_to_chromadb():
                 print(f"⚠️  Skipping empty file: {os.path.basename(file_path)}")
                 continue
             
-            # Extract filename and create base ID
-            filename = os.path.basename(file_path)
-            paper_id = filename.replace('.md', '')
+            # Extract paper ID from the folder structure
+            # Path format: .../markdown/{paper_id}.md/{paper_id}/auto/{paper_id}.md
+            path_parts = file_path.split(os.sep)
+            paper_id = path_parts[-4].replace('.md', '')  # Get the outer folder name without .md
+            filename = f"{paper_id}.md"
             
             # Chunk the document
             chunks = chunk_markdown_document(content, CHUNK_SIZE, CHUNK_OVERLAP)
@@ -269,7 +171,8 @@ def load_markdown_to_chromadb():
                     "section_type": chunk_metadata["section_type"],
                     "source": "pdf_conversion",
                     "conversion_tool": "mineru",
-                    "chunking_tool": "langchain" if LANGCHAIN_AVAILABLE else "custom",
+                    "chunking_tool": "langchain",
+                    "folder_structure": "paper_directory",
                     "word_count": len(chunk_content.split()),
                     "loaded_at": datetime.now().isoformat(),
                     "file_path": file_path
@@ -323,7 +226,7 @@ def load_markdown_to_chromadb():
         # Print collection statistics
         total_count = collection.count()
         print(f"📊 Collection now contains {total_count} chunks")
-        print(f"📄 Average chunks per paper: {total_count / len(markdown_files):.1f}")
+        print(f"📄 Average chunks per paper: {total_count / len(paper_dirs):.1f}")
         
         # Show some sample queries
         print("\n🔍 Sample queries you can try:")
@@ -339,7 +242,7 @@ def load_markdown_to_chromadb():
     print(f"📁 Database location: {CHROMA_DB_PATH}")
     print(f"📚 Collection name: {COLLECTION_NAME}")
     print(f"🔪 Chunking strategy: {CHUNK_SIZE} chars with {CHUNK_OVERLAP} overlap")
-    print(f"🛠️  Chunking tool: {'LangChain MarkdownTextSplitter' if LANGCHAIN_AVAILABLE else 'Custom implementation'}")
+    print(f"🛠️  Chunking tool: LangChain MarkdownTextSplitter")
 
 def test_collection():
     """Test the collection with a sample query"""
@@ -348,7 +251,14 @@ def test_collection():
     COLLECTION_NAME = "llm_reasoning_agents_papers"
     
     try:
-        client = chromadb.PersistentClient(path=CHROMA_DB_PATH)
+        # Use the same settings as the main function to avoid conflicts
+        client = chromadb.PersistentClient(
+            path=CHROMA_DB_PATH,
+            settings=Settings(
+                anonymized_telemetry=False,
+                allow_reset=True
+            )
+        )
         collection = client.get_collection(name=COLLECTION_NAME)
         
         print("\n🧪 Testing collection with sample query...")
@@ -377,7 +287,7 @@ def test_collection():
 
 if __name__ == "__main__":
     print("=" * 60)
-    print("📚 ChromaDB Markdown Loader (with LangChain Chunking)")
+    print("📚 ChromaDB Markdown Loader (LangChain)")
     print("=" * 60)
     
     # Load documents

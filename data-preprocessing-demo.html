@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Preprocessing Pipeline Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="module">
+        // This is a demo file showing how to integrate the DataPreprocessingApp
+        // In a real implementation, you would:
+        // 1. Import React and ReactDOM
+        // 2. Import the DataPreprocessingApp component
+        // 3. Render it to the DOM
+        
+        console.log(`
+🎯 Data Preprocessing Pipeline Demo
+        
+This demo shows the UI for a data preprocessing pipeline that:
+✅ Searches papers from HuggingFace
+✅ Downloads PDFs of selected papers  
+✅ Converts PDFs to Markdown
+✅ Creates ChromaDB collections
+
+To use this in your project:
+
+1. Install dependencies:
+   npm install react react-dom
+
+2. Import the component:
+   import DataPreprocessingApp from './DataPreprocessingApp.tsx';
+
+3. Replace the mock API calls with real FastAPI endpoints:
+   - /api/search-papers
+   - /api/start-preprocessing  
+   - /api/get-progress
+   - /api/get-status
+
+4. The UI is ready to use with your Python backend!
+
+Features included:
+- Step-by-step progress tracking
+- Paper selection interface
+- Configuration panel
+- Real-time progress updates
+- Error handling
+- Dark/light theme toggle
+        `);
+    </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+# arXiv Metadata Fetcher Dependencies
+arxiv>=2.1.0
+
+# Additional utilities (if not already in main requirements.txt)
+tqdm>=4.64.0
