@@ -99,7 +99,7 @@ def fetch_paper_details_batch(arxiv_ids: List[str]) -> Dict[str, Any]:
         # Process each result
         for result in client.results(search):
             try:
-                arxiv_id = result.get_short_id()
+                arxiv_id = result.get_short_id().split('v')[0]  # Remove version suffix
                 
                 paper_info = {
                     'arxiv_id': arxiv_id,
