@@ -169,6 +169,7 @@ async def execute_tool(request: ToolRequest):
                         headers = search_result["headers"]
                         similarity = search_result["similarity_score"]
                         content = search_result["content"]
+                        paper_metadata = search_result.get("paper_metadata", {})
                         
                         # Truncate content for readability
                         content_preview = content[:500] + "..." if len(content) > 500 else content
@@ -179,7 +180,21 @@ async def execute_tool(request: ToolRequest):
                             result += f"**Section:** {headers}\n"
                         result += f"**Chunk Size:** {search_result['chunk_size']} chars\n\n"
                         result += f"{content_preview}\n\n"
-                        result += "---\n\n"
+                        
+                        # Add paper metadata
+                        result += f"**Paper Details:**\n"
+                        result += f"- **ID:** {paper_id}\n"
+                        result += f"- **Title:** {paper_metadata.get('title', 'Unknown')}\n"
+                        result += f"- **Authors:** {paper_metadata.get('authors', 'Unknown')}\n"
+                        result += f"- **Published:** {paper_metadata.get('published_date', 'Unknown')}\n"
+                        result += f"- **Abstract:** {paper_metadata.get('abstract', 'No abstract available')[:200]}...\n"
+                        result += f"- **Categories:** {paper_metadata.get('categories', '')}\n"
+                        if paper_metadata.get('arxiv_url'):
+                            result += f"- **arXiv URL:** {paper_metadata.get('arxiv_url')}\n"
+                        if paper_metadata.get('doi'):
+                            result += f"- **DOI:** {paper_metadata.get('doi')}\n"
+                        
+                        result += "\n---\n\n"
             
             return ToolResponse(
                 result=result,
@@ -265,9 +280,13 @@ async def not_found_handler(request: Request, exc: HTTPException):
     return {"error": "Endpoint not found", "path": request.url.path}
 
 @app.exception_handler(500)
-async def internal_error_handler(request: Request, exc: HTTPException):
-    logger.error(f"Internal server error: {exc.detail}")
-    return {"error": "Internal server error", "detail": str(exc.detail)}
+async def internal_error_handler(request: Request, exc: Exception):
+    if hasattr(exc, 'detail'):
+        logger.error(f"Internal server error: {exc.detail}")
+        return {"error": "Internal server error", "detail": str(exc.detail)}
+    else:
+        logger.error(f"Internal server error: {str(exc)}")
+        return {"error": "Internal server error", "detail": str(exc)}
 
 if __name__ == "__main__":
     # Run the FastAPI server

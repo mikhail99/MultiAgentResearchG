@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { ProcessStatus } from '../types';
 
 interface StatusBarProps {
@@ -13,45 +13,33 @@ const steps = [
   { id: ProcessStatus.GENERATING, label: 'Generate' },
   { id: ProcessStatus.EVALUATING, label: 'Evaluate' },
   { id: ProcessStatus.PROPOSING, label: 'Propose' },
+  { id: ProcessStatus.CHECKING_NOVELTY, label: 'Novelty Check' },
   { id: ProcessStatus.AGGREGATING, label: 'Aggregate' },
   { id: ProcessStatus.FEEDBACK, label: 'Feedback' },
 ];
 
-const StatusBar: React.FC<StatusBarProps> = ({ status, completedSteps = [], onRestartFrom, hasFeedback = false }) => {
+const StatusBar: React.FC<StatusBarProps> = React.memo(({ status, completedSteps = [], onRestartFrom, hasFeedback = false }) => {
   const [hoveredStep, setHoveredStep] = useState<ProcessStatus | null>(null);
-  const getStatusIndex = () => {
-    switch(status) {
-      case ProcessStatus.RESEARCHING: return 0;
-      case ProcessStatus.GENERATING: return 1;
-      case ProcessStatus.EVALUATING: return 2;
-      case ProcessStatus.PROPOSING: return 3;
-      case ProcessStatus.AGGREGATING:
-      case ProcessStatus.GENERATING_FACTS:
-      case ProcessStatus.GENERATING_QUESTIONS:
-          return 4;
-      case ProcessStatus.FEEDBACK: return 5;
-      case ProcessStatus.IDLE: return -1;
-      default: return -1;
-    }
-  };
 
-  const currentIndex = getStatusIndex();
+  const getStepState = useMemo(() => {
+    return (step: { id: ProcessStatus; label: string }, index: number) => {
+      const isCompleted = completedSteps.includes(step.id);
+      const isCurrent = status === step.id;
+      const isHovered = hoveredStep === step.id;
+      const hoveredIndex = hoveredStep ? steps.findIndex(s => s.id === hoveredStep) : -1;
+      const willRerun = hoveredStep && hoveredIndex <= index && isCompleted;
 
-  const getStepState = (step: { id: ProcessStatus; label: string }, index: number) => {
-    const isCompleted = completedSteps.includes(step.id);
-    const isCurrent = status === step.id;
-    const isHovered = hoveredStep === step.id;
-    const hoveredIndex = hoveredStep ? steps.findIndex(s => s.id === hoveredStep) : -1;
-    const willRerun = hoveredStep && hoveredIndex <= index && isCompleted;
+      return { isCompleted, isCurrent, isHovered, willRerun };
+    };
+  }, [status, completedSteps, hoveredStep]);
 
-    return { isCompleted, isCurrent, isHovered, willRerun };
-  };
 
-  const getAffectedSteps = (fromStep: ProcessStatus): string[] => {
+
+  const getAffectedSteps = useCallback((fromStep: ProcessStatus): string[] => {
     const fromIndex = steps.findIndex(step => step.id === fromStep);
     if (fromIndex === -1) return [];
     return steps.slice(fromIndex).map(step => step.label);
-  };
+  }, []);
 
   return (
     <div className="w-full p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40 border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg">
@@ -139,6 +127,6 @@ const StatusBar: React.FC<StatusBarProps> = ({ status, completedSteps = [], onRe
       )}
     </div>
   );
-};
+});
 
 export default StatusBar;

@@ -9,6 +9,8 @@ import AgentCard from './components/AgentCard';
 import FeedbackPanel from './components/FeedbackPanel';
 import ResultsPanel from './components/ResultsPanel';
 import PromptEditorModal from './components/PromptEditorModal';
+import ErrorBoundary from './components/ErrorBoundary';
+import KeyboardShortcuts from './components/KeyboardShortcuts';
 import { SunIcon, MoonIcon, HumanIcon, LoopIcon, SparklesIcon, AgentIcon } from './components/Icons';
 
 // Helper function to read file content
@@ -98,6 +100,8 @@ export default function App() {
   const [evaluatorSentPrompt, setEvaluatorSentPrompt] = useState<string>('');
   const [proposal, setProposal] = useState<string>('');
   const [proposerSentPrompt, setProposerSentPrompt] = useState<string>('');
+  const [noveltyAssessment, setNoveltyAssessment] = useState<string>('');
+  const [noveltyCheckerSentPrompt, setNoveltyCheckerSentPrompt] = useState<string>('');
   const [finalReport, setFinalReport] = useState<string>('');
   const [aggregatorSentPrompt, setAggregatorSentPrompt] = useState<string>('');
 
@@ -164,6 +168,8 @@ export default function App() {
     evaluatorSentPrompt: string;
     proposal: string;
     proposerSentPrompt: string;
+    noveltyAssessment: string;
+    noveltyCheckerSentPrompt: string;
     finalReport: string;
     aggregatorSentPrompt: string;
     stylizedFacts: StylizedFact[];
@@ -189,6 +195,8 @@ export default function App() {
         evaluatorSentPrompt,
         proposal,
         proposerSentPrompt,
+        noveltyAssessment,
+        noveltyCheckerSentPrompt,
         finalReport,
         aggregatorSentPrompt,
         stylizedFacts,
@@ -217,6 +225,7 @@ export default function App() {
     if (data.generatedAnalysis) steps.push(ProcessStatus.GENERATING);
     if (data.critique) steps.push(ProcessStatus.EVALUATING);
     if (data.proposal) steps.push(ProcessStatus.PROPOSING);
+    if (data.noveltyAssessment) steps.push(ProcessStatus.CHECKING_NOVELTY);
     if (data.finalReport) steps.push(ProcessStatus.AGGREGATING);
     if (data.stylizedFacts && data.stylizedFacts.length > 0) steps.push(ProcessStatus.GENERATING_FACTS);
     if (data.stylizedQuestions && data.stylizedQuestions.length > 0) steps.push(ProcessStatus.GENERATING_QUESTIONS);
@@ -225,7 +234,7 @@ export default function App() {
   };
 
   const isOutputsEmpty = () => (
-    !researchSummary && !generatedAnalysis && !critique && !proposal && !finalReport && stylizedFacts.length === 0 && stylizedQuestions.length === 0
+    !researchSummary && !generatedAnalysis && !critique && !proposal && !noveltyAssessment && !finalReport && stylizedFacts.length === 0 && stylizedQuestions.length === 0
   );
 
   useEffect(() => {
@@ -246,6 +255,8 @@ export default function App() {
         setEvaluatorSentPrompt(data.evaluatorSentPrompt || '');
         setProposal(data.proposal || '');
         setProposerSentPrompt(data.proposerSentPrompt || '');
+        setNoveltyAssessment(data.noveltyAssessment || '');
+        setNoveltyCheckerSentPrompt(data.noveltyCheckerSentPrompt || '');
         setFinalReport(data.finalReport || '');
         setAggregatorSentPrompt(data.aggregatorSentPrompt || '');
         setStylizedFacts(data.stylizedFacts || []);
@@ -291,6 +302,8 @@ export default function App() {
     setEvaluatorSentPrompt(data.evaluatorSentPrompt);
     setProposal(data.proposal);
     setProposerSentPrompt(data.proposerSentPrompt);
+    setNoveltyAssessment(data.noveltyAssessment || '');
+    setNoveltyCheckerSentPrompt(data.noveltyCheckerSentPrompt || '');
     setFinalReport(data.finalReport);
     setAggregatorSentPrompt(data.aggregatorSentPrompt);
     setStylizedFacts(data.stylizedFacts || []);
@@ -312,6 +325,8 @@ export default function App() {
     setEvaluatorSentPrompt('');
     setProposal('');
     setProposerSentPrompt('');
+    setNoveltyAssessment('');
+    setNoveltyCheckerSentPrompt('');
     setFinalReport('');
     setAggregatorSentPrompt('');
     setStylizedFacts([]);
@@ -345,6 +360,7 @@ export default function App() {
       ProcessStatus.GENERATING,
       ProcessStatus.EVALUATING,
       ProcessStatus.PROPOSING,
+      ProcessStatus.CHECKING_NOVELTY,
       ProcessStatus.AGGREGATING,
       ProcessStatus.GENERATING_FACTS,
       ProcessStatus.GENERATING_QUESTIONS,
@@ -364,6 +380,7 @@ export default function App() {
       let analysisResult = generatedAnalysis;
       let critiqueResult = critique;
       let proposalResult = proposal;
+      let noveltyAssessmentResult = noveltyAssessment;
       let finalReportResult = finalReport;
 
       // 1. Researcher (with tools)
@@ -448,12 +465,52 @@ export default function App() {
         setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING]);
         await simulateDelay();
       }
+
+      // 5. Novelty Checker
+      if (shouldRunStep(ProcessStatus.CHECKING_NOVELTY)) {
+        setStatus(ProcessStatus.CHECKING_NOVELTY);
+        setNoveltyAssessment('');
+        
+        // Execute search tools for novelty checking
+        let noveltyToolData = '';
+        if (toolServiceAvailable) {
+          console.log('🔧 Executing novelty check tools...');
+          try {
+            const results = await executeResearcherTools(proposalResult, {
+              includeWebSearch: enableWebSearch,
+              includeLocalSearch: enableLocalSearch,
+              metadata: { iteration, modelProvider, purpose: 'novelty_check' }
+            });
+            
+            // Format for prompt
+            noveltyToolData = formatToolResultsForPrompt(results.webResults, results.localResults);
+            
+            if (results.errors.length > 0) {
+              console.warn('⚠️ Novelty check tool errors:', results.errors);
+            }
+          } catch (error) {
+            console.error('💥 Novelty check tool execution failed:', error);
+            noveltyToolData = '**Tool Results:** Tools unavailable for novelty check.\n';
+          }
+        } else {
+          noveltyToolData = '**Tool Results:** Tool service not available for novelty check.\n';
+        }
+        
+        const noveltyCheckerPrompt = fillPromptTemplate(agentPrompts.NoveltyChecker, { 
+          proposal: proposalResult,
+          tool_results: noveltyToolData
+        });
+        setNoveltyCheckerSentPrompt(noveltyCheckerPrompt);
+        noveltyAssessmentResult = await generateContentStream(AgentName.NOVELTY_CHECKER, noveltyCheckerPrompt, llmOptions, (chunk) => setNoveltyAssessment(prev => prev + chunk));
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.CHECKING_NOVELTY), ProcessStatus.CHECKING_NOVELTY]);
+        await simulateDelay();
+      }
       
-      // 5. Aggregator
+      // 6. Aggregator
       if (shouldRunStep(ProcessStatus.AGGREGATING)) {
         setStatus(ProcessStatus.AGGREGATING);
         setFinalReport('');
-        const aggregatorPrompt = fillPromptTemplate(agentPrompts.Aggregator, { topic, researchSummary: researchResult, generatedAnalysis: analysisResult, critique: critiqueResult, proposal: proposalResult, feedback: currentFeedback, fileContents });
+        const aggregatorPrompt = fillPromptTemplate(agentPrompts.Aggregator, { topic, researchSummary: researchResult, generatedAnalysis: analysisResult, critique: critiqueResult, proposal: proposalResult, noveltyAssessment: noveltyAssessmentResult, feedback: currentFeedback, fileContents });
         setAggregatorSentPrompt(aggregatorPrompt);
         finalReportResult = await generateContentStream(AgentName.AGGREGATOR, aggregatorPrompt, llmOptions, (chunk) => setFinalReport(prev => prev + chunk));
         setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING]);
@@ -603,6 +660,16 @@ ${proposal}
 
 ---
 
+### Novelty Checker Agent
+**Sent Prompt:**
+\`\`\`
+${noveltyCheckerSentPrompt}
+\`\`\`
+**Output:**
+${noveltyAssessment}
+
+---
+
 ### Aggregator Agent
 **Sent Prompt:**
 \`\`\`
@@ -655,6 +722,8 @@ ${questionsText}
     evaluatorSentPrompt,
     proposal,
     proposerSentPrompt,
+    noveltyAssessment,
+    noveltyCheckerSentPrompt,
     finalReport,
     aggregatorSentPrompt,
     stylizedFacts,
@@ -716,6 +785,7 @@ ${questionsText}
       { id: ProcessStatus.GENERATING, label: 'Generate' },
       { id: ProcessStatus.EVALUATING, label: 'Evaluate' },
       { id: ProcessStatus.PROPOSING, label: 'Propose' },
+      { id: ProcessStatus.CHECKING_NOVELTY, label: 'Novelty Check' },
       { id: ProcessStatus.AGGREGATING, label: 'Aggregate' },
       { id: ProcessStatus.GENERATING_FACTS, label: 'Facts' },
       { id: ProcessStatus.GENERATING_QUESTIONS, label: 'Questions' },
@@ -732,7 +802,7 @@ ${questionsText}
   const llmOptions: LlmOptions = { provider: modelProvider, url: localLlmUrl };
 
   return (
-    <>
+    <ErrorBoundary>
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-sans p-4 sm:p-6 lg:p-8 transition-colors duration-300">
         <div className="max-w-7xl mx-auto">
           <header className="text-center mb-8 relative">
@@ -800,6 +870,7 @@ ${questionsText}
                   <AgentCard title="Generator Agent" content={generatedAnalysis} sentPrompt={generatorSentPrompt} isLoading={status === ProcessStatus.GENERATING} agent={AgentName.GENERATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.GENERATOR)} />
                   <AgentCard title="Evaluator Agent" content={critique} sentPrompt={evaluatorSentPrompt} isLoading={status === ProcessStatus.EVALUATING} agent={AgentName.EVALUATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.EVALUATOR)} />
                   <AgentCard title="Proposer Agent" content={proposal} sentPrompt={proposerSentPrompt} isLoading={status === ProcessStatus.PROPOSING} agent={AgentName.PROPOSER} onEditPrompt={() => handleOpenPromptEditor(AgentName.PROPOSER)} />
+                  <AgentCard title="Novelty Checker Agent" content={noveltyAssessment} sentPrompt={noveltyCheckerSentPrompt} isLoading={status === ProcessStatus.CHECKING_NOVELTY} agent={AgentName.NOVELTY_CHECKER} onEditPrompt={() => handleOpenPromptEditor(AgentName.NOVELTY_CHECKER)} />
               </div>
                <div className="grid grid-cols-1">
                   <AgentCard title="Aggregator Agent" content={finalReport} sentPrompt={aggregatorSentPrompt} isLoading={status === ProcessStatus.AGGREGATING} agent={AgentName.AGGREGATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.AGGREGATOR)} />
@@ -825,9 +896,9 @@ ${questionsText}
             </div>
           </main>
         </div>
-      </div>
 
-      {showRestoreToast && (
+        {/* Components outside main container */}
+        {showRestoreToast && (
         <div className="fixed bottom-4 right-4 z-50 max-w-sm">
           <div className="bg-gray-900 text-white dark:bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4">
             <p className="text-sm font-semibold">Restore last session?</p>
@@ -879,6 +950,7 @@ ${questionsText}
           </div>
         </div>
       )}
+
       <PromptEditorModal
         isOpen={isPromptEditorOpen}
         onClose={handleClosePromptEditor}
@@ -887,6 +959,18 @@ ${questionsText}
         llmOptions={llmOptions}
         initialAgent={editingAgent}
       />
-    </>
+
+      {/* Keyboard Shortcuts */}
+      <KeyboardShortcuts
+        onStart={handleStart}
+        onRevision={handleRevision}
+        onExport={handleExportRun}
+        onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        isLoading={isLoading}
+        hasCompletedRun={status === ProcessStatus.FEEDBACK || (stylizedFacts.length > 0 || stylizedQuestions.length > 0)}
+        hasFeedback={feedback.trim().length > 0}
+      />
+      </div>
+    </ErrorBoundary>
   );
 }

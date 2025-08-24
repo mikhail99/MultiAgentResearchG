@@ -10,17 +10,18 @@ from typing import List, Dict, Any, Optional
 import os
 
 class ChromaDBSearchTool:
-    """ChromaDB search tool for research papers"""
+    """ChromaDB search tool for research papers with metadata lookup"""
     
     def __init__(self, db_path: str = "backend/data/chromadb", collection_name: str = "llm_reasoning_agents_papers"):
         self.db_path = db_path
         self.collection_name = collection_name
         self.client = None
         self.collection = None
+        self.metadata_collection = None
         self._initialize()
     
     def _initialize(self):
-        """Initialize ChromaDB client and collection"""
+        """Initialize ChromaDB client and collections"""
         try:
             self.client = chromadb.PersistentClient(
                 path=self.db_path,
@@ -28,21 +29,82 @@ class ChromaDBSearchTool:
             )
             self.collection = self.client.get_collection(name=self.collection_name)
             print(f"✅ ChromaDB initialized: {self.collection_name}")
+            
+            # Try to initialize metadata collection
+            try:
+                metadata_collection_name = "LLM_Reasoning_Agents_arxiv_metadata"
+                self.metadata_collection = self.client.get_collection(name=metadata_collection_name)
+                print(f"✅ Metadata collection initialized: {metadata_collection_name}")
+            except Exception as e:
+                print(f"⚠️  Metadata collection not available: {str(e)}")
+                self.metadata_collection = None
+                
         except Exception as e:
             print(f"❌ Error initializing ChromaDB: {str(e)}")
             self.client = None
             self.collection = None
+            self.metadata_collection = None
     
+    def _lookup_paper_metadata(self, paper_ids: List[str]) -> Dict[str, Dict[str, Any]]:
+        """
+        Lookup paper metadata from the arXiv metadata collection
+        
+        Args:
+            paper_ids: List of paper IDs to lookup
+            
+        Returns:
+            Dictionary mapping paper_id to metadata
+        """
+        if not self.metadata_collection:
+            return {}
+        
+        metadata_dict = {}
+        
+        try:
+            # Get all metadata and filter by paper ID
+            all_results = self.metadata_collection.get()
+            
+            for paper_id in paper_ids:
+                try:
+                    # Find the metadata entry that matches our paper_id (with or without version suffix)
+                    found = False
+                    for i, metadata in enumerate(all_results['metadatas']):
+                        arxiv_id = metadata.get('arxiv_id', '')
+                        # Check if the arxiv_id starts with our paper_id (handles version suffixes)
+                        if arxiv_id.startswith(paper_id):
+                            metadata_dict[paper_id] = {
+                                'title': metadata.get('title', 'Unknown'),
+                                'authors': metadata.get('authors', 'Unknown'),
+                                'published_date': metadata.get('published_date', 'Unknown'),
+                                'abstract': metadata.get('abstract', 'No abstract available'),
+                                'categories': metadata.get('categories', ''),
+                                'arxiv_url': metadata.get('arxiv_url', ''),
+                                'doi': metadata.get('doi', '')
+                            }
+                            found = True
+                            break
+                    
+                    if not found:
+                        print(f"⚠️  Warning: No metadata found for paper ID: {paper_id}")
+                        
+                except Exception as e:
+                    print(f"⚠️  Warning: Error looking up metadata for {paper_id}: {str(e)}")
+                    
+        except Exception as e:
+            print(f"❌ Error in metadata lookup: {str(e)}")
+            
+        return metadata_dict
+
     def search(self, query: str, n_results: int = 5) -> Dict[str, Any]:
         """
-        Search the collection for relevant document chunks
+        Search the collection for relevant document chunks and enrich with metadata
         
         Args:
             query: Search query string
             n_results: Number of results to return
             
         Returns:
-            Dictionary with search results and metadata
+            Dictionary with search results and enriched metadata
         """
         if not self.collection:
             return {
@@ -60,21 +122,46 @@ class ChromaDBSearchTool:
             
             # Format results
             formatted_results = []
+            paper_ids = []
+            
             if results['documents'] and results['documents'][0]:
                 for i, doc in enumerate(results['documents'][0]):
                     metadata = results['metadatas'][0][i] if results['metadatas'] and results['metadatas'][0] else {}
                     distance = results['distances'][0][i] if results['distances'] and results['distances'][0] else 0
                     
+                    paper_id = metadata.get('paper_id', 'unknown')
+                    if paper_id != 'unknown':
+                        paper_ids.append(paper_id)
+                    
                     formatted_results.append({
                         "content": doc,
                         "metadata": metadata,
                         "similarity_score": 1 - distance,  # Convert distance to similarity
-                        "paper_id": metadata.get('paper_id', 'unknown'),
+                        "paper_id": paper_id,
                         "filename": metadata.get('filename', 'unknown'),
                         "chunk_id": metadata.get('chunk_id', 'unknown'),
                         "headers": metadata.get('headers', ''),
                         "chunk_size": metadata.get('chunk_size', 0)
                     })
+            
+            # Lookup metadata for found papers
+            paper_metadata = self._lookup_paper_metadata(paper_ids)
+            
+            # Enrich results with metadata
+            for result in formatted_results:
+                paper_id = result['paper_id']
+                if paper_id in paper_metadata:
+                    result['paper_metadata'] = paper_metadata[paper_id]
+                else:
+                    result['paper_metadata'] = {
+                        'title': 'Unknown',
+                        'authors': 'Unknown', 
+                        'published_date': 'Unknown',
+                        'abstract': 'No abstract available',
+                        'categories': '',
+                        'arxiv_url': '',
+                        'doi': ''
+                    }
             
             return {
                 "success": True,
