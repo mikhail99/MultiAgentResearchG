@@ -11,6 +11,9 @@ import ResultsPanel from './components/ResultsPanel';
 import PromptEditorModal from './components/PromptEditorModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
+import WorkflowTemplateModal from './components/WorkflowTemplateModal';
+import { useWorkflowTemplates } from './hooks/useWorkflowTemplates';
+import { WorkflowTemplate } from './types/workflowTemplates';
 import { SunIcon, MoonIcon, HumanIcon, LoopIcon, SparklesIcon, AgentIcon } from './components/Icons';
 
 // Helper function to read file content
@@ -114,7 +117,11 @@ export default function App() {
   const [completedSteps, setCompletedSteps] = useState<ProcessStatus[]>([]);
   const [showRestartConfirm, setShowRestartConfirm] = useState<boolean>(false);
   const [restartFromStep, setRestartFromStep] = useState<ProcessStatus | null>(null);
-  
+
+  // Template-related state
+  const [showTemplateModal, setShowTemplateModal] = useState<boolean>(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplate | null>(null);
+
   // Tool-related state
   const [toolResults, setToolResults] = useState<ToolResults | null>(null);
   const [toolServiceAvailable, setToolServiceAvailable] = useState<boolean>(false);
@@ -141,6 +148,16 @@ export default function App() {
     document.body.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // Template management
+  const {
+    templates,
+    isLoading: templatesLoading,
+    createTemplate,
+    trackUsage,
+    deleteTemplate,
+    updateTemplate
+  } = useWorkflowTemplates();
 
   // Check tool service health on load
   useEffect(() => {
@@ -779,6 +796,43 @@ ${questionsText}
     setRestartFromStep(null);
   };
 
+  // Template functions
+  const handleOpenTemplateModal = () => {
+    setShowTemplateModal(true);
+  };
+
+  const handleSelectTemplate = (template: WorkflowTemplate) => {
+    setSelectedTemplate(template);
+    trackUsage(template.id);
+
+    // Apply template settings
+    setAgentPrompts(template.agentPrompts);
+    setModelProvider(template.modelProvider);
+    setLocalLlmUrl(template.localLlmUrl);
+    setEnableWebSearch(template.enableWebSearch);
+    setEnableLocalSearch(template.enableLocalSearch);
+    setTheme(template.theme);
+    setIteration(template.maxIterations);
+
+    // Close modal and show success
+    setShowTemplateModal(false);
+    console.log(`✅ Applied template: ${template.name}`);
+  };
+
+  const handleCreateTemplate = (name: string, description: string, category: WorkflowTemplate['category']) => {
+    const templateId = createTemplate(name, description, category, {
+      agentPrompts,
+      modelProvider,
+      localLlmUrl,
+      enableWebSearch,
+      enableLocalSearch,
+      theme,
+      iteration,
+      completedSteps
+    });
+    console.log(`✅ Created template: ${name} (ID: ${templateId})`);
+  };
+
   const getAffectedSteps = (fromStep: ProcessStatus): string[] => {
     const allSteps = [
       { id: ProcessStatus.RESEARCHING, label: 'Research' },
@@ -827,7 +881,7 @@ ${questionsText}
 
           <main className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-3 space-y-6">
-               <ControlPanel 
+               <ControlPanel
                   topic={topic}
                   setTopic={setTopic}
                   files={files}
@@ -836,6 +890,7 @@ ${questionsText}
                   onExport={handleExportRun}
                   onExportJson={handleExportJson}
                   onCopyLink={handleCopyLinkToSession}
+                  onOpenTemplateModal={handleOpenTemplateModal}
                   isLoading={isLoading}
                   iteration={iteration}
                   modelProvider={modelProvider}
@@ -958,6 +1013,26 @@ ${questionsText}
         onSave={setAgentPrompts}
         llmOptions={llmOptions}
         initialAgent={editingAgent}
+      />
+
+      {/* Workflow Template Modal */}
+      <WorkflowTemplateModal
+        isOpen={showTemplateModal}
+        onClose={() => setShowTemplateModal(false)}
+        onSelectTemplate={handleSelectTemplate}
+        currentPrompts={agentPrompts}
+        currentSettings={{
+          modelProvider,
+          localLlmUrl,
+          enableWebSearch,
+          enableLocalSearch,
+          theme,
+          iteration,
+          completedSteps
+        }}
+        templates={templates}
+        onCreateTemplate={handleCreateTemplate}
+        onDeleteTemplate={deleteTemplate}
       />
 
       {/* Keyboard Shortcuts */}

@@ -11,6 +11,7 @@ interface ControlPanelProps {
   onExport: () => void;
   onExportJson: () => void;
   onCopyLink: () => void;
+  onOpenTemplateModal: () => void;
   isLoading: boolean;
   iteration: number;
   modelProvider: ModelProvider;
@@ -20,8 +21,8 @@ interface ControlPanelProps {
   isRunComplete: boolean;
 }
 
-const ControlPanel: React.FC<ControlPanelProps> = ({ 
-    topic, setTopic, files, setFiles, onStart, onExport, onExportJson, onCopyLink, isLoading, iteration, 
+const ControlPanel: React.FC<ControlPanelProps> = ({
+    topic, setTopic, files, setFiles, onStart, onExport, onExportJson, onCopyLink, onOpenTemplateModal, isLoading, iteration,
     modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, isRunComplete
 }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,6 +113,21 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             {files.map(file => <p key={file.name} className="truncate">- {file.name}</p>)}
           </div>
         )}
+      </div>
+
+      {/* Templates Section */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          4. Templates (Optional)
+        </label>
+        <button
+          onClick={onOpenTemplateModal}
+          disabled={isLoading}
+          className="w-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <span className="text-lg mr-2">📝</span>
+          <span>Choose Template</span>
+        </button>
       </div>
 
       <div className="space-y-3">
