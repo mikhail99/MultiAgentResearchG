@@ -11,7 +11,7 @@ interface StatusBarProps {
 const steps = [
   { id: ProcessStatus.SEARCHING, label: 'Search' },
   { id: ProcessStatus.LEARNING, label: 'Learnings' },
-  { id: ProcessStatus.GAP_ANALYZING, label: 'Gap Analysis' },
+  { id: ProcessStatus.OPPORTUNITY_ANALYZING, label: 'Opportunity Analysis' },
   { id: ProcessStatus.PROPOSING, label: 'Propose' },
   { id: ProcessStatus.CHECKING_NOVELTY, label: 'Novelty Check' },
   { id: ProcessStatus.AGGREGATING, label: 'Aggregate' },

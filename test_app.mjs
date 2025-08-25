@@ -25,7 +25,7 @@ async function testApp() {
     console.log('🔍 Test 2: Agent visibility...');
     const searchAgent = await page.locator('text=Search').count();
     const learningsAgent = await page.locator('text=Learnings').count();
-    const gapAnalysisAgent = await page.locator('text=Gap Analysis').count();
+    const opportunityAnalysisAgent = await page.locator('text=Opportunity Analysis').count();
     
     console.log('👥 Agents found:', {
       search: searchAgent,

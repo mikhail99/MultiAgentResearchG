@@ -86,11 +86,11 @@ async function debugTest() {
     console.log('\n🔍 DEBUG: Agent cards');
     const searchAgent = await page.locator('text=Search Agent').count();
     const learningsAgent = await page.locator('text=Learnings Agent').count();
-    const gapAnalysisAgent = await page.locator('text=Gap Analysis Agent').count();
+    const opportunityAnalysisAgent = await page.locator('text=Opportunity Analysis Agent').count();
     
     console.log('Search Agent found:', searchAgent);
     console.log('Learnings Agent found:', learningsAgent);
-    console.log('Gap Analysis Agent found:', gapAnalysisAgent);
+    console.log('Opportunity Analysis Agent found:', opportunityAnalysisAgent);
     
     // Debug: Check for status bar
     console.log('\n🔍 DEBUG: Status bar');

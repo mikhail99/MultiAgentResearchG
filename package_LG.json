@@ -1,0 +1,37 @@
+{
+  "name": "multi-agent-research-assistant-langgraph",
+  "version": "1.0.0",
+  "description": "Multi-agent research assistant using LangGraph.js",
+  "main": "index.tsx",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@langchain/langgraph": "^0.2.0",
+    "@langchain/core": "^0.2.0",
+    "@langchain/community": "^0.2.0",
+    "@langchain/anthropic": "^0.2.0",
+    "@google/genai": "^0.3.0",
+    "zod": "^3.22.0",
+    "uuid": "^9.0.1",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.32"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@types/uuid": "^9.0.7",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.55.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0"
+  }
+}

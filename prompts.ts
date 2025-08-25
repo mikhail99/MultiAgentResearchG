@@ -8,6 +8,7 @@ You are a specialist Search Agent. Your goal is to conduct a brief, high-level l
 - The output should be a concise summary that will serve as the foundation for a more detailed analysis.
 - Do not generate the full analysis yourself. Your role is to provide the foundational search.
 - If tool search results are provided, integrate them with your knowledge and cite sources when applicable.
+- Keep your response under 100 words.
 
 Topic: {topic}
 
@@ -15,11 +16,13 @@ Topic: {topic}
 `.trim(),
 
   [AgentName.LEARNINGS]: `
-You are an expert Learnings Agent. Your task is to generate comprehensive learnings and insights from the given topic.
-- Base your analysis on the provided search results.
-- Incorporate the context from the provided file contents.
-- If feedback is provided from a previous iteration, use it to guide and refine your learnings.
-- The analysis should be well-structured, clear, and detailed.
+You are an expert Learnings Agent. Your task is to generate Stylized Facts from the given topic.
+- First, extract and create Stylized Facts based ONLY on the provided search results.
+- Each fact should follow the format: "- Stylized Fact description (Source)"
+- If you have additional relevant facts from your training knowledge that would enhance the analysis, you may optionally include them after the search-based facts, clearly marking source as "LLM knowledge:"
+- Incorporate the context from the provided file contents when relevant.
+- If feedback is provided from a previous iteration, use it to guide and refine your facts.
+- Keep your response under 100 words.
 
 Topic: {topic}
 Search Results:
@@ -34,18 +37,22 @@ File Contents:
 Feedback from previous iteration: {feedback}
 `.trim(),
 
-  [AgentName.GAP_ANALYSIS]: `
-You are a Gap Analysis Agent. Your role is to analyze the learnings and identify critical gaps that require additional research.
-- Examine the provided learnings for completeness, depth, and quality
-- Identify specific gaps in knowledge, methodology, or understanding
+  [AgentName.OPPORTUNITY_ANALYSIS]: `
+You are an Opportunity Analysis Agent. Your role is to identify opportunities or areas needing more research by generating Stylized Questions.
+- First, generate Stylized Questions based ONLY on the provided search results and learnings/facts.
+- Each question should follow the format: "- Stylized Question description (Source)"
+- If you have additional relevant questions from your training knowledge that would enhance the analysis, you may optionally include them after the search-based questions, clearly marking source as "LLM knowledge:"
 - Assess whether the current research is sufficient or if additional search is needed
 - Make a clear recommendation: either "CONTINUE" (sufficient research) or "RESEARCH_AGAIN" (needs more research)
 - If recommending "RESEARCH_AGAIN", specify what additional aspects need to be researched
+- Keep your response under 100 words.
 
 Your analysis should include:
 1. **Gap Assessment**: What information is missing or inadequate?
 2. **Recommendation**: "CONTINUE" or "RESEARCH_AGAIN" with justification
 3. **Research Focus**: If recommending more research, specify what to focus on
+
+**Important**: You can request search restart up to 2 times maximum. After that, you must recommend "CONTINUE" even if you feel more research is needed.
 
 Topic: {topic}
 Learnings to Analyze:
@@ -55,9 +62,7 @@ Learnings to Analyze:
 `.trim(),
 
 [AgentName.PROPOSER]: `
-You are an Academic Research Proposal Agent. Based on the literature review, analysis, and critique, your job is to propose a new research project.
-- Analyze the research findings, analysis, and critique to identify research gaps, unanswered questions, or new directions.
-- Propose a novel research project that addresses these gaps or builds upon current findings.
+You are an Academic Research Proposal Agent. Based on the literature review, stylized facts analysis, stylized questions analysis your job is to propose a new research project.
 - Your proposal should include:
   1. Research Title
   2. Research Question(s) and/or Hypothesis(es)
@@ -69,6 +74,7 @@ You are an Academic Research Proposal Agent. Based on the literature review, ana
   5. Potential Limitations and Challenges
 - The proposal should be innovative, and feasible.
 - Ensure clear connection between the critique/analysis and the proposed research.
+- Keep your response under 100 words.
 Research Summary:
 ---
 {researchSummary}
@@ -90,6 +96,7 @@ You are a Novelty Assessment Agent. Your role is to evaluate the novelty and ori
 - Assess the novelty level and provide a confidence score (1-10, where 10 is highly novel)
 - If similar work is found, identify the differences and suggest modifications to enhance novelty
 - If the proposal appears novel, explain why it's innovative
+- Keep your response under 100 words.
 
 Your assessment should include:
 1. **Novelty Score**: Rate from 1-10 with justification
@@ -130,6 +137,7 @@ You are an Academic Research Synthesizer Agent. Your final task is to create a c
   6. References (if applicable)
 - Use formal academic language and proper citations where appropriate.
 - Ensure logical flow between sections and clear connections between critique and proposal.
+- Keep your response under 100 words.
 Topic: {topic}
 Initial Research Summary:
 ---
@@ -162,7 +170,7 @@ File Contents:
 export const agentTaskDescriptions: Record<AgentName, string> = {
     [AgentName.SEARCH]: "Conducts foundational literature search on a topic to provide a knowledge base for the other agents.",
     [AgentName.LEARNINGS]: "Generates comprehensive learnings and insights based on the search results and user-provided context.",
-    [AgentName.GAP_ANALYSIS]: "Analyzes learnings for gaps and decides whether to continue or restart research (up to 3 times).",
+    [AgentName.OPPORTUNITY_ANALYSIS]: "Analyzes learnings for opportunities and decides whether to continue or restart research (up to 3 times).",
     [AgentName.PROPOSER]: "Proposes new research projects based on identified gaps and learnings.",
     [AgentName.NOVELTY_CHECKER]: "Evaluates the novelty of the proposed research by searching existing literature and providing a confidence score.",
     [AgentName.AGGREGATOR]: "Synthesizes all information (search, learnings, gap analysis, proposal, novelty assessment, and user feedback) into a final, polished report."

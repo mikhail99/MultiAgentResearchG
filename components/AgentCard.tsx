@@ -32,7 +32,7 @@ interface AgentCardProps {
 const agentIcons: Record<AgentName, React.ReactNode> = {
     [AgentName.SEARCH]: <ResearcherIcon />,
     [AgentName.LEARNINGS]: <GeneratorIcon />,
-    [AgentName.GAP_ANALYSIS]: <EvaluatorIcon />,
+    [AgentName.OPPORTUNITY_ANALYSIS]: <EvaluatorIcon />,
     [AgentName.PROPOSER]: <ProposerIcon />,
     [AgentName.NOVELTY_CHECKER]: <AggregatorIcon />, // Reuse icon for now
     [AgentName.AGGREGATOR]: <AggregatorIcon />,

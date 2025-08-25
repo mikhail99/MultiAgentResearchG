@@ -2,7 +2,7 @@ export enum ProcessStatus {
   IDLE = 'IDLE',
   SEARCHING = 'SEARCHING',
   LEARNING = 'LEARNING',
-  GAP_ANALYZING = 'GAP_ANALYZING',
+  OPPORTUNITY_ANALYZING = 'OPPORTUNITY_ANALYZING',
   PROPOSING = 'PROPOSING',
   CHECKING_NOVELTY = 'CHECKING_NOVELTY',
   AGGREGATING = 'AGGREGATING',
@@ -14,7 +14,7 @@ export enum ProcessStatus {
 export enum AgentName {
   SEARCH = 'Search',
   LEARNINGS = 'Learnings',
-  GAP_ANALYSIS = 'Gap Analysis',
+  OPPORTUNITY_ANALYSIS = 'Opportunity Analysis',
   PROPOSER = 'Proposer',
   NOVELTY_CHECKER = 'NoveltyChecker',
   AGGREGATOR = 'Aggregator'
@@ -44,7 +44,7 @@ export interface AgentInput {
 export interface AgentStates {
   searchResults: string[];
   learnings: string[];
-  gapAnalyses: string[];
+  opportunityAnalyses: string[];
   proposals: string[];
   noveltyChecks: string[];
   aggregations: string[];

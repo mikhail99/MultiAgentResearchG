@@ -31,11 +31,11 @@ export const agentTaskProfiles: AgentTaskProfile[] = [
     }
   },
   {
-    agentName: AgentName.GAP_ANALYSIS,
-    displayName: 'Gap Analysis Agent',
-    description: 'Analyzes learnings for gaps and decides whether to continue or restart search',
+    agentName: AgentName.OPPORTUNITY_ANALYSIS,
+    displayName: 'Opportunity Analysis Agent',
+    description: 'Analyzes learnings for opportunities and decides whether to continue or restart search',
     taskProfile: {
-      task: 'Analyze Gaps',
+      task: 'Analyze Opportunities',
       dataSources: ['Deep Review'],
       outputFormat: 'Markdown'
     }

@@ -33,15 +33,15 @@ async function finalTest() {
     // Test 4: Agent Cards ✅
     const searchAgent = await page.locator('text=Search Agent').count();
     const learningsAgent = await page.locator('text=Learnings Agent').count();
-    const gapAnalysisAgent = await page.locator('text=Gap Analysis Agent').count();
-    console.log(`4. Agent Cards: ${searchAgent > 0 && learningsAgent > 0 && gapAnalysisAgent > 0 ? '✅ WORKING' : '❌ MISSING'}`);
+    const opportunityAnalysisAgent = await page.locator('text=Opportunity Analysis Agent').count();
+    console.log(`4. Agent Cards: ${searchAgent > 0 && learningsAgent > 0 && opportunityAnalysisAgent > 0 ? '✅ WORKING' : '❌ MISSING'}`);
     
     // Test 5: Prompt Editor Buttons (Check for EditIcon)
     const editButtons = await page.locator('button[title="Edit Base Prompt"], button[title*="Edit"], svg[stroke="currentColor"]').count();
     console.log(`5. Prompt Editor Buttons: ${editButtons > 0 ? '✅ WORKING' : '❌ MISSING'}`);
     
     // Test 6: Status Bar (Check for specific elements)
-    const statusBarContainer = await page.locator('div:has-text("Search"), div:has-text("Learnings"), div:has-text("Gap Analysis")').count();
+    const statusBarContainer = await page.locator('div:has-text("Search"), div:has-text("Learnings"), div:has-text("Opportunity Analysis")').count();
     console.log(`6. Status Bar: ${statusBarContainer > 0 ? '✅ WORKING' : '❌ MISSING'}`);
     
     // Test 7: Run Button ✅
@@ -97,7 +97,7 @@ async function finalTest() {
     console.log(`Edit icons found: ${editIcons}`);
     
     // Check for status bar steps
-    const statusSteps = await page.locator('div:has-text("Search"), div:has-text("Learnings"), div:has-text("Gap Analysis")').count();
+    const statusSteps = await page.locator('div:has-text("Search"), div:has-text("Learnings"), div:has-text("Opportunity Analysis")').count();
     console.log(`Status steps found: ${statusSteps}`);
     
     // Check for iteration navigation
