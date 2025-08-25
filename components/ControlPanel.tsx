@@ -18,12 +18,16 @@ interface ControlPanelProps {
   setModelProvider: (provider: ModelProvider) => void;
   localLlmUrl: string;
   setLocalLlmUrl: (url: string) => void;
+  enableWebSearch: boolean;
+  setEnableWebSearch: (enabled: boolean) => void;
+  enableLocalSearch: boolean;
+  setEnableLocalSearch: (enabled: boolean) => void;
   isRunComplete: boolean;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
     topic, setTopic, files, setFiles, onStart, onExport, onExportJson, onCopyLink, onOpenTemplateModal, isLoading, iteration,
-    modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, isRunComplete
+    modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, enableWebSearch, setEnableWebSearch, enableLocalSearch, setEnableLocalSearch, isRunComplete
 }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -95,6 +99,34 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           className="w-full bg-white dark:bg-gray-900 border border-gray-400 dark:border-gray-600 rounded-md px-3 py-2 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
           disabled={isLoading}
         />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          3. Research Tools
+        </label>
+        <div className="space-y-3">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={enableWebSearch}
+              onChange={(e) => setEnableWebSearch(e.target.checked)}
+              disabled={isLoading}
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Web Search</span>
+          </label>
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              checked={enableLocalSearch}
+              onChange={(e) => setEnableLocalSearch(e.target.checked)}
+              disabled={isLoading}
+              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+            />
+            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Local Search</span>
+          </label>
+        </div>
       </div>
 
       <div>

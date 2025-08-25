@@ -24,6 +24,9 @@ interface AgentCardProps {
   onViewTaskProfile?: () => void;
   toolResults?: ToolResults | null;
   toolServiceAvailable?: boolean;
+  currentIteration?: number;
+  totalIterations?: number;
+  onIterationSelect?: (iteration: number) => void;
 }
 
 const agentIcons: Record<AgentName, React.ReactNode> = {
@@ -77,7 +80,20 @@ const MarkdownComponents = {
 };
 
 
-const AgentCard: React.FC<AgentCardProps> = ({ title, content, sentPrompt, isLoading, agent, onEditPrompt, onViewTaskProfile, toolResults, toolServiceAvailable }) => {
+const AgentCard: React.FC<AgentCardProps> = ({
+  title,
+  content,
+  sentPrompt,
+  isLoading,
+  agent,
+  onEditPrompt,
+  onViewTaskProfile,
+  toolResults,
+  toolServiceAvailable,
+  currentIteration = 0,
+  totalIterations = 1,
+  onIterationSelect
+}) => {
   const [copied, setCopied] = useState(false);
   const [showSentPrompt, setShowSentPrompt] = useState(false);
 
@@ -130,12 +146,13 @@ const AgentCard: React.FC<AgentCardProps> = ({ title, content, sentPrompt, isLoa
 
   return (
     <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg flex flex-col min-h-[24rem]">
-      <div className="flex items-center justify-between p-4 border-b border-gray-300 dark:border-gray-700">
-        <div className="flex items-center">
-            {agentIcons[agent]}
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
-        </div>
-        <div className="flex items-center space-x-1 sm:space-x-2">
+      <div className="p-4 border-b border-gray-300 dark:border-gray-700">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+              {agentIcons[agent]}
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{title}</h3>
+          </div>
+          <div className="flex items-center space-x-1 sm:space-x-2">
             {onViewTaskProfile && (
                 <button
                     onClick={onViewTaskProfile}
@@ -152,15 +169,50 @@ const AgentCard: React.FC<AgentCardProps> = ({ title, content, sentPrompt, isLoa
             >
                 <EditIcon />
             </button>
-            <button 
+            <button
                 onClick={() => setShowSentPrompt(!showSentPrompt)}
-                title={showSentPrompt ? "View Agent Output" : "View Sent Prompt"} 
+                title={showSentPrompt ? "View Agent Output" : "View Sent Prompt"}
                 disabled={!hasContent || isLoading}
                 className={`p-1.5 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${showSentPrompt ? 'bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}`}
             >
                 <PromptIcon />
             </button>
-            <button 
+          </div>
+        </div>
+
+        {/* Iteration Navigation */}
+        {totalIterations > 1 && onIterationSelect && (
+          <div className="flex items-center justify-between text-sm">
+            <div className="flex items-center space-x-1">
+              <span className="text-gray-600 dark:text-gray-400">Iterations:</span>
+              {Array.from({ length: totalIterations }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => onIterationSelect(i)}
+                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                    i === currentIteration
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                  title={`View iteration ${i + 1}`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <span className="text-gray-500 dark:text-gray-400 text-xs">
+              {currentIteration + 1} of {totalIterations}
+            </span>
+          </div>
+        )}
+
+        {/* Debug info for iterations */}
+        {console.log(`🔍 AgentCard Debug - ${title}: totalIterations=${totalIterations}, currentIteration=${currentIteration}, hasCallback=${!!onIterationSelect}`)}
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <button
                 onClick={handleCopy}
                 title={`Copy ${currentTitle}`}
                 disabled={!hasContent || isLoading}
@@ -168,19 +220,20 @@ const AgentCard: React.FC<AgentCardProps> = ({ title, content, sentPrompt, isLoa
             >
                 {copied ? <CheckIcon /> : <CopyIcon />}
             </button>
-            <button 
-                onClick={handleSave} 
+            <button
+                onClick={handleSave}
                 title={`Save ${currentTitle} as .txt`}
                 disabled={!hasContent || isLoading}
                 className="p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <SaveIcon />
             </button>
+          </div>
         </div>
       </div>
       
-      {/* Tool Results Section (only for Researcher Agent) */}
-      {agent === AgentName.RESEARCHER && (
+      {/* Tool Results Section (only for Search Agent) */}
+      {agent === AgentName.SEARCH && (
         <div className="px-4 pt-2 pb-1 border-b border-gray-200 dark:border-gray-700">
           {toolServiceAvailable ? (
             <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">

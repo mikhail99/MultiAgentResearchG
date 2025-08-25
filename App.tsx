@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AgentName, ProcessStatus, StylizedFact, ModelProvider, LlmOptions, AgentPrompts, ToolResults } from './types';
+import { AgentName, ProcessStatus, StylizedFact, ModelProvider, LlmOptions, AgentPrompts, ToolResults, AgentStates } from './types';
 import { generateContentStream, generateFacts, generateQuestions } from './services/geminiService';
 import { executeResearcherTools, formatToolResultsForPrompt, checkToolServiceHealth } from './services/toolService';
 import { initialPrompts } from './prompts';
@@ -90,24 +90,30 @@ export default function App() {
   const [iteration, setIteration] = useState<number>(1);
   const [feedback, setFeedback] = useState<string>('');
   
-  const [modelProvider, setModelProvider] = useState<ModelProvider>(ModelProvider.GEMINI);
+  const [modelProvider, setModelProvider] = useState<ModelProvider>(ModelProvider.LOCAL);
   const [localLlmUrl, setLocalLlmUrl] = useState<string>('http://localhost:11434/v1/chat/completions');
   
   const [isPromptEditorOpen, setIsPromptEditorOpen] = useState(false);
   const [editingAgent, setEditingAgent] = useState<AgentName | null>(null);
   const [agentPrompts, setAgentPrompts] = useState<AgentPrompts>(initialPrompts);
 
-  const [researchSummary, setResearchSummary] = useState<string>('');
+  // Agent states with iteration support
+  const [agentStates, setAgentStates] = useState<AgentStates>({
+    searchResults: [],
+    learnings: [],
+    gapAnalyses: [],
+    proposals: [],
+    noveltyChecks: [],
+    aggregations: [],
+    userFeedback: []
+  });
+
+  // Legacy sent prompts (single values, not iterated)
   const [researcherSentPrompt, setResearcherSentPrompt] = useState<string>('');
-  const [generatedAnalysis, setGeneratedAnalysis] = useState<string>('');
   const [generatorSentPrompt, setGeneratorSentPrompt] = useState<string>('');
-  const [critique, setCritique] = useState<string>('');
   const [evaluatorSentPrompt, setEvaluatorSentPrompt] = useState<string>('');
-  const [proposal, setProposal] = useState<string>('');
   const [proposerSentPrompt, setProposerSentPrompt] = useState<string>('');
-  const [noveltyAssessment, setNoveltyAssessment] = useState<string>('');
   const [noveltyCheckerSentPrompt, setNoveltyCheckerSentPrompt] = useState<string>('');
-  const [finalReport, setFinalReport] = useState<string>('');
   const [aggregatorSentPrompt, setAggregatorSentPrompt] = useState<string>('');
 
   const [stylizedFacts, setStylizedFacts] = useState<StylizedFact[]>([]);
@@ -137,6 +143,16 @@ export default function App() {
   // Gap Analysis restart tracking
   const [searchRestartCount, setSearchRestartCount] = useState<number>(0);
   const [maxSearchRestarts] = useState<number>(3);
+
+  // Iteration selection for each agent
+  const [selectedIterations, setSelectedIterations] = useState<Record<AgentName, number>>({
+    [AgentName.SEARCH]: 0,
+    [AgentName.LEARNINGS]: 0,
+    [AgentName.GAP_ANALYSIS]: 0,
+    [AgentName.PROPOSER]: 0,
+    [AgentName.NOVELTY_CHECKER]: 0,
+    [AgentName.AGGREGATOR]: 0
+  });
 
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('theme')) {
@@ -172,10 +188,14 @@ export default function App() {
   // Check tool service health on load
   useEffect(() => {
     const checkTools = async () => {
+      console.log('🔧 Checking tool service health...');
       const isAvailable = await checkToolServiceHealth();
+      console.log('🔧 Tool service health result:', isAvailable);
       setToolServiceAvailable(isAvailable);
       if (!isAvailable) {
         console.warn('⚠️ Tool service not available. Research agent will run without tools.');
+      } else {
+        console.log('✅ Tool service is available and ready to use.');
       }
     };
     checkTools();
@@ -214,33 +234,49 @@ export default function App() {
         topic,
         iteration,
         modelProvider,
-        researchSummary,
+        researchSummary: agentStates.searchResults.join('\n\n'),
         researcherSentPrompt,
-        generatedAnalysis,
+        generatedAnalysis: agentStates.learnings[agentStates.learnings.length - 1] || '',
         generatorSentPrompt,
-        critique,
+        critique: agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || '',
         evaluatorSentPrompt,
-        proposal,
+        proposal: agentStates.proposals[agentStates.proposals.length - 1] || '',
         proposerSentPrompt,
-        noveltyAssessment,
+        noveltyAssessment: agentStates.noveltyChecks[agentStates.noveltyChecks.length - 1] || '',
         noveltyCheckerSentPrompt,
-        finalReport,
+        finalReport: agentStates.aggregations[agentStates.aggregations.length - 1] || '',
         aggregatorSentPrompt,
         stylizedFacts,
         stylizedQuestions,
         completedSteps,
         toolResults,
       };
+      console.log('💾 Saving data:', {
+        topic,
+        hasResearchSummary: !!payload.researchSummary,
+        hasGeneratedAnalysis: !!payload.generatedAnalysis,
+        completedSteps: payload.completedSteps
+      });
       localStorage.setItem(LAST_RUN_KEY, JSON.stringify(payload));
-    } catch {}
+    } catch (error) {
+      console.error('❌ Error saving data:', error);
+    }
   };
 
   const tryGetSavedRun = (): SavedRun | null => {
     try {
       const raw = localStorage.getItem(LAST_RUN_KEY);
+      console.log('💾 tryGetSavedRun:', { hasRawData: !!raw, rawLength: raw?.length });
       if (!raw) return null;
-      return JSON.parse(raw) as SavedRun;
-    } catch {
+      const parsed = JSON.parse(raw) as SavedRun;
+      console.log('💾 Parsed saved data:', {
+        hasTopic: !!parsed.topic,
+        hasResearchSummary: !!parsed.researchSummary,
+        hasGeneratedAnalysis: !!parsed.generatedAnalysis
+      });
+      return parsed;
+    } catch (error) {
+      console.error('❌ Error parsing saved data:', error);
       return null;
     }
   };
@@ -261,7 +297,14 @@ export default function App() {
   };
 
   const isOutputsEmpty = () => (
-    !researchSummary && !generatedAnalysis && !critique && !proposal && !noveltyAssessment && !finalReport && stylizedFacts.length === 0 && stylizedQuestions.length === 0
+    agentStates.searchResults.length === 0 &&
+    agentStates.learnings.length === 0 &&
+    agentStates.gapAnalyses.length === 0 &&
+    agentStates.proposals.length === 0 &&
+    agentStates.noveltyChecks.length === 0 &&
+    agentStates.aggregations.length === 0 &&
+    stylizedFacts.length === 0 &&
+    stylizedQuestions.length === 0
   );
 
   useEffect(() => {
@@ -273,18 +316,25 @@ export default function App() {
         const data = JSON.parse(json) as SavedRun & { v?: number };
         setTopic(data.topic || '');
         setIteration(data.iteration || 1);
-        setModelProvider(data.modelProvider || ModelProvider.GEMINI);
-        setResearchSummary(data.researchSummary || '');
+        setModelProvider(data.modelProvider || ModelProvider.LOCAL);
+
+        // Restore agent states from saved data
+        setAgentStates({
+          searchResults: data.researchSummary ? [data.researchSummary] : [],
+          learnings: data.generatedAnalysis ? [data.generatedAnalysis] : [],
+          gapAnalyses: data.critique ? [data.critique] : [],
+          proposals: data.proposal ? [data.proposal] : [],
+          noveltyChecks: data.noveltyAssessment ? [data.noveltyAssessment] : [],
+          aggregations: data.finalReport ? [data.finalReport] : [],
+          userFeedback: []
+        });
+
+        // Restore legacy sent prompts
         setResearcherSentPrompt(data.researcherSentPrompt || '');
-        setGeneratedAnalysis(data.generatedAnalysis || '');
         setGeneratorSentPrompt(data.generatorSentPrompt || '');
-        setCritique(data.critique || '');
         setEvaluatorSentPrompt(data.evaluatorSentPrompt || '');
-        setProposal(data.proposal || '');
         setProposerSentPrompt(data.proposerSentPrompt || '');
-        setNoveltyAssessment(data.noveltyAssessment || '');
         setNoveltyCheckerSentPrompt(data.noveltyCheckerSentPrompt || '');
-        setFinalReport(data.finalReport || '');
         setAggregatorSentPrompt(data.aggregatorSentPrompt || '');
         setStylizedFacts(data.stylizedFacts || []);
         setStylizedQuestions(data.stylizedQuestions || []);
@@ -300,9 +350,26 @@ export default function App() {
     }
 
     // On first load, if there's a saved run and current state is empty, offer restore
-    const hasSaved = !!tryGetSavedRun();
-    if (hasSaved && !topic && isOutputsEmpty()) {
+    const savedData = tryGetSavedRun();
+    const hasSaved = !!savedData;
+    const outputsEmpty = isOutputsEmpty();
+
+    console.log('🔄 Auto-restore check:', {
+      hasSaved,
+      topic: !!topic,
+      outputsEmpty,
+      savedDataKeys: savedData ? Object.keys(savedData) : null
+    });
+
+    if (hasSaved && !topic && outputsEmpty) {
+      console.log('📋 Showing restore toast');
       setShowRestoreToast(true);
+    } else {
+      console.log('📋 Not showing restore toast:', {
+        hasSaved,
+        hasTopic: !!topic,
+        outputsEmpty
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -318,21 +385,30 @@ export default function App() {
   const restoreLastRun = () => {
     const data = tryGetSavedRun();
     if (!data) return;
+
     setTopic(data.topic);
     setIteration(data.iteration);
     setModelProvider(data.modelProvider);
-    setResearchSummary(data.researchSummary);
-    setResearcherSentPrompt(data.researcherSentPrompt);
-    setGeneratedAnalysis(data.generatedAnalysis);
-    setGeneratorSentPrompt(data.generatorSentPrompt);
-    setCritique(data.critique);
-    setEvaluatorSentPrompt(data.evaluatorSentPrompt);
-    setProposal(data.proposal);
-    setProposerSentPrompt(data.proposerSentPrompt);
-    setNoveltyAssessment(data.noveltyAssessment || '');
+
+    // Restore agent states from saved data
+    setAgentStates({
+      searchResults: data.researchSummary ? [data.researchSummary] : [],
+      learnings: data.generatedAnalysis ? [data.generatedAnalysis] : [],
+      gapAnalyses: data.critique ? [data.critique] : [],
+      proposals: data.proposal ? [data.proposal] : [],
+      noveltyChecks: data.noveltyAssessment ? [data.noveltyAssessment] : [],
+      aggregations: data.finalReport ? [data.finalReport] : [],
+      userFeedback: []
+    });
+
+    // Restore legacy sent prompts
+    setResearcherSentPrompt(data.researcherSentPrompt || '');
+    setGeneratorSentPrompt(data.generatorSentPrompt || '');
+    setEvaluatorSentPrompt(data.evaluatorSentPrompt || '');
+    setProposerSentPrompt(data.proposerSentPrompt || '');
     setNoveltyCheckerSentPrompt(data.noveltyCheckerSentPrompt || '');
-    setFinalReport(data.finalReport);
-    setAggregatorSentPrompt(data.aggregatorSentPrompt);
+    setAggregatorSentPrompt(data.aggregatorSentPrompt || '');
+
     setStylizedFacts(data.stylizedFacts || []);
     setStylizedQuestions(data.stylizedQuestions || []);
     setCompletedSteps(data.completedSteps || deriveCompletedSteps(data));
@@ -344,24 +420,42 @@ export default function App() {
   const dismissRestoreToast = () => setShowRestoreToast(false);
 
   const clearOutputs = () => {
-    setResearchSummary('');
+    // Reset agent states
+    setAgentStates({
+      searchResults: [],
+      learnings: [],
+      gapAnalyses: [],
+      proposals: [],
+      noveltyChecks: [],
+      aggregations: [],
+      userFeedback: []
+    });
+
+    // Reset legacy sent prompts
     setResearcherSentPrompt('');
-    setGeneratedAnalysis('');
     setGeneratorSentPrompt('');
-    setCritique('');
     setEvaluatorSentPrompt('');
-    setProposal('');
     setProposerSentPrompt('');
-    setNoveltyAssessment('');
     setNoveltyCheckerSentPrompt('');
-    setFinalReport('');
     setAggregatorSentPrompt('');
+
+    // Reset other state
     setStylizedFacts([]);
     setStylizedQuestions([]);
     setCompletedSteps([]);
     setToolResults(null);
     setError(null);
     setSearchRestartCount(0); // Reset restart count
+
+    // Reset iteration selections
+    setSelectedIterations({
+      [AgentName.SEARCH]: 0,
+      [AgentName.LEARNINGS]: 0,
+      [AgentName.GAP_ANALYSIS]: 0,
+      [AgentName.PROPOSER]: 0,
+      [AgentName.NOVELTY_CHECKER]: 0,
+      [AgentName.AGGREGATOR]: 0
+    });
   };
 
   const handleOpenPromptEditor = (agent: AgentName) => {
@@ -393,8 +487,80 @@ export default function App() {
     setShowTaskProfileDialog(false);
     setSelectedAgentProfile(null);
   };
+
+  // Helper functions for agent states and iterations
+  const getCurrentIteration = (agentName: AgentName): number => {
+    return selectedIterations[agentName] || 0;
+  };
+
+  const getAgentContent = (agentName: AgentName): string => {
+    const iteration = getCurrentIteration(agentName);
+    switch (agentName) {
+      case AgentName.SEARCH:
+        return agentStates.searchResults[iteration] || '';
+      case AgentName.LEARNINGS:
+        return agentStates.learnings[iteration] || '';
+      case AgentName.GAP_ANALYSIS:
+        return agentStates.gapAnalyses[iteration] || '';
+      case AgentName.PROPOSER:
+        return agentStates.proposals[iteration] || '';
+      case AgentName.NOVELTY_CHECKER:
+        return agentStates.noveltyChecks[iteration] || '';
+      case AgentName.AGGREGATOR:
+        return agentStates.aggregations[iteration] || '';
+      default:
+        return '';
+    }
+  };
+
+  const getAgentIterationCount = (agentName: AgentName): number => {
+    const count = (() => {
+      switch (agentName) {
+        case AgentName.SEARCH:
+          return agentStates.searchResults.length;
+        case AgentName.LEARNINGS:
+          return agentStates.learnings.length;
+        case AgentName.GAP_ANALYSIS:
+          return agentStates.gapAnalyses.length;
+        case AgentName.PROPOSER:
+          return agentStates.proposals.length;
+        case AgentName.NOVELTY_CHECKER:
+          return agentStates.noveltyChecks.length;
+        case AgentName.AGGREGATOR:
+          return agentStates.aggregations.length;
+        default:
+          return 0;
+      }
+    })();
+
+    console.log(`🔢 ${agentName} iteration count: ${count}`);
+    return count;
+  };
+
+  const setIterationForAgent = (agentName: AgentName, iteration: number) => {
+    setSelectedIterations(prev => ({
+      ...prev,
+      [agentName]: Math.max(0, Math.min(iteration, getAgentIterationCount(agentName) - 1))
+    }));
+  };
   
   const runWorkflow = async (currentFeedback = '', startFromStep: ProcessStatus = ProcessStatus.SEARCHING) => {
+    console.log('🚀 Starting workflow from step:', startFromStep);
+    console.log('📊 Current agentStates:', {
+      searchResults: agentStates.searchResults.length,
+      learnings: agentStates.learnings.length,
+      gapAnalyses: agentStates.gapAnalyses.length,
+      proposals: agentStates.proposals.length,
+      noveltyChecks: agentStates.noveltyChecks.length,
+      aggregations: agentStates.aggregations.length
+    });
+
+    // Prevent concurrent execution
+    if (status !== ProcessStatus.IDLE && status !== ProcessStatus.FEEDBACK) {
+      console.log('⚠️ Workflow already running, current status:', status);
+      return;
+    }
+
     const fileNames = files.map(f => f.name).join(', ') || 'No files provided';
     const fileContents = (await Promise.all(files.map(readFileContent))).join('\n\n---\n\n');
 
@@ -424,20 +590,21 @@ export default function App() {
     }
 
     try {
-      let researchResult = researchSummary;
-      let analysisResult = generatedAnalysis;
-      let critiqueResult = critique;
-      let proposalResult = proposal;
-      let noveltyAssessmentResult = noveltyAssessment;
-      let finalReportResult = finalReport;
+      // Ensure we're in a running state
+      setStatus(startFromStep);
 
       // 1. Search (with tools)
+      console.log('🔍 Checking Search step:', shouldRunStep(ProcessStatus.SEARCHING));
       if (shouldRunStep(ProcessStatus.SEARCHING)) {
+        console.log('🔎 Executing Search step...');
         setStatus(ProcessStatus.SEARCHING);
-        setResearchSummary('');
-        
+
         // Execute research tools if available
         let toolData = '';
+        console.log('🔧 Tool service available:', toolServiceAvailable);
+        console.log('🔧 Web search enabled:', enableWebSearch);
+        console.log('🔧 Local search enabled:', enableLocalSearch);
+
         if (toolServiceAvailable) {
           console.log('🔧 Executing research tools...');
           try {
@@ -454,10 +621,20 @@ export default function App() {
               errors: results.errors,
               timestamp: new Date().toISOString()
             });
-            
+
+            console.log('🔧 Tool results received:', {
+              hasWebResults: !!results.webResults,
+              hasLocalResults: !!results.localResults,
+              webResultsLength: results.webResults?.length || 0,
+              localResultsLength: results.localResults?.length || 0,
+              errorCount: results.errors.length
+            });
+
             // Format for prompt
             toolData = formatToolResultsForPrompt(results.webResults, results.localResults);
-            
+            console.log('🔧 Formatted tool data length:', toolData.length);
+            console.log('🔧 Formatted tool data preview:', toolData.substring(0, 200) + '...');
+
             if (results.errors.length > 0) {
               console.warn('⚠️ Tool errors:', results.errors);
             }
@@ -466,6 +643,7 @@ export default function App() {
             toolData = '**Tool Results:** Tools unavailable for this research.\n';
           }
         } else {
+          console.log('🔧 Tool service not available, using fallback');
           toolData = '**Tool Results:** Tool service not available. Proceeding with knowledge-based research.\n';
         }
         
@@ -476,44 +654,242 @@ export default function App() {
         });
         setResearcherSentPrompt(researcherPrompt);
         
-        researchResult = await generateContentStream(AgentName.SEARCH, researcherPrompt, llmOptions, (chunk) => setResearchSummary(prev => prev + chunk));
+        // Start with empty result in the array for streaming
+        setAgentStates(prev => ({
+          ...prev,
+          searchResults: [...prev.searchResults, '']
+        }));
+
+        let currentIndex = agentStates.searchResults.length;
+        await generateContentStream(AgentName.SEARCH, researcherPrompt, llmOptions, (chunk) => {
+          // Update the current result in real-time
+          setAgentStates(prev => {
+            const newSearchResults = [...prev.searchResults];
+            if (newSearchResults.length > currentIndex) {
+              newSearchResults[currentIndex] += chunk;
+            } else {
+              newSearchResults.push(chunk);
+              currentIndex = newSearchResults.length - 1;
+            }
+            return { ...prev, searchResults: newSearchResults };
+          });
+        });
+
         setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.SEARCHING), ProcessStatus.SEARCHING]);
+
+        console.log('✅ Search step completed, results summary:', {
+          totalResults: agentStates.searchResults.length,
+          lastResultLength: agentStates.searchResults[agentStates.searchResults.length - 1]?.length || 0
+        });
+
         await simulateDelay();
       }
 
       // 2. Learnings
+      console.log('🔍 Checking Learnings step:', shouldRunStep(ProcessStatus.LEARNING));
       if (shouldRunStep(ProcessStatus.LEARNING)) {
+        console.log('📚 Executing Learnings step...');
         setStatus(ProcessStatus.LEARNING);
-        setGeneratedAnalysis('');
-        const generatorPrompt = fillPromptTemplate(agentPrompts[AgentName.LEARNINGS], { topic, researchSummary: researchResult, fileNames, fileContents, feedback: currentFeedback });
-        setGeneratorSentPrompt(generatorPrompt);
-        analysisResult = await generateContentStream(AgentName.LEARNINGS, generatorPrompt, llmOptions, (chunk) => setGeneratedAnalysis(prev => prev + chunk));
+
+        // Get current search results with validation
+        const currentSearchResults = agentStates.searchResults.join('\n\n');
+
+        console.log('📚 Learnings Agent Debug:', {
+          searchResultsCount: agentStates.searchResults.length,
+          searchResultsLengths: agentStates.searchResults.map(r => r.length),
+          currentSearchResultsLength: currentSearchResults.length,
+          lastSearchResult: agentStates.searchResults[agentStates.searchResults.length - 1]?.substring(0, 100) + '...'
+        });
+
+        if (!currentSearchResults.trim()) {
+          console.warn('⚠️ No search results available for Learnings agent');
+          // Create a fallback with the topic to allow the workflow to continue
+          const fallbackSearchResults = `Fallback: No search results available. Please research the topic "${topic}" from your knowledge base.`;
+          const learningsPrompt = fillPromptTemplate(agentPrompts[AgentName.LEARNINGS], {
+            topic,
+            researchSummary: fallbackSearchResults,
+            fileNames,
+            fileContents,
+            feedback: currentFeedback
+          });
+          setGeneratorSentPrompt(learningsPrompt);
+        } else {
+          const learningsPrompt = fillPromptTemplate(agentPrompts[AgentName.LEARNINGS], {
+            topic,
+            researchSummary: currentSearchResults,
+            fileNames,
+            fileContents,
+            feedback: currentFeedback
+          });
+          setGeneratorSentPrompt(learningsPrompt);
+        }
+
+        // Build the learnings prompt
+        const learningsPrompt = fillPromptTemplate(agentPrompts[AgentName.LEARNINGS], {
+          topic,
+          researchSummary: currentSearchResults,
+          fileNames,
+          fileContents,
+          feedback: currentFeedback
+        });
+        setGeneratorSentPrompt(learningsPrompt);
+
+        // Start with empty result in the array for streaming
+        setAgentStates(prev => ({
+          ...prev,
+          learnings: [...prev.learnings, '']
+        }));
+
+        let learningsIndex = agentStates.learnings.length;
+        await generateContentStream(AgentName.LEARNINGS, learningsPrompt, llmOptions, (chunk) => {
+          // Update the current result in real-time
+          setAgentStates(prev => {
+            const newLearnings = [...prev.learnings];
+            if (newLearnings.length > learningsIndex) {
+              newLearnings[learningsIndex] += chunk;
+            } else {
+              newLearnings.push(chunk);
+              learningsIndex = newLearnings.length - 1;
+            }
+            return { ...prev, learnings: newLearnings };
+          });
+        });
+
         setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING]);
         await simulateDelay();
       }
 
       // 3. Gap Analysis
+      console.log('🔍 Checking Gap Analysis step:', {
+        shouldRunStep: shouldRunStep(ProcessStatus.GAP_ANALYZING),
+        currentStep: status,
+        completedSteps,
+        stepOrderIndex: getStepIndex(status),
+        gapAnalysisIndex: getStepIndex(ProcessStatus.GAP_ANALYZING)
+      });
+
       if (shouldRunStep(ProcessStatus.GAP_ANALYZING)) {
+        console.log('🎯 Starting Gap Analysis step...');
         setStatus(ProcessStatus.GAP_ANALYZING);
-        setCritique('');
-        const evaluatorPrompt = fillPromptTemplate(agentPrompts[AgentName.GAP_ANALYSIS], { topic, generatedAnalysis: analysisResult });
-        setEvaluatorSentPrompt(evaluatorPrompt);
-        critiqueResult = await generateContentStream(AgentName.GAP_ANALYSIS, evaluatorPrompt, llmOptions, (chunk) => setCritique(prev => prev + chunk));
+
+        // Get current learnings with validation
+        const currentLearnings = agentStates.learnings[agentStates.learnings.length - 1] || '';
+
+        console.log('🔍 Gap Analysis Debug:', {
+          learningsLength: agentStates.learnings.length,
+          currentLearningsLength: currentLearnings.length,
+          lastLearnings: agentStates.learnings[agentStates.learnings.length - 1],
+          completedSteps: completedSteps,
+          searchResultsCount: agentStates.searchResults.length
+        });
+
+        // Determine which learnings to use
+        let learningsToUse = currentLearnings;
+
+        if (!currentLearnings.trim()) {
+          console.warn('⚠️ No current learnings available for Gap Analysis. Learnings array:', agentStates.learnings);
+          console.warn('⚠️ This might indicate the Learnings step didn\'t complete properly.');
+
+          // Try to get learnings from the previous iteration if available
+          const previousLearnings = agentStates.learnings.length > 1 ?
+            agentStates.learnings[agentStates.learnings.length - 2] : '';
+
+          if (previousLearnings && previousLearnings.trim()) {
+            console.log('🔄 Using previous learnings as fallback');
+            learningsToUse = previousLearnings;
+          } else {
+            console.warn('⚠️ No fallback learnings available, creating mock learnings for Gap Analysis');
+            // Create mock learnings to allow Gap Analysis to proceed
+            learningsToUse = 'Mock learnings: Previous analysis steps did not complete successfully. Please review the search results and provide feedback.';
+          }
+        }
+
+        console.log('📝 Creating Gap Analysis prompt...');
+        const gapAnalysisPrompt = fillPromptTemplate(agentPrompts[AgentName.GAP_ANALYSIS], {
+          topic,
+          generatedAnalysis: learningsToUse
+        });
+        console.log('📝 Gap Analysis prompt created, length:', gapAnalysisPrompt.length);
+        setEvaluatorSentPrompt(gapAnalysisPrompt);
+
+        // Start with empty result in the array for streaming
+        console.log('📝 Initializing Gap Analysis streaming...');
+        setAgentStates(prev => ({
+          ...prev,
+          gapAnalyses: [...prev.gapAnalyses, '']
+        }));
+
+        let gapIndex = agentStates.gapAnalyses.length;
+        let gapAnalysisResult = '';
+        console.log('🤖 Calling generateContentStream for Gap Analysis...');
+
+        try {
+          // Add timeout to prevent infinite hanging
+          const streamingPromise = generateContentStream(AgentName.GAP_ANALYSIS, gapAnalysisPrompt, llmOptions, (chunk) => {
+            console.log('📦 Gap Analysis received chunk, length:', chunk.length);
+            gapAnalysisResult += chunk;
+            // Update the current result in real-time
+            setAgentStates(prev => {
+              const newGapAnalyses = [...prev.gapAnalyses];
+              if (newGapAnalyses.length > gapIndex) {
+                newGapAnalyses[gapIndex] += chunk;
+              } else {
+                newGapAnalyses.push(chunk);
+                gapIndex = newGapAnalyses.length - 1;
+              }
+              return { ...prev, gapAnalyses: newGapAnalyses };
+            });
+          });
+
+          // Timeout after 30 seconds
+          const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Gap Analysis streaming timeout after 30 seconds')), 30000);
+          });
+
+          await Promise.race([streamingPromise, timeoutPromise]);
+        } catch (error) {
+          console.error('❌ Gap Analysis streaming error:', error);
+          // Set a fallback message if streaming fails
+          const fallbackResult = `Gap Analysis: Unable to analyze learnings due to streaming error. ${error.message || 'Unknown error'}`;
+          setAgentStates(prev => ({
+            ...prev,
+            gapAnalyses: [...prev.gapAnalyses, fallbackResult]
+          }));
+          gapAnalysisResult = fallbackResult; // Update the result variable for decision logic
+        }
+
+        console.log('✅ Gap Analysis streaming completed, result length:', gapAnalysisResult.length);
         setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.GAP_ANALYZING), ProcessStatus.GAP_ANALYZING]);
         await simulateDelay();
 
         // Gap Analysis Decision Logic
-        const shouldRestartSearch = critiqueResult.toLowerCase().includes('research_again') ||
-                                   critiqueResult.toLowerCase().includes('restart') ||
-                                   (critiqueResult.toLowerCase().includes('research') && searchRestartCount < maxSearchRestarts);
+        console.log('🎯 Gap Analysis Result:', gapAnalysisResult);
+
+        // More robust restart detection
+        const lowerResult = gapAnalysisResult.toLowerCase();
+        const restartKeywords = ['research_again', 'restart', 'search again', 'new search', 'insufficient data', 'need more research', 'research more'];
+
+        const shouldRestartSearch = restartKeywords.some(keyword => lowerResult.includes(keyword)) ||
+                                   (lowerResult.includes('research') && searchRestartCount < maxSearchRestarts);
+
+        console.log('🎯 Restart Analysis:', {
+          gapAnalysisResult: gapAnalysisResult.substring(0, 200) + '...',
+          shouldRestartSearch,
+          searchRestartCount,
+          maxSearchRestarts,
+          keywordsFound: restartKeywords.filter(keyword => lowerResult.includes(keyword))
+        });
 
         if (shouldRestartSearch && searchRestartCount < maxSearchRestarts) {
           console.log(`🔄 Gap Analysis recommends restarting search (${searchRestartCount + 1}/${maxSearchRestarts})`);
           setSearchRestartCount(prev => prev + 1);
 
-          // Reset learnings and gap analysis for restart
-          setGeneratedAnalysis('');
-          setCritique('');
+          // Clear current learnings and gap analysis for restart (but keep in history)
+          setAgentStates(prev => ({
+            ...prev,
+            learnings: [],
+            gapAnalyses: []
+          }));
 
           // Restart from searching step
           setTimeout(() => runWorkflow(currentFeedback, ProcessStatus.SEARCHING), 500);
@@ -526,10 +902,54 @@ export default function App() {
       // 4. Proposer
       if (shouldRunStep(ProcessStatus.PROPOSING)) {
         setStatus(ProcessStatus.PROPOSING);
-        setProposal('');
-        const proposerPrompt = fillPromptTemplate(agentPrompts.Proposer, { topic, generatedAnalysis: analysisResult, critique: critiqueResult });
+
+        // Get current learnings and gap analysis with validation
+        const currentLearnings = agentStates.learnings[agentStates.learnings.length - 1] || '';
+        const currentGapAnalysis = agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || '';
+
+        console.log('💡 Proposer Agent Debug:', {
+          learningsCount: agentStates.learnings.length,
+          currentLearningsLength: currentLearnings.length,
+          gapAnalysesCount: agentStates.gapAnalyses.length,
+          currentGapAnalysisLength: currentGapAnalysis.length
+        });
+
+        if (!currentLearnings.trim()) {
+          console.warn('⚠️ No learnings available for Proposer agent');
+        }
+
+        if (!currentGapAnalysis.trim()) {
+          console.warn('⚠️ No gap analysis available for Proposer agent');
+        }
+
+        const proposerPrompt = fillPromptTemplate(agentPrompts[AgentName.PROPOSER], {
+          topic,
+          generatedAnalysis: currentLearnings || 'No learnings available',
+          critique: currentGapAnalysis || 'No gap analysis available'
+        });
         setProposerSentPrompt(proposerPrompt);
-        proposalResult = await generateContentStream(AgentName.PROPOSER, proposerPrompt, llmOptions, (chunk) => setProposal(prev => prev + chunk));
+
+        // Start with empty result in the array for streaming
+        setAgentStates(prev => ({
+          ...prev,
+          proposals: [...prev.proposals, '']
+        }));
+
+        let proposalIndex = agentStates.proposals.length;
+        await generateContentStream(AgentName.PROPOSER, proposerPrompt, llmOptions, (chunk) => {
+          // Update the current result in real-time
+          setAgentStates(prev => {
+            const newProposals = [...prev.proposals];
+            if (newProposals.length > proposalIndex) {
+              newProposals[proposalIndex] += chunk;
+            } else {
+              newProposals.push(chunk);
+              proposalIndex = newProposals.length - 1;
+            }
+            return { ...prev, proposals: newProposals };
+          });
+        });
+
         setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING]);
         await simulateDelay();
       }
@@ -537,22 +957,24 @@ export default function App() {
       // 5. Novelty Checker
       if (shouldRunStep(ProcessStatus.CHECKING_NOVELTY)) {
         setStatus(ProcessStatus.CHECKING_NOVELTY);
-        setNoveltyAssessment('');
-        
+
+        // Get current proposal
+        const currentProposal = agentStates.proposals[agentStates.proposals.length - 1] || '';
+
         // Execute search tools for novelty checking
         let noveltyToolData = '';
         if (toolServiceAvailable) {
           console.log('🔧 Executing novelty check tools...');
           try {
-            const results = await executeResearcherTools(proposalResult, {
+            const results = await executeResearcherTools(currentProposal, {
               includeWebSearch: enableWebSearch,
               includeLocalSearch: enableLocalSearch,
               metadata: { iteration, modelProvider, purpose: 'novelty_check' }
             });
-            
+
             // Format for prompt
             noveltyToolData = formatToolResultsForPrompt(results.webResults, results.localResults);
-            
+
             if (results.errors.length > 0) {
               console.warn('⚠️ Novelty check tool errors:', results.errors);
             }
@@ -563,13 +985,34 @@ export default function App() {
         } else {
           noveltyToolData = '**Tool Results:** Tool service not available for novelty check.\n';
         }
-        
-        const noveltyCheckerPrompt = fillPromptTemplate(agentPrompts.NoveltyChecker, { 
-          proposal: proposalResult,
+
+        const noveltyCheckerPrompt = fillPromptTemplate(agentPrompts[AgentName.NOVELTY_CHECKER], {
+          proposal: currentProposal,
           tool_results: noveltyToolData
         });
         setNoveltyCheckerSentPrompt(noveltyCheckerPrompt);
-        noveltyAssessmentResult = await generateContentStream(AgentName.NOVELTY_CHECKER, noveltyCheckerPrompt, llmOptions, (chunk) => setNoveltyAssessment(prev => prev + chunk));
+
+        // Start with empty result in the array for streaming
+        setAgentStates(prev => ({
+          ...prev,
+          noveltyChecks: [...prev.noveltyChecks, '']
+        }));
+
+        let noveltyIndex = agentStates.noveltyChecks.length;
+        await generateContentStream(AgentName.NOVELTY_CHECKER, noveltyCheckerPrompt, llmOptions, (chunk) => {
+          // Update the current result in real-time
+          setAgentStates(prev => {
+            const newNoveltyChecks = [...prev.noveltyChecks];
+            if (newNoveltyChecks.length > noveltyIndex) {
+              newNoveltyChecks[noveltyIndex] += chunk;
+            } else {
+              newNoveltyChecks.push(chunk);
+              noveltyIndex = newNoveltyChecks.length - 1;
+            }
+            return { ...prev, noveltyChecks: newNoveltyChecks };
+          });
+        });
+
         setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.CHECKING_NOVELTY), ProcessStatus.CHECKING_NOVELTY]);
         await simulateDelay();
       }
@@ -577,10 +1020,47 @@ export default function App() {
       // 6. Aggregator
       if (shouldRunStep(ProcessStatus.AGGREGATING)) {
         setStatus(ProcessStatus.AGGREGATING);
-        setFinalReport('');
-        const aggregatorPrompt = fillPromptTemplate(agentPrompts.Aggregator, { topic, researchSummary: researchResult, generatedAnalysis: analysisResult, critique: critiqueResult, proposal: proposalResult, noveltyAssessment: noveltyAssessmentResult, feedback: currentFeedback, fileContents });
+
+        // Get current states
+        const currentSearchResults = agentStates.searchResults.join('\n\n');
+        const currentLearnings = agentStates.learnings[agentStates.learnings.length - 1] || '';
+        const currentGapAnalysis = agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || '';
+        const currentProposal = agentStates.proposals[agentStates.proposals.length - 1] || '';
+        const currentNoveltyCheck = agentStates.noveltyChecks[agentStates.noveltyChecks.length - 1] || '';
+
+        const aggregatorPrompt = fillPromptTemplate(agentPrompts[AgentName.AGGREGATOR], {
+          topic,
+          researchSummary: currentSearchResults,
+          generatedAnalysis: currentLearnings,
+          critique: currentGapAnalysis,
+          proposal: currentProposal,
+          noveltyAssessment: currentNoveltyCheck,
+          feedback: currentFeedback,
+          fileContents
+        });
         setAggregatorSentPrompt(aggregatorPrompt);
-        finalReportResult = await generateContentStream(AgentName.AGGREGATOR, aggregatorPrompt, llmOptions, (chunk) => setFinalReport(prev => prev + chunk));
+
+        // Start with empty result in the array for streaming
+        setAgentStates(prev => ({
+          ...prev,
+          aggregations: [...prev.aggregations, '']
+        }));
+
+        let aggregatorIndex = agentStates.aggregations.length;
+        await generateContentStream(AgentName.AGGREGATOR, aggregatorPrompt, llmOptions, (chunk) => {
+          // Update the current result in real-time
+          setAgentStates(prev => {
+            const newAggregations = [...prev.aggregations];
+            if (newAggregations.length > aggregatorIndex) {
+              newAggregations[aggregatorIndex] += chunk;
+            } else {
+              newAggregations.push(chunk);
+              aggregatorIndex = newAggregations.length - 1;
+            }
+            return { ...prev, aggregations: newAggregations };
+          });
+        });
+
         setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING]);
         await simulateDelay();
       }
@@ -590,11 +1070,14 @@ export default function App() {
         setStatus(ProcessStatus.GENERATING_FACTS);
         setStylizedFacts([]);
         let factsBuffer = '';
+        // Get current aggregation
+        const currentAggregation = agentStates.aggregations[agentStates.aggregations.length - 1] || '';
+
         const factsPrompt = `
           Based on the final report below, emit 5-7 stylized facts as a bullet list only.\n
           - Use the exact format "- Fact — Description" (em dash or colon are acceptable).\n
           - No section headers, no JSON, no commentary.\n
-          Final Report:\n---\n${finalReportResult}\n---
+          Final Report:\n---\n${currentAggregation}\n---
         `;
         await generateContentStream(AgentName.LEARNINGS, factsPrompt, llmOptions, (chunk) => {
           factsBuffer += chunk;
@@ -609,11 +1092,14 @@ export default function App() {
         setStatus(ProcessStatus.GENERATING_QUESTIONS);
         setStylizedQuestions([]);
         let questionsBuffer = '';
+        // Get current aggregation
+        const currentAggregation = agentStates.aggregations[agentStates.aggregations.length - 1] || '';
+
         const questionsPrompt = `
           Based on the final report below, emit 5 insightful questions as a bullet list only.\n
           - Use the exact format "- question text".\n
           - No section headers, no JSON, no commentary.\n
-          Final Report:\n---\n${finalReportResult}\n---
+          Final Report:\n---\n${currentAggregation}\n---
         `;
         await generateContentStream(AgentName.LEARNINGS, questionsPrompt, llmOptions, (chunk) => {
           questionsBuffer += chunk;
@@ -688,33 +1174,33 @@ export default function App() {
 
 ## Agent Outputs
 
-### Researcher Agent
+### Search Agent
 **Sent Prompt:**
 \`\`\`
 ${researcherSentPrompt}
 \`\`\`
 **Output:**
-${researchSummary}
+${agentStates.searchResults.join('\n\n---\n\n') || 'No search results'}
 
 ---
 
-### Generator Agent
+### Learnings Agent
 **Sent Prompt:**
 \`\`\`
 ${generatorSentPrompt}
 \`\`\`
 **Output:**
-${generatedAnalysis}
+${agentStates.learnings[agentStates.learnings.length - 1] || 'No learnings generated'}
 
 ---
 
-### Evaluator Agent
+### Gap Analysis Agent
 **Sent Prompt:**
 \`\`\`
 ${evaluatorSentPrompt}
 \`\`\`
 **Output:**
-${critique}
+${agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || 'No gap analysis'}
 
 ---
 
@@ -724,7 +1210,7 @@ ${critique}
 ${proposerSentPrompt}
 \`\`\`
 **Output:**
-${proposal}
+${agentStates.proposals[agentStates.proposals.length - 1] || 'No proposal generated'}
 
 ---
 
@@ -734,7 +1220,7 @@ ${proposal}
 ${noveltyCheckerSentPrompt}
 \`\`\`
 **Output:**
-${noveltyAssessment}
+${agentStates.noveltyChecks[agentStates.noveltyChecks.length - 1] || 'No novelty check'}
 
 ---
 
@@ -744,7 +1230,7 @@ ${noveltyAssessment}
 ${aggregatorSentPrompt}
 \`\`\`
 **Output:**
-${finalReport}
+${agentStates.aggregations[agentStates.aggregations.length - 1] || 'No final report'}
 
 ---
 
@@ -782,22 +1268,23 @@ ${questionsText}
     topic,
     iteration,
     modelProvider,
-    researchSummary,
+    researchSummary: agentStates.searchResults.join('\n\n'),
     researcherSentPrompt,
-    generatedAnalysis,
+    generatedAnalysis: agentStates.learnings[agentStates.learnings.length - 1] || '',
     generatorSentPrompt,
-    critique,
+    critique: agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || '',
     evaluatorSentPrompt,
-    proposal,
+    proposal: agentStates.proposals[agentStates.proposals.length - 1] || '',
     proposerSentPrompt,
-    noveltyAssessment,
+    noveltyAssessment: agentStates.noveltyChecks[agentStates.noveltyChecks.length - 1] || '',
     noveltyCheckerSentPrompt,
-    finalReport,
+    finalReport: agentStates.aggregations[agentStates.aggregations.length - 1] || '',
     aggregatorSentPrompt,
     stylizedFacts,
     stylizedQuestions,
     completedSteps,
     toolResults,
+    agentStates, // Include full agent states for iteration support
   });
 
   const handleExportJson = () => {
@@ -949,6 +1436,10 @@ ${questionsText}
                   setModelProvider={setModelProvider}
                   localLlmUrl={localLlmUrl}
                   setLocalLlmUrl={setLocalLlmUrl}
+                  enableWebSearch={enableWebSearch}
+                  setEnableWebSearch={setEnableWebSearch}
+                  enableLocalSearch={enableLocalSearch}
+                  setEnableLocalSearch={setEnableLocalSearch}
                   isRunComplete={status === ProcessStatus.FEEDBACK || (stylizedFacts.length > 0 || stylizedQuestions.length > 0)}
                 />
             </div>
@@ -966,7 +1457,7 @@ ${questionsText}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <AgentCard
                     title="Search Agent"
-                    content={researchSummary}
+                    content={getAgentContent(AgentName.SEARCH)}
                     sentPrompt={researcherSentPrompt}
                     isLoading={status === ProcessStatus.SEARCHING}
                     agent={AgentName.SEARCH}
@@ -974,14 +1465,72 @@ ${questionsText}
                     onViewTaskProfile={() => handleViewTaskProfile(AgentName.SEARCH)}
                     toolResults={toolResults}
                     toolServiceAvailable={toolServiceAvailable}
+                    currentIteration={getCurrentIteration(AgentName.SEARCH)}
+                    totalIterations={getAgentIterationCount(AgentName.SEARCH)}
+                    onIterationSelect={(iteration) => setIterationForAgent(AgentName.SEARCH, iteration)}
                   />
-                  <AgentCard title="Learnings Agent" content={generatedAnalysis} sentPrompt={generatorSentPrompt} isLoading={status === ProcessStatus.LEARNING} agent={AgentName.LEARNINGS} onEditPrompt={() => handleOpenPromptEditor(AgentName.LEARNINGS)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.LEARNINGS)} />
-                  <AgentCard title="Gap Analysis Agent" content={critique} sentPrompt={evaluatorSentPrompt} isLoading={status === ProcessStatus.GAP_ANALYZING} agent={AgentName.GAP_ANALYSIS} onEditPrompt={() => handleOpenPromptEditor(AgentName.GAP_ANALYSIS)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.GAP_ANALYSIS)} />
-                  <AgentCard title="Proposer Agent" content={proposal} sentPrompt={proposerSentPrompt} isLoading={status === ProcessStatus.PROPOSING} agent={AgentName.PROPOSER} onEditPrompt={() => handleOpenPromptEditor(AgentName.PROPOSER)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.PROPOSER)} />
-                  <AgentCard title="Novelty Checker Agent" content={noveltyAssessment} sentPrompt={noveltyCheckerSentPrompt} isLoading={status === ProcessStatus.CHECKING_NOVELTY} agent={AgentName.NOVELTY_CHECKER} onEditPrompt={() => handleOpenPromptEditor(AgentName.NOVELTY_CHECKER)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.NOVELTY_CHECKER)} />
+                  <AgentCard
+                    title="Learnings Agent"
+                    content={getAgentContent(AgentName.LEARNINGS)}
+                    sentPrompt={generatorSentPrompt}
+                    isLoading={status === ProcessStatus.LEARNING}
+                    agent={AgentName.LEARNINGS}
+                    onEditPrompt={() => handleOpenPromptEditor(AgentName.LEARNINGS)}
+                    onViewTaskProfile={() => handleViewTaskProfile(AgentName.LEARNINGS)}
+                    currentIteration={getCurrentIteration(AgentName.LEARNINGS)}
+                    totalIterations={getAgentIterationCount(AgentName.LEARNINGS)}
+                    onIterationSelect={(iteration) => setIterationForAgent(AgentName.LEARNINGS, iteration)}
+                  />
+                  <AgentCard
+                    title="Gap Analysis Agent"
+                    content={getAgentContent(AgentName.GAP_ANALYSIS)}
+                    sentPrompt={evaluatorSentPrompt}
+                    isLoading={status === ProcessStatus.GAP_ANALYZING}
+                    agent={AgentName.GAP_ANALYSIS}
+                    onEditPrompt={() => handleOpenPromptEditor(AgentName.GAP_ANALYSIS)}
+                    onViewTaskProfile={() => handleViewTaskProfile(AgentName.GAP_ANALYSIS)}
+                    currentIteration={getCurrentIteration(AgentName.GAP_ANALYSIS)}
+                    totalIterations={getAgentIterationCount(AgentName.GAP_ANALYSIS)}
+                    onIterationSelect={(iteration) => setIterationForAgent(AgentName.GAP_ANALYSIS, iteration)}
+                  />
+                  <AgentCard
+                    title="Proposer Agent"
+                    content={getAgentContent(AgentName.PROPOSER)}
+                    sentPrompt={proposerSentPrompt}
+                    isLoading={status === ProcessStatus.PROPOSING}
+                    agent={AgentName.PROPOSER}
+                    onEditPrompt={() => handleOpenPromptEditor(AgentName.PROPOSER)}
+                    onViewTaskProfile={() => handleViewTaskProfile(AgentName.PROPOSER)}
+                    currentIteration={getCurrentIteration(AgentName.PROPOSER)}
+                    totalIterations={getAgentIterationCount(AgentName.PROPOSER)}
+                    onIterationSelect={(iteration) => setIterationForAgent(AgentName.PROPOSER, iteration)}
+                  />
+                  <AgentCard
+                    title="Novelty Checker Agent"
+                    content={getAgentContent(AgentName.NOVELTY_CHECKER)}
+                    sentPrompt={noveltyCheckerSentPrompt}
+                    isLoading={status === ProcessStatus.CHECKING_NOVELTY}
+                    agent={AgentName.NOVELTY_CHECKER}
+                    onEditPrompt={() => handleOpenPromptEditor(AgentName.NOVELTY_CHECKER)}
+                    onViewTaskProfile={() => handleViewTaskProfile(AgentName.NOVELTY_CHECKER)}
+                    currentIteration={getCurrentIteration(AgentName.NOVELTY_CHECKER)}
+                    totalIterations={getAgentIterationCount(AgentName.NOVELTY_CHECKER)}
+                    onIterationSelect={(iteration) => setIterationForAgent(AgentName.NOVELTY_CHECKER, iteration)}
+                  />
               </div>
                <div className="grid grid-cols-1">
-                  <AgentCard title="Aggregator Agent" content={finalReport} sentPrompt={aggregatorSentPrompt} isLoading={status === ProcessStatus.AGGREGATING} agent={AgentName.AGGREGATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.AGGREGATOR)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.AGGREGATOR)} />
+                  <AgentCard
+                    title="Aggregator Agent"
+                    content={getAgentContent(AgentName.AGGREGATOR)}
+                    sentPrompt={aggregatorSentPrompt}
+                    isLoading={status === ProcessStatus.AGGREGATING}
+                    agent={AgentName.AGGREGATOR}
+                    onEditPrompt={() => handleOpenPromptEditor(AgentName.AGGREGATOR)}
+                    onViewTaskProfile={() => handleViewTaskProfile(AgentName.AGGREGATOR)}
+                    currentIteration={getCurrentIteration(AgentName.AGGREGATOR)}
+                    totalIterations={getAgentIterationCount(AgentName.AGGREGATOR)}
+                    onIterationSelect={(iteration) => setIterationForAgent(AgentName.AGGREGATOR, iteration)}
+                  />
                </div>
 
               {status === ProcessStatus.FEEDBACK && (

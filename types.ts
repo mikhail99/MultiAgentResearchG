@@ -40,6 +40,17 @@ export interface AgentInput {
   proposal?: string;
 }
 
+// Agent iteration states for tracking evolution across iterations
+export interface AgentStates {
+  searchResults: string[];
+  learnings: string[];
+  gapAnalyses: string[];
+  proposals: string[];
+  noveltyChecks: string[];
+  aggregations: string[];
+  userFeedback: string[];
+}
+
 export interface LlmOptions {
     provider: ModelProvider;
     url: string;
