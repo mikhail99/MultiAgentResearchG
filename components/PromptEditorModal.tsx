@@ -13,7 +13,7 @@ interface PromptEditorModalProps {
 }
 
 const PromptEditorModal: React.FC<PromptEditorModalProps> = ({ isOpen, onClose, prompts, onSave, llmOptions, initialAgent }) => {
-  const [selectedAgent, setSelectedAgent] = useState<AgentName>(initialAgent || AgentName.RESEARCHER);
+  const [selectedAgent, setSelectedAgent] = useState<AgentName>(initialAgent || AgentName.SEARCH);
   const [currentPrompt, setCurrentPrompt] = useState<string>('');
   const [improvementInstruction, setImprovementInstruction] = useState('');
   const [isImproving, setIsImproving] = useState(false);

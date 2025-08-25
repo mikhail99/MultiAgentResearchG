@@ -18,7 +18,7 @@ export const generateContentStream = async (
   if (options.provider === ModelProvider.GEMINI) {
     if (!ai) throw new Error("GoogleGenAI client not initialized. Is API_KEY set?");
     
-    const isResearcher = agentName === AgentName.RESEARCHER;
+    const isSearch = agentName === AgentName.SEARCH;
     
     const responseStream = await ai.models.generateContentStream({
       model: 'gemini-2.5-flash',
@@ -26,7 +26,7 @@ export const generateContentStream = async (
       config: {
         temperature: 0.5,
         topP: 0.95,
-        ...(isResearcher && { tools: [{ googleSearch: {} }] }),
+        ...(isSearch && { tools: [{ googleSearch: {} }] }),
       }
     });
 
@@ -41,7 +41,7 @@ export const generateContentStream = async (
     }
     
     // Handle grounding metadata after stream is complete
-    if (isResearcher && finalResponse?.candidates?.[0]?.groundingMetadata?.groundingChunks) {
+    if (isSearch && finalResponse?.candidates?.[0]?.groundingMetadata?.groundingChunks) {
         const sources = finalResponse.candidates[0].groundingMetadata.groundingChunks
             .map((chunk: any) => chunk.web?.uri && `- ${chunk.web.title}: ${chunk.web.uri}`)
             .filter(Boolean)
@@ -123,7 +123,7 @@ export const generateContent = async (agentName: AgentName, fullPrompt: string, 
   if (options.provider === ModelProvider.GEMINI) {
     if (!ai) throw new Error("GoogleGenAI client not initialized. Is API_KEY set?");
     
-    const isResearcher = agentName === AgentName.RESEARCHER;
+    const isSearch = agentName === AgentName.SEARCH;
     
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
@@ -131,12 +131,12 @@ export const generateContent = async (agentName: AgentName, fullPrompt: string, 
       config: {
         temperature: 0.5,
         topP: 0.95,
-        ...(isResearcher && { tools: [{ googleSearch: {} }] }),
+        ...(isSearch && { tools: [{ googleSearch: {} }] }),
       }
     });
     
     let text = response.text;
-    if (isResearcher && response.candidates?.[0]?.groundingMetadata?.groundingChunks) {
+    if (isSearch && response.candidates?.[0]?.groundingMetadata?.groundingChunks) {
         const sources = response.candidates[0].groundingMetadata.groundingChunks
             .map((chunk: any) => chunk.web?.uri && `- ${chunk.web.title}: ${chunk.web.uri}`)
             .filter(Boolean)
@@ -197,7 +197,7 @@ export const improvePrompt = async (promptToImprove: string, taskDescription: st
     `;
 
     // We can just reuse generateContent for this meta-task. We'll pass a dummy agent name.
-    return generateContent(AgentName.GENERATOR, metaPrompt, options);
+    return generateContent(AgentName.LEARNINGS, metaPrompt, options);
 };
 
 

@@ -1,8 +1,8 @@
 export enum ProcessStatus {
   IDLE = 'IDLE',
-  RESEARCHING = 'RESEARCHING',
-  GENERATING = 'GENERATING',
-  EVALUATING = 'EVALUATING',
+  SEARCHING = 'SEARCHING',
+  LEARNING = 'LEARNING',
+  GAP_ANALYZING = 'GAP_ANALYZING',
   PROPOSING = 'PROPOSING',
   CHECKING_NOVELTY = 'CHECKING_NOVELTY',
   AGGREGATING = 'AGGREGATING',
@@ -12,9 +12,9 @@ export enum ProcessStatus {
 }
 
 export enum AgentName {
-  RESEARCHER = 'Researcher',
-  GENERATOR = 'Generator',
-  EVALUATOR = 'Evaluator',
+  SEARCH = 'Search',
+  LEARNINGS = 'Learnings',
+  GAP_ANALYSIS = 'Gap Analysis',
   PROPOSER = 'Proposer',
   NOVELTY_CHECKER = 'NoveltyChecker',
   AGGREGATOR = 'Aggregator'

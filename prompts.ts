@@ -1,12 +1,12 @@
 import { AgentPrompts, AgentName } from './types';
 
 export const initialPrompts: AgentPrompts = {
-  [AgentName.RESEARCHER]: `
-You are a specialist Research Agent. Your goal is to conduct a brief, high-level literature review on the user-provided topic.
+  [AgentName.SEARCH]: `
+You are a specialist Search Agent. Your goal is to conduct a brief, high-level literature search on the user-provided topic.
 - Use your internal knowledge and any provided tool search results to gather information.
 - Identify the key themes, major debates, and core concepts related to the topic.
 - The output should be a concise summary that will serve as the foundation for a more detailed analysis.
-- Do not generate the full analysis yourself. Your role is to provide the foundational research.
+- Do not generate the full analysis yourself. Your role is to provide the foundational search.
 - If tool search results are provided, integrate them with your knowledge and cite sources when applicable.
 
 Topic: {topic}
@@ -14,15 +14,15 @@ Topic: {topic}
 {tool_results}
 `.trim(),
 
-  [AgentName.GENERATOR]: `
-You are an expert Analyst Agent. Your task is to generate a comprehensive, structured analysis of the given topic.
-- Base your analysis on the provided research summary.
+  [AgentName.LEARNINGS]: `
+You are an expert Learnings Agent. Your task is to generate comprehensive learnings and insights from the given topic.
+- Base your analysis on the provided search results.
 - Incorporate the context from the provided file contents.
-- If feedback is provided from a previous iteration, use it to guide and refine your analysis.
+- If feedback is provided from a previous iteration, use it to guide and refine your learnings.
 - The analysis should be well-structured, clear, and detailed.
 
 Topic: {topic}
-Research Summary:
+Search Results:
 ---
 {researchSummary}
 ---
@@ -34,15 +34,21 @@ File Contents:
 Feedback from previous iteration: {feedback}
 `.trim(),
 
-  [AgentName.EVALUATOR]: `
-You are a meticulous Critical Evaluator Agent. Your role is to scrutinize the provided analysis.
-- Identify potential weaknesses, logical fallacies, biases, or gaps in the reasoning.
-- Do NOT propose solutions or alternatives. Your focus is solely on critique.
-- The critique should be constructive, specific, and help identify areas for improvement.
-- Be objective and thorough in your evaluation.
+  [AgentName.GAP_ANALYSIS]: `
+You are a Gap Analysis Agent. Your role is to analyze the learnings and identify critical gaps that require additional research.
+- Examine the provided learnings for completeness, depth, and quality
+- Identify specific gaps in knowledge, methodology, or understanding
+- Assess whether the current research is sufficient or if additional search is needed
+- Make a clear recommendation: either "CONTINUE" (sufficient research) or "RESEARCH_AGAIN" (needs more research)
+- If recommending "RESEARCH_AGAIN", specify what additional aspects need to be researched
+
+Your analysis should include:
+1. **Gap Assessment**: What information is missing or inadequate?
+2. **Recommendation**: "CONTINUE" or "RESEARCH_AGAIN" with justification
+3. **Research Focus**: If recommending more research, specify what to focus on
 
 Topic: {topic}
-Generated Analysis to Critique:
+Learnings to Analyze:
 ---
 {generatedAnalysis}
 ---
@@ -154,10 +160,10 @@ File Contents:
 };
 
 export const agentTaskDescriptions: Record<AgentName, string> = {
-    [AgentName.RESEARCHER]: "Conducts foundational research on a topic to provide a knowledge base for the other agents.",
-    [AgentName.GENERATOR]: "Generates an initial, detailed analysis based on the research summary and any user-provided context.",
-    [AgentName.EVALUATOR]: "Critiques the generated analysis to find weaknesses, biases, and logical gaps.",
-    [AgentName.PROPOSER]: "Suggests concrete, actionable improvements for the analysis based on the critique.",
+    [AgentName.SEARCH]: "Conducts foundational literature search on a topic to provide a knowledge base for the other agents.",
+    [AgentName.LEARNINGS]: "Generates comprehensive learnings and insights based on the search results and user-provided context.",
+    [AgentName.GAP_ANALYSIS]: "Analyzes learnings for gaps and decides whether to continue or restart research (up to 3 times).",
+    [AgentName.PROPOSER]: "Proposes new research projects based on identified gaps and learnings.",
     [AgentName.NOVELTY_CHECKER]: "Evaluates the novelty of the proposed research by searching existing literature and providing a confidence score.",
-    [AgentName.AGGREGATOR]: "Synthesizes all information (research, analysis, critique, proposal, novelty assessment, and user feedback) into a final, polished report."
+    [AgentName.AGGREGATOR]: "Synthesizes all information (search, learnings, gap analysis, proposal, novelty assessment, and user feedback) into a final, polished report."
 };

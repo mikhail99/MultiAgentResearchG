@@ -12,6 +12,8 @@ import PromptEditorModal from './components/PromptEditorModal';
 import ErrorBoundary from './components/ErrorBoundary';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import WorkflowTemplateModal from './components/WorkflowTemplateModal';
+import TaskProfileDialog from './components/TaskProfileDialog';
+import { getAgentTaskProfile } from './components/agentTaskProfiles';
 import { useWorkflowTemplates } from './hooks/useWorkflowTemplates';
 import { WorkflowTemplate } from './types/workflowTemplates';
 import { SunIcon, MoonIcon, HumanIcon, LoopIcon, SparklesIcon, AgentIcon } from './components/Icons';
@@ -127,7 +129,15 @@ export default function App() {
   const [toolServiceAvailable, setToolServiceAvailable] = useState<boolean>(false);
   const [enableWebSearch, setEnableWebSearch] = useState<boolean>(true);
   const [enableLocalSearch, setEnableLocalSearch] = useState<boolean>(true);
-  
+
+  // Task Profile Dialog state
+  const [showTaskProfileDialog, setShowTaskProfileDialog] = useState<boolean>(false);
+  const [selectedAgentProfile, setSelectedAgentProfile] = useState<{ agentName: AgentName; profile: any } | null>(null);
+
+  // Gap Analysis restart tracking
+  const [searchRestartCount, setSearchRestartCount] = useState<number>(0);
+  const [maxSearchRestarts] = useState<number>(3);
+
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined' && localStorage.getItem('theme')) {
         return localStorage.getItem('theme') as 'light' | 'dark';
@@ -238,9 +248,9 @@ export default function App() {
   // Helper function to determine completed steps based on current state (for backward compatibility)
   const deriveCompletedSteps = (data: Partial<SavedRun>): ProcessStatus[] => {
     const steps: ProcessStatus[] = [];
-    if (data.researchSummary) steps.push(ProcessStatus.RESEARCHING);
-    if (data.generatedAnalysis) steps.push(ProcessStatus.GENERATING);
-    if (data.critique) steps.push(ProcessStatus.EVALUATING);
+    if (data.researchSummary) steps.push(ProcessStatus.SEARCHING);
+    if (data.generatedAnalysis) steps.push(ProcessStatus.LEARNING);
+    if (data.critique) steps.push(ProcessStatus.GAP_ANALYZING);
     if (data.proposal) steps.push(ProcessStatus.PROPOSING);
     if (data.noveltyAssessment) steps.push(ProcessStatus.CHECKING_NOVELTY);
     if (data.finalReport) steps.push(ProcessStatus.AGGREGATING);
@@ -351,6 +361,7 @@ export default function App() {
     setCompletedSteps([]);
     setToolResults(null);
     setError(null);
+    setSearchRestartCount(0); // Reset restart count
   };
 
   const handleOpenPromptEditor = (agent: AgentName) => {
@@ -362,8 +373,28 @@ export default function App() {
     setIsPromptEditorOpen(false);
     setTimeout(() => setEditingAgent(null), 300);
   };
+
+  const handleViewTaskProfile = (agentName: AgentName) => {
+    const profile = getAgentTaskProfile(agentName);
+    if (profile) {
+      setSelectedAgentProfile({
+        agentName,
+        profile: {
+          ...profile.taskProfile,
+          displayName: profile.displayName,
+          description: profile.description
+        }
+      });
+      setShowTaskProfileDialog(true);
+    }
+  };
+
+  const handleCloseTaskProfileDialog = () => {
+    setShowTaskProfileDialog(false);
+    setSelectedAgentProfile(null);
+  };
   
-  const runWorkflow = async (currentFeedback = '', startFromStep: ProcessStatus = ProcessStatus.RESEARCHING) => {
+  const runWorkflow = async (currentFeedback = '', startFromStep: ProcessStatus = ProcessStatus.SEARCHING) => {
     const fileNames = files.map(f => f.name).join(', ') || 'No files provided';
     const fileContents = (await Promise.all(files.map(readFileContent))).join('\n\n---\n\n');
 
@@ -373,9 +404,9 @@ export default function App() {
 
     // Define step order for comparisons
     const stepOrder = [
-      ProcessStatus.RESEARCHING,
-      ProcessStatus.GENERATING,
-      ProcessStatus.EVALUATING,
+      ProcessStatus.SEARCHING,
+      ProcessStatus.LEARNING,
+      ProcessStatus.GAP_ANALYZING,
       ProcessStatus.PROPOSING,
       ProcessStatus.CHECKING_NOVELTY,
       ProcessStatus.AGGREGATING,
@@ -388,7 +419,7 @@ export default function App() {
     const shouldRunStep = (step: ProcessStatus) => getStepIndex(step) >= getStepIndex(startFromStep);
 
     // Clear completed steps when starting fresh
-    if (startFromStep === ProcessStatus.RESEARCHING) {
+    if (startFromStep === ProcessStatus.SEARCHING) {
       setCompletedSteps([]);
     }
 
@@ -400,9 +431,9 @@ export default function App() {
       let noveltyAssessmentResult = noveltyAssessment;
       let finalReportResult = finalReport;
 
-      // 1. Researcher (with tools)
-      if (shouldRunStep(ProcessStatus.RESEARCHING)) {
-        setStatus(ProcessStatus.RESEARCHING);
+      // 1. Search (with tools)
+      if (shouldRunStep(ProcessStatus.SEARCHING)) {
+        setStatus(ProcessStatus.SEARCHING);
         setResearchSummary('');
         
         // Execute research tools if available
@@ -439,37 +470,57 @@ export default function App() {
         }
         
         // Build enhanced prompt with tool results
-        const researcherPrompt = fillPromptTemplate(agentPrompts.Researcher, { 
+        const researcherPrompt = fillPromptTemplate(agentPrompts[AgentName.SEARCH], { 
           topic,
           tool_results: toolData
         });
         setResearcherSentPrompt(researcherPrompt);
         
-        researchResult = await generateContentStream(AgentName.RESEARCHER, researcherPrompt, llmOptions, (chunk) => setResearchSummary(prev => prev + chunk));
-        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.RESEARCHING), ProcessStatus.RESEARCHING]);
+        researchResult = await generateContentStream(AgentName.SEARCH, researcherPrompt, llmOptions, (chunk) => setResearchSummary(prev => prev + chunk));
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.SEARCHING), ProcessStatus.SEARCHING]);
         await simulateDelay();
       }
 
-      // 2. Generator
-      if (shouldRunStep(ProcessStatus.GENERATING)) {
-        setStatus(ProcessStatus.GENERATING);
+      // 2. Learnings
+      if (shouldRunStep(ProcessStatus.LEARNING)) {
+        setStatus(ProcessStatus.LEARNING);
         setGeneratedAnalysis('');
-        const generatorPrompt = fillPromptTemplate(agentPrompts.Generator, { topic, researchSummary: researchResult, fileNames, fileContents, feedback: currentFeedback });
+        const generatorPrompt = fillPromptTemplate(agentPrompts[AgentName.LEARNINGS], { topic, researchSummary: researchResult, fileNames, fileContents, feedback: currentFeedback });
         setGeneratorSentPrompt(generatorPrompt);
-        analysisResult = await generateContentStream(AgentName.GENERATOR, generatorPrompt, llmOptions, (chunk) => setGeneratedAnalysis(prev => prev + chunk));
-        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.GENERATING), ProcessStatus.GENERATING]);
+        analysisResult = await generateContentStream(AgentName.LEARNINGS, generatorPrompt, llmOptions, (chunk) => setGeneratedAnalysis(prev => prev + chunk));
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING]);
         await simulateDelay();
       }
 
-      // 3. Evaluator
-      if (shouldRunStep(ProcessStatus.EVALUATING)) {
-        setStatus(ProcessStatus.EVALUATING);
+      // 3. Gap Analysis
+      if (shouldRunStep(ProcessStatus.GAP_ANALYZING)) {
+        setStatus(ProcessStatus.GAP_ANALYZING);
         setCritique('');
-        const evaluatorPrompt = fillPromptTemplate(agentPrompts.Evaluator, { topic, generatedAnalysis: analysisResult });
+        const evaluatorPrompt = fillPromptTemplate(agentPrompts[AgentName.GAP_ANALYSIS], { topic, generatedAnalysis: analysisResult });
         setEvaluatorSentPrompt(evaluatorPrompt);
-        critiqueResult = await generateContentStream(AgentName.EVALUATOR, evaluatorPrompt, llmOptions, (chunk) => setCritique(prev => prev + chunk));
-        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.EVALUATING), ProcessStatus.EVALUATING]);
+        critiqueResult = await generateContentStream(AgentName.GAP_ANALYSIS, evaluatorPrompt, llmOptions, (chunk) => setCritique(prev => prev + chunk));
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.GAP_ANALYZING), ProcessStatus.GAP_ANALYZING]);
         await simulateDelay();
+
+        // Gap Analysis Decision Logic
+        const shouldRestartSearch = critiqueResult.toLowerCase().includes('research_again') ||
+                                   critiqueResult.toLowerCase().includes('restart') ||
+                                   (critiqueResult.toLowerCase().includes('research') && searchRestartCount < maxSearchRestarts);
+
+        if (shouldRestartSearch && searchRestartCount < maxSearchRestarts) {
+          console.log(`🔄 Gap Analysis recommends restarting search (${searchRestartCount + 1}/${maxSearchRestarts})`);
+          setSearchRestartCount(prev => prev + 1);
+
+          // Reset learnings and gap analysis for restart
+          setGeneratedAnalysis('');
+          setCritique('');
+
+          // Restart from searching step
+          setTimeout(() => runWorkflow(currentFeedback, ProcessStatus.SEARCHING), 500);
+          return; // Exit current workflow execution
+        } else if (searchRestartCount >= maxSearchRestarts) {
+          console.log(`⚠️ Maximum search restarts (${maxSearchRestarts}) reached, continuing with current results`);
+        }
       }
 
       // 4. Proposer
@@ -545,7 +596,7 @@ export default function App() {
           - No section headers, no JSON, no commentary.\n
           Final Report:\n---\n${finalReportResult}\n---
         `;
-        await generateContentStream(AgentName.GENERATOR, factsPrompt, llmOptions, (chunk) => {
+        await generateContentStream(AgentName.LEARNINGS, factsPrompt, llmOptions, (chunk) => {
           factsBuffer += chunk;
           setStylizedFacts(parseFactsFromBuffer(factsBuffer));
         });
@@ -564,7 +615,7 @@ export default function App() {
           - No section headers, no JSON, no commentary.\n
           Final Report:\n---\n${finalReportResult}\n---
         `;
-        await generateContentStream(AgentName.GENERATOR, questionsPrompt, llmOptions, (chunk) => {
+        await generateContentStream(AgentName.LEARNINGS, questionsPrompt, llmOptions, (chunk) => {
           questionsBuffer += chunk;
           setStylizedQuestions(parseQuestionsFromBuffer(questionsBuffer));
         });
@@ -593,7 +644,7 @@ export default function App() {
     }
     clearOutputs();
     setFeedback('');
-    setStatus(ProcessStatus.RESEARCHING);
+    setStatus(ProcessStatus.SEARCHING);
     
     setTimeout(() => runWorkflow(currentFeedback), 100);
   };
@@ -831,13 +882,14 @@ ${questionsText}
       completedSteps
     });
     console.log(`✅ Created template: ${name} (ID: ${templateId})`);
+    return templateId;
   };
 
   const getAffectedSteps = (fromStep: ProcessStatus): string[] => {
     const allSteps = [
-      { id: ProcessStatus.RESEARCHING, label: 'Research' },
-      { id: ProcessStatus.GENERATING, label: 'Generate' },
-      { id: ProcessStatus.EVALUATING, label: 'Evaluate' },
+      { id: ProcessStatus.SEARCHING, label: 'Search' },
+      { id: ProcessStatus.LEARNING, label: 'Learnings' },
+      { id: ProcessStatus.GAP_ANALYZING, label: 'Gap Analysis' },
       { id: ProcessStatus.PROPOSING, label: 'Propose' },
       { id: ProcessStatus.CHECKING_NOVELTY, label: 'Novelty Check' },
       { id: ProcessStatus.AGGREGATING, label: 'Aggregate' },
@@ -912,23 +964,24 @@ ${questionsText}
               {error && <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-800 dark:text-red-200 p-4 rounded-lg">{error}</div>}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <AgentCard 
-                    title="Researcher Agent" 
-                    content={researchSummary} 
-                    sentPrompt={researcherSentPrompt} 
-                    isLoading={status === ProcessStatus.RESEARCHING} 
-                    agent={AgentName.RESEARCHER} 
-                    onEditPrompt={() => handleOpenPromptEditor(AgentName.RESEARCHER)}
+                  <AgentCard
+                    title="Search Agent"
+                    content={researchSummary}
+                    sentPrompt={researcherSentPrompt}
+                    isLoading={status === ProcessStatus.SEARCHING}
+                    agent={AgentName.SEARCH}
+                    onEditPrompt={() => handleOpenPromptEditor(AgentName.SEARCH)}
+                    onViewTaskProfile={() => handleViewTaskProfile(AgentName.SEARCH)}
                     toolResults={toolResults}
                     toolServiceAvailable={toolServiceAvailable}
                   />
-                  <AgentCard title="Generator Agent" content={generatedAnalysis} sentPrompt={generatorSentPrompt} isLoading={status === ProcessStatus.GENERATING} agent={AgentName.GENERATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.GENERATOR)} />
-                  <AgentCard title="Evaluator Agent" content={critique} sentPrompt={evaluatorSentPrompt} isLoading={status === ProcessStatus.EVALUATING} agent={AgentName.EVALUATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.EVALUATOR)} />
-                  <AgentCard title="Proposer Agent" content={proposal} sentPrompt={proposerSentPrompt} isLoading={status === ProcessStatus.PROPOSING} agent={AgentName.PROPOSER} onEditPrompt={() => handleOpenPromptEditor(AgentName.PROPOSER)} />
-                  <AgentCard title="Novelty Checker Agent" content={noveltyAssessment} sentPrompt={noveltyCheckerSentPrompt} isLoading={status === ProcessStatus.CHECKING_NOVELTY} agent={AgentName.NOVELTY_CHECKER} onEditPrompt={() => handleOpenPromptEditor(AgentName.NOVELTY_CHECKER)} />
+                  <AgentCard title="Learnings Agent" content={generatedAnalysis} sentPrompt={generatorSentPrompt} isLoading={status === ProcessStatus.LEARNING} agent={AgentName.LEARNINGS} onEditPrompt={() => handleOpenPromptEditor(AgentName.LEARNINGS)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.LEARNINGS)} />
+                  <AgentCard title="Gap Analysis Agent" content={critique} sentPrompt={evaluatorSentPrompt} isLoading={status === ProcessStatus.GAP_ANALYZING} agent={AgentName.GAP_ANALYSIS} onEditPrompt={() => handleOpenPromptEditor(AgentName.GAP_ANALYSIS)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.GAP_ANALYSIS)} />
+                  <AgentCard title="Proposer Agent" content={proposal} sentPrompt={proposerSentPrompt} isLoading={status === ProcessStatus.PROPOSING} agent={AgentName.PROPOSER} onEditPrompt={() => handleOpenPromptEditor(AgentName.PROPOSER)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.PROPOSER)} />
+                  <AgentCard title="Novelty Checker Agent" content={noveltyAssessment} sentPrompt={noveltyCheckerSentPrompt} isLoading={status === ProcessStatus.CHECKING_NOVELTY} agent={AgentName.NOVELTY_CHECKER} onEditPrompt={() => handleOpenPromptEditor(AgentName.NOVELTY_CHECKER)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.NOVELTY_CHECKER)} />
               </div>
                <div className="grid grid-cols-1">
-                  <AgentCard title="Aggregator Agent" content={finalReport} sentPrompt={aggregatorSentPrompt} isLoading={status === ProcessStatus.AGGREGATING} agent={AgentName.AGGREGATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.AGGREGATOR)} />
+                  <AgentCard title="Aggregator Agent" content={finalReport} sentPrompt={aggregatorSentPrompt} isLoading={status === ProcessStatus.AGGREGATING} agent={AgentName.AGGREGATOR} onEditPrompt={() => handleOpenPromptEditor(AgentName.AGGREGATOR)} onViewTaskProfile={() => handleViewTaskProfile(AgentName.AGGREGATOR)} />
                </div>
 
               {status === ProcessStatus.FEEDBACK && (
@@ -1045,6 +1098,17 @@ ${questionsText}
         hasCompletedRun={status === ProcessStatus.FEEDBACK || (stylizedFacts.length > 0 || stylizedQuestions.length > 0)}
         hasFeedback={feedback.trim().length > 0}
       />
+
+      {/* Task Profile Dialog */}
+      {showTaskProfileDialog && selectedAgentProfile && (
+        <TaskProfileDialog
+          isOpen={showTaskProfileDialog}
+          onClose={handleCloseTaskProfileDialog}
+          agentName={selectedAgentProfile.agentName}
+          taskProfile={selectedAgentProfile.profile}
+          agentDescription={selectedAgentProfile.profile.description}
+        />
+      )}
       </div>
     </ErrorBoundary>
   );
