@@ -227,6 +227,24 @@ export class LangGraphWebService {
         }
       },
       onStream: (chunk: string) => {
+        // Handle memory updates
+        if (chunk.includes('[MEMORY_UPDATE]')) {
+          try {
+            const memoryData = JSON.parse(chunk.replace('[MEMORY_UPDATE] ', ''));
+            if (options.onChunk) {
+              options.onChunk({
+                memoryNotes: memoryData.memoryNotes,
+                memoryLinks: memoryData.memoryLinks,
+                memoryStats: memoryData.memoryStats,
+                currentStep: currentAgent,
+              } as Partial<WorkflowState>);
+            }
+            return;
+          } catch (error) {
+            console.error('❌ Failed to parse memory update:', error);
+          }
+        }
+
         // Handle streaming based on current agent
         if (chunk.includes('[STREAMING]')) {
           const cleanChunk = chunk.replace('[STREAMING] ', '');
@@ -378,6 +396,24 @@ export class LangGraphWebService {
           }
         },
         onStream: (chunk: string) => {
+          // Handle memory updates
+          if (chunk.includes('[MEMORY_UPDATE]')) {
+            try {
+              const memoryData = JSON.parse(chunk.replace('[MEMORY_UPDATE] ', ''));
+              if (options.onChunk) {
+                options.onChunk({
+                  memoryNotes: memoryData.memoryNotes,
+                  memoryLinks: memoryData.memoryLinks,
+                  memoryStats: memoryData.memoryStats,
+                  currentStep: currentAgent,
+                } as Partial<WorkflowState>);
+              }
+              return;
+            } catch (error) {
+              console.error('❌ Failed to parse memory update:', error);
+            }
+          }
+
           // Handle streaming based on current agent
           if (chunk.includes('[STREAMING]')) {
             const cleanChunk = chunk.replace('[STREAMING] ', '');

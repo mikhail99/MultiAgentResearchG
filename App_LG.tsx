@@ -13,6 +13,8 @@ import ErrorBoundary from './components/ErrorBoundary';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import WorkflowTemplateModal from './components/WorkflowTemplateModal';
 import TaskProfileDialog from './components/TaskProfileDialog';
+import MemoryVisualization from './components/MemoryVisualization';
+import MemoryTestApp from './components/MemoryTestApp';
 import { getAgentTaskProfile } from './components/agentTaskProfiles';
 import { useWorkflowTemplates } from './hooks/useWorkflowTemplates';
 import { WorkflowTemplate } from './types/workflowTemplates';
@@ -21,7 +23,7 @@ import { WorkflowState } from './types/workflow_LG';
 import { createInitialState, validateWorkflowState, sanitizeWorkflowState } from './services/workflowService_LG';
 // Browser-compatible LangGraph service
 import { langGraphService, WorkflowRunOptions } from './services/langgraphService_LG';
-import { getAgentContent, getAgentIterationCount } from './services/workflowService_LG';
+import { getAgentContent } from './services/workflowService_LG';
 
 // Helper function to read file content
 const readFileContent = (file: File): Promise<string> => {
@@ -156,6 +158,7 @@ export default function App_LG() {
   // Session management state
   const [showRestoreToast, setShowRestoreToast] = useState<boolean>(false);
   const [showLinkToast, setShowLinkToast] = useState<boolean>(false);
+  const [showMemoryTestApp, setShowMemoryTestApp] = useState<boolean>(false);
 
   // Theme
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -740,7 +743,16 @@ export default function App_LG() {
         if (currentThreadId && workflowState) {
           // Continue existing workflow
           const onChunk = (chunk: Partial<WorkflowState>) => {
-            setWorkflowState(prev => prev ? { ...prev, ...chunk } : chunk as WorkflowState);
+            console.log('🧠 Workflow Chunk:', chunk);
+            setWorkflowState(prev => {
+              const newState = prev ? { ...prev, ...chunk } : chunk as WorkflowState;
+              console.log('🧠 Updated Workflow State Memory:', {
+                memoryNotes: newState.memoryNotes?.length,
+                memoryLinks: newState.memoryLinks?.length,
+                memoryStats: newState.memoryStats
+              });
+              return newState;
+            });
             setStatus(chunk.currentStep || status);
           };
 
@@ -1092,13 +1104,22 @@ ${questionsText}
               LangGraph.js Edition
               <LoopIcon />
             </p>
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="absolute top-0 right-0 p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-              title="Toggle Theme"
-            >
-              {theme === 'light' ? <SunIcon /> : <MoonIcon />}
-            </button>
+            <div className="absolute top-0 right-0 flex gap-2">
+              <button
+                onClick={() => setShowMemoryTestApp(true)}
+                className="p-2 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-600 dark:text-blue-300 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors"
+                title="Open Memory Test Lab"
+              >
+                🧠
+              </button>
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+                title="Toggle Theme"
+              >
+                {theme === 'light' ? <SunIcon /> : <MoonIcon />}
+              </button>
+            </div>
           </header>
 
           <main className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -1226,6 +1247,15 @@ ${questionsText}
                 />
               </div>
 
+              {/* A-Mem Memory Visualization */}
+              {workflowState?.memoryNotes && workflowState.memoryNotes.length > 0 && (
+                <MemoryVisualization
+                  memoryNotes={workflowState.memoryNotes}
+                  memoryLinks={workflowState.memoryLinks || []}
+                  memoryQuality={workflowState.memoryStats?.memoryQuality || 0}
+                />
+              )}
+
               {status === ProcessStatus.FEEDBACK && (
                 <FeedbackPanel
                   feedback={feedback}
@@ -1296,6 +1326,29 @@ ${questionsText}
             taskProfile={selectedAgentProfile.profile}
             agentDescription={selectedAgentProfile.profile.description}
           />
+        )}
+
+        {/* Memory Test App Modal */}
+        {showMemoryTestApp && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white dark:bg-gray-900 rounded-lg shadow-xl w-full h-full max-w-7xl mx-4 my-4 overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  🧠 A-Mem Memory Test Lab
+                </h2>
+                <button
+                  onClick={() => setShowMemoryTestApp(false)}
+                  className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+                  title="Close Memory Test Lab"
+                >
+                  ✕
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden">
+                <MemoryTestApp />
+              </div>
+            </div>
+          </div>
         )}
       </div>
 

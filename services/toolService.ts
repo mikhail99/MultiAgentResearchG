@@ -5,12 +5,14 @@
  * - Web search
  * - Local search
  * - Save results
+ * - Memory operations (A-Mem integration)
  * - Future tools...
  *
  * Features:
  * - Circuit Breaker pattern for resilience
  * - Automatic fallback mechanisms
  * - Health monitoring and recovery
+ * - Agentic Memory (A-Mem) integration
  */
 
 // Tool request/response interfaces
@@ -328,4 +330,218 @@ export const resetCircuitBreaker = () => {
   // This would require a global reference to replace the instance
   console.log('🔄 Circuit breaker reset requested - restart required for full effect');
   return newCircuitBreaker.getState();
+};
+
+// Memory-related tool functions for A-Mem integration
+
+/**
+ * Search through agent memories using semantic similarity
+ */
+export const searchMemories = async (
+  query: string,
+  agentName?: string,
+  limit: number = 5
+): Promise<string> => {
+  const requestId = generateRequestId();
+
+  try {
+    console.log(`🧠 Searching memories for: ${query}`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TOOL_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_BASE_URL}/tool`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-ID': requestId
+      },
+      body: JSON.stringify({
+        agent_name: 'MEMORY_AGENT',
+        task: 'memory_search',
+        query,
+        metadata: {
+          agent_filter: agentName,
+          limit,
+          timestamp: new Date().toISOString()
+        },
+        id: requestId
+      } as ToolRequest),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Memory search failed: ${response.status}`);
+    }
+
+    const result: ToolResponse = await response.json();
+    return result.result;
+
+  } catch (error) {
+    console.error('❌ Memory search failed:', error);
+    return `Error: Memory search unavailable - ${error instanceof Error ? error.message : String(error)}`;
+  }
+};
+
+/**
+ * Retrieve specific memory by ID
+ */
+export const getMemoryById = async (memoryId: string): Promise<string> => {
+  const requestId = generateRequestId();
+
+  try {
+    console.log(`🧠 Retrieving memory: ${memoryId}`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TOOL_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_BASE_URL}/tool`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-ID': requestId
+      },
+      body: JSON.stringify({
+        agent_name: 'MEMORY_AGENT',
+        task: 'memory_retrieve',
+        query: memoryId,
+        metadata: {
+          memory_id: memoryId,
+          timestamp: new Date().toISOString()
+        },
+        id: requestId
+      } as ToolRequest),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Memory retrieval failed: ${response.status}`);
+    }
+
+    const result: ToolResponse = await response.json();
+    return result.result;
+
+  } catch (error) {
+    console.error('❌ Memory retrieval failed:', error);
+    return `Error: Memory retrieval unavailable - ${error instanceof Error ? error.message : String(error)}`;
+  }
+};
+
+/**
+ * Get memory statistics and insights
+ */
+export const getMemoryStats = async (): Promise<string> => {
+  const requestId = generateRequestId();
+
+  try {
+    console.log(`🧠 Getting memory statistics`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TOOL_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_BASE_URL}/tool`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-ID': requestId
+      },
+      body: JSON.stringify({
+        agent_name: 'MEMORY_AGENT',
+        task: 'memory_stats',
+        query: 'get_stats',
+        metadata: {
+          timestamp: new Date().toISOString()
+        },
+        id: requestId
+      } as ToolRequest),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Memory stats failed: ${response.status}`);
+    }
+
+    const result: ToolResponse = await response.json();
+    return result.result;
+
+  } catch (error) {
+    console.error('❌ Memory stats failed:', error);
+    return `Error: Memory stats unavailable - ${error instanceof Error ? error.message : String(error)}`;
+  }
+};
+
+/**
+ * Find related memories based on semantic similarity
+ */
+export const findRelatedMemories = async (
+  memoryId: string,
+  limit: number = 3
+): Promise<string> => {
+  const requestId = generateRequestId();
+
+  try {
+    console.log(`🧠 Finding related memories for: ${memoryId}`);
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TOOL_TIMEOUT);
+
+    const response = await fetch(`${FASTAPI_BASE_URL}/tool`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Request-ID': requestId
+      },
+      body: JSON.stringify({
+        agent_name: 'MEMORY_AGENT',
+        task: 'memory_related',
+        query: memoryId,
+        metadata: {
+          memory_id: memoryId,
+          limit,
+          timestamp: new Date().toISOString()
+        },
+        id: requestId
+      } as ToolRequest),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      throw new Error(`Related memories search failed: ${response.status}`);
+    }
+
+    const result: ToolResponse = await response.json();
+    return result.result;
+
+  } catch (error) {
+    console.error('❌ Related memories search failed:', error);
+    return `Error: Related memories search unavailable - ${error instanceof Error ? error.message : String(error)}`;
+  }
+};
+
+/**
+ * Format memory results for agent prompts
+ */
+export const formatMemoryResultsForPrompt = (
+  memoryResults: string,
+  context?: string
+): string => {
+  if (!memoryResults || memoryResults.includes('Error:')) {
+    return `**Memory Search Results:**\n${memoryResults}\n`;
+  }
+
+  const sections = [`**Memory Search Results:**\n${memoryResults}\n`];
+
+  if (context) {
+    sections.unshift(`**Context:** ${context}\n\n`);
+  }
+
+  return sections.join('\n---\n');
 };
