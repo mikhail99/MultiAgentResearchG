@@ -101,7 +101,7 @@ export default function App() {
   const [agentStates, setAgentStates] = useState<AgentStates>({
     searchResults: [],
     learnings: [],
-    gapAnalyses: [],
+    opportunityAnalyses: [],
     proposals: [],
     noveltyChecks: [],
     aggregations: [],
@@ -144,11 +144,14 @@ export default function App() {
   const [searchRestartCount, setSearchRestartCount] = useState<number>(0);
   const [maxSearchRestarts] = useState<number>(3);
 
+  // Selective restart functionality
+  const [restartChoice, setRestartChoice] = useState<'continue' | 'search' | 'proposal'>('continue');
+
   // Iteration selection for each agent
   const [selectedIterations, setSelectedIterations] = useState<Record<AgentName, number>>({
     [AgentName.SEARCH]: 0,
     [AgentName.LEARNINGS]: 0,
-    [AgentName.GAP_ANALYSIS]: 0,
+    [AgentName.OPPORTUNITY_ANALYSIS]: 0,
     [AgentName.PROPOSER]: 0,
     [AgentName.NOVELTY_CHECKER]: 0,
     [AgentName.AGGREGATOR]: 0
@@ -238,7 +241,7 @@ export default function App() {
         researcherSentPrompt,
         generatedAnalysis: agentStates.learnings[agentStates.learnings.length - 1] || '',
         generatorSentPrompt,
-        critique: agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || '',
+        critique: agentStates.opportunityAnalyses[agentStates.opportunityAnalyses.length - 1] || '',
         evaluatorSentPrompt,
         proposal: agentStates.proposals[agentStates.proposals.length - 1] || '',
         proposerSentPrompt,
@@ -286,7 +289,7 @@ export default function App() {
     const steps: ProcessStatus[] = [];
     if (data.researchSummary) steps.push(ProcessStatus.SEARCHING);
     if (data.generatedAnalysis) steps.push(ProcessStatus.LEARNING);
-    if (data.critique) steps.push(ProcessStatus.GAP_ANALYZING);
+    if (data.critique) steps.push(ProcessStatus.OPPORTUNITY_ANALYZING);
     if (data.proposal) steps.push(ProcessStatus.PROPOSING);
     if (data.noveltyAssessment) steps.push(ProcessStatus.CHECKING_NOVELTY);
     if (data.finalReport) steps.push(ProcessStatus.AGGREGATING);
@@ -299,7 +302,7 @@ export default function App() {
   const isOutputsEmpty = () => (
     agentStates.searchResults.length === 0 &&
     agentStates.learnings.length === 0 &&
-    agentStates.gapAnalyses.length === 0 &&
+    agentStates.opportunityAnalyses.length === 0 &&
     agentStates.proposals.length === 0 &&
     agentStates.noveltyChecks.length === 0 &&
     agentStates.aggregations.length === 0 &&
@@ -322,7 +325,7 @@ export default function App() {
         setAgentStates({
           searchResults: data.researchSummary ? [data.researchSummary] : [],
           learnings: data.generatedAnalysis ? [data.generatedAnalysis] : [],
-          gapAnalyses: data.critique ? [data.critique] : [],
+          opportunityAnalyses: data.critique ? [data.critique] : [],
           proposals: data.proposal ? [data.proposal] : [],
           noveltyChecks: data.noveltyAssessment ? [data.noveltyAssessment] : [],
           aggregations: data.finalReport ? [data.finalReport] : [],
@@ -394,7 +397,7 @@ export default function App() {
     setAgentStates({
       searchResults: data.researchSummary ? [data.researchSummary] : [],
       learnings: data.generatedAnalysis ? [data.generatedAnalysis] : [],
-      gapAnalyses: data.critique ? [data.critique] : [],
+      opportunityAnalyses: data.critique ? [data.critique] : [],
       proposals: data.proposal ? [data.proposal] : [],
       noveltyChecks: data.noveltyAssessment ? [data.noveltyAssessment] : [],
       aggregations: data.finalReport ? [data.finalReport] : [],
@@ -424,7 +427,7 @@ export default function App() {
     setAgentStates({
       searchResults: [],
       learnings: [],
-      gapAnalyses: [],
+      opportunityAnalyses: [],
       proposals: [],
       noveltyChecks: [],
       aggregations: [],
@@ -451,7 +454,7 @@ export default function App() {
     setSelectedIterations({
       [AgentName.SEARCH]: 0,
       [AgentName.LEARNINGS]: 0,
-      [AgentName.GAP_ANALYSIS]: 0,
+      [AgentName.OPPORTUNITY_ANALYSIS]: 0,
       [AgentName.PROPOSER]: 0,
       [AgentName.NOVELTY_CHECKER]: 0,
       [AgentName.AGGREGATOR]: 0
@@ -500,8 +503,8 @@ export default function App() {
         return agentStates.searchResults[iteration] || '';
       case AgentName.LEARNINGS:
         return agentStates.learnings[iteration] || '';
-      case AgentName.GAP_ANALYSIS:
-        return agentStates.gapAnalyses[iteration] || '';
+      case AgentName.OPPORTUNITY_ANALYSIS:
+        return agentStates.opportunityAnalyses[iteration] || '';
       case AgentName.PROPOSER:
         return agentStates.proposals[iteration] || '';
       case AgentName.NOVELTY_CHECKER:
@@ -520,8 +523,8 @@ export default function App() {
           return agentStates.searchResults.length;
         case AgentName.LEARNINGS:
           return agentStates.learnings.length;
-        case AgentName.GAP_ANALYSIS:
-          return agentStates.gapAnalyses.length;
+        case AgentName.OPPORTUNITY_ANALYSIS:
+          return agentStates.opportunityAnalyses.length;
         case AgentName.PROPOSER:
           return agentStates.proposals.length;
         case AgentName.NOVELTY_CHECKER:
@@ -545,11 +548,11 @@ export default function App() {
   };
   
   const runWorkflow = async (currentFeedback = '', startFromStep: ProcessStatus = ProcessStatus.SEARCHING) => {
-    console.log('🚀 Starting workflow from step:', startFromStep);
+    console.log('🚀 Starting workflow from step:', startFromStep, 'with feedback:', currentFeedback ? 'Yes' : 'No');
     console.log('📊 Current agentStates:', {
       searchResults: agentStates.searchResults.length,
       learnings: agentStates.learnings.length,
-      gapAnalyses: agentStates.gapAnalyses.length,
+      opportunityAnalyses: agentStates.opportunityAnalyses.length,
       proposals: agentStates.proposals.length,
       noveltyChecks: agentStates.noveltyChecks.length,
       aggregations: agentStates.aggregations.length
@@ -572,7 +575,7 @@ export default function App() {
     const stepOrder = [
       ProcessStatus.SEARCHING,
       ProcessStatus.LEARNING,
-      ProcessStatus.GAP_ANALYZING,
+      ProcessStatus.OPPORTUNITY_ANALYZING,
       ProcessStatus.PROPOSING,
       ProcessStatus.CHECKING_NOVELTY,
       ProcessStatus.AGGREGATING,
@@ -584,9 +587,15 @@ export default function App() {
     const getStepIndex = (step: ProcessStatus) => stepOrder.indexOf(step);
     const shouldRunStep = (step: ProcessStatus) => getStepIndex(step) >= getStepIndex(startFromStep);
 
-    // Clear completed steps when starting fresh
+    // Clear completed steps when starting fresh or from search
     if (startFromStep === ProcessStatus.SEARCHING) {
       setCompletedSteps([]);
+    } else if (startFromStep === ProcessStatus.OPPORTUNITY_ANALYZING) {
+      // When restarting from proposal, keep Search and Learnings steps as completed
+      setCompletedSteps([
+        ProcessStatus.SEARCHING,
+        ProcessStatus.LEARNING
+      ]);
     }
 
     try {
@@ -761,16 +770,16 @@ export default function App() {
 
       // 3. Gap Analysis
       console.log('🔍 Checking Gap Analysis step:', {
-        shouldRunStep: shouldRunStep(ProcessStatus.GAP_ANALYZING),
+        shouldRunStep: shouldRunStep(ProcessStatus.OPPORTUNITY_ANALYZING),
         currentStep: status,
         completedSteps,
         stepOrderIndex: getStepIndex(status),
-        gapAnalysisIndex: getStepIndex(ProcessStatus.GAP_ANALYZING)
+        gapAnalysisIndex: getStepIndex(ProcessStatus.OPPORTUNITY_ANALYZING)
       });
 
-      if (shouldRunStep(ProcessStatus.GAP_ANALYZING)) {
+      if (shouldRunStep(ProcessStatus.OPPORTUNITY_ANALYZING)) {
         console.log('🎯 Starting Gap Analysis step...');
-        setStatus(ProcessStatus.GAP_ANALYZING);
+        setStatus(ProcessStatus.OPPORTUNITY_ANALYZING);
 
         // Get current learnings with validation
         const currentLearnings = agentStates.learnings[agentStates.learnings.length - 1] || '';
@@ -805,7 +814,7 @@ export default function App() {
         }
 
         console.log('📝 Creating Gap Analysis prompt...');
-        const gapAnalysisPrompt = fillPromptTemplate(agentPrompts[AgentName.GAP_ANALYSIS], {
+        const gapAnalysisPrompt = fillPromptTemplate(agentPrompts[AgentName.OPPORTUNITY_ANALYSIS], {
           topic,
           generatedAnalysis: learningsToUse
         });
@@ -816,28 +825,28 @@ export default function App() {
         console.log('📝 Initializing Gap Analysis streaming...');
         setAgentStates(prev => ({
           ...prev,
-          gapAnalyses: [...prev.gapAnalyses, '']
+          opportunityAnalyses: [...prev.opportunityAnalyses, '']
         }));
 
-        let gapIndex = agentStates.gapAnalyses.length;
+        let gapIndex = agentStates.opportunityAnalyses.length;
         let gapAnalysisResult = '';
         console.log('🤖 Calling generateContentStream for Gap Analysis...');
 
         try {
           // Add timeout to prevent infinite hanging
-          const streamingPromise = generateContentStream(AgentName.GAP_ANALYSIS, gapAnalysisPrompt, llmOptions, (chunk) => {
+          const streamingPromise = generateContentStream(AgentName.OPPORTUNITY_ANALYSIS, gapAnalysisPrompt, llmOptions, (chunk) => {
             console.log('📦 Gap Analysis received chunk, length:', chunk.length);
             gapAnalysisResult += chunk;
             // Update the current result in real-time
             setAgentStates(prev => {
-              const newGapAnalyses = [...prev.gapAnalyses];
+              const newGapAnalyses = [...prev.opportunityAnalyses];
               if (newGapAnalyses.length > gapIndex) {
                 newGapAnalyses[gapIndex] += chunk;
               } else {
                 newGapAnalyses.push(chunk);
                 gapIndex = newGapAnalyses.length - 1;
               }
-              return { ...prev, gapAnalyses: newGapAnalyses };
+              return { ...prev, opportunityAnalyses: newGapAnalyses };
             });
           });
 
@@ -853,13 +862,13 @@ export default function App() {
           const fallbackResult = `Gap Analysis: Unable to analyze learnings due to streaming error. ${error.message || 'Unknown error'}`;
           setAgentStates(prev => ({
             ...prev,
-            gapAnalyses: [...prev.gapAnalyses, fallbackResult]
+            opportunityAnalyses: [...prev.opportunityAnalyses, fallbackResult]
           }));
           gapAnalysisResult = fallbackResult; // Update the result variable for decision logic
         }
 
         console.log('✅ Gap Analysis streaming completed, result length:', gapAnalysisResult.length);
-        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.GAP_ANALYZING), ProcessStatus.GAP_ANALYZING]);
+        setCompletedSteps(prev => [...prev.filter(s => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING]);
         await simulateDelay();
 
         // Gap Analysis Decision Logic
@@ -888,7 +897,7 @@ export default function App() {
           setAgentStates(prev => ({
             ...prev,
             learnings: [],
-            gapAnalyses: []
+            opportunityAnalyses: []
           }));
 
           // Restart from searching step
@@ -905,12 +914,12 @@ export default function App() {
 
         // Get current learnings and gap analysis with validation
         const currentLearnings = agentStates.learnings[agentStates.learnings.length - 1] || '';
-        const currentGapAnalysis = agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || '';
+        const currentGapAnalysis = agentStates.opportunityAnalyses[agentStates.opportunityAnalyses.length - 1] || '';
 
         console.log('💡 Proposer Agent Debug:', {
           learningsCount: agentStates.learnings.length,
           currentLearningsLength: currentLearnings.length,
-          gapAnalysesCount: agentStates.gapAnalyses.length,
+          opportunityAnalysesCount: agentStates.opportunityAnalyses.length,
           currentGapAnalysisLength: currentGapAnalysis.length
         });
 
@@ -1024,7 +1033,7 @@ export default function App() {
         // Get current states
         const currentSearchResults = agentStates.searchResults.join('\n\n');
         const currentLearnings = agentStates.learnings[agentStates.learnings.length - 1] || '';
-        const currentGapAnalysis = agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || '';
+        const currentGapAnalysis = agentStates.opportunityAnalyses[agentStates.opportunityAnalyses.length - 1] || '';
         const currentProposal = agentStates.proposals[agentStates.proposals.length - 1] || '';
         const currentNoveltyCheck = agentStates.noveltyChecks[agentStates.noveltyChecks.length - 1] || '';
 
@@ -1145,8 +1154,37 @@ export default function App() {
       setError("Please provide feedback for the revision.");
       return;
     }
-    setIteration(prev => prev + 1);
-    startAnalysis(feedback);
+
+    // Handle different restart choices
+    if (restartChoice === 'search') {
+      // Restart from Search - keep all data, just rerun workflow
+      console.log('🔄 Restarting from Search (keeping all history)');
+      setIteration(prev => prev + 1);
+      runWorkflow(feedback, ProcessStatus.SEARCHING);
+    } else if (restartChoice === 'proposal') {
+      // Restart from Proposal - keep Search and Learnings, rerun from Opportunity Analysis
+      console.log('🔄 Restarting from Proposal (keeping Search + Learnings)');
+
+      // Clear downstream results but keep history
+      setAgentStates(prev => ({
+        ...prev,
+        opportunityAnalyses: [], // Clear current but keep history via iteration
+        proposals: [],
+        noveltyChecks: [],
+        aggregations: []
+      }));
+
+      setIteration(prev => prev + 1);
+      runWorkflow(feedback, ProcessStatus.OPPORTUNITY_ANALYZING);
+    } else {
+      // Continue normally - standard revision
+      console.log('➡️ Continuing normally with feedback');
+      setIteration(prev => prev + 1);
+      runWorkflow(feedback);
+    }
+
+    // Reset restart choice
+    setRestartChoice('continue');
   };
 
   const handleExportRun = () => {
@@ -1200,7 +1238,7 @@ ${agentStates.learnings[agentStates.learnings.length - 1] || 'No learnings gener
 ${evaluatorSentPrompt}
 \`\`\`
 **Output:**
-${agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || 'No gap analysis'}
+${agentStates.opportunityAnalyses[agentStates.opportunityAnalyses.length - 1] || 'No gap analysis'}
 
 ---
 
@@ -1272,7 +1310,7 @@ ${questionsText}
     researcherSentPrompt,
     generatedAnalysis: agentStates.learnings[agentStates.learnings.length - 1] || '',
     generatorSentPrompt,
-    critique: agentStates.gapAnalyses[agentStates.gapAnalyses.length - 1] || '',
+    critique: agentStates.opportunityAnalyses[agentStates.opportunityAnalyses.length - 1] || '',
     evaluatorSentPrompt,
     proposal: agentStates.proposals[agentStates.proposals.length - 1] || '',
     proposerSentPrompt,
@@ -1376,7 +1414,7 @@ ${questionsText}
     const allSteps = [
       { id: ProcessStatus.SEARCHING, label: 'Search' },
       { id: ProcessStatus.LEARNING, label: 'Learnings' },
-      { id: ProcessStatus.GAP_ANALYZING, label: 'Gap Analysis' },
+      { id: ProcessStatus.OPPORTUNITY_ANALYZING, label: 'Gap Analysis' },
       { id: ProcessStatus.PROPOSING, label: 'Propose' },
       { id: ProcessStatus.CHECKING_NOVELTY, label: 'Novelty Check' },
       { id: ProcessStatus.AGGREGATING, label: 'Aggregate' },
@@ -1483,15 +1521,15 @@ ${questionsText}
                   />
                   <AgentCard
                     title="Gap Analysis Agent"
-                    content={getAgentContent(AgentName.GAP_ANALYSIS)}
+                    content={getAgentContent(AgentName.OPPORTUNITY_ANALYSIS)}
                     sentPrompt={evaluatorSentPrompt}
-                    isLoading={status === ProcessStatus.GAP_ANALYZING}
-                    agent={AgentName.GAP_ANALYSIS}
-                    onEditPrompt={() => handleOpenPromptEditor(AgentName.GAP_ANALYSIS)}
-                    onViewTaskProfile={() => handleViewTaskProfile(AgentName.GAP_ANALYSIS)}
-                    currentIteration={getCurrentIteration(AgentName.GAP_ANALYSIS)}
-                    totalIterations={getAgentIterationCount(AgentName.GAP_ANALYSIS)}
-                    onIterationSelect={(iteration) => setIterationForAgent(AgentName.GAP_ANALYSIS, iteration)}
+                    isLoading={status === ProcessStatus.OPPORTUNITY_ANALYZING}
+                    agent={AgentName.OPPORTUNITY_ANALYSIS}
+                    onEditPrompt={() => handleOpenPromptEditor(AgentName.OPPORTUNITY_ANALYSIS)}
+                    onViewTaskProfile={() => handleViewTaskProfile(AgentName.OPPORTUNITY_ANALYSIS)}
+                    currentIteration={getCurrentIteration(AgentName.OPPORTUNITY_ANALYSIS)}
+                    totalIterations={getAgentIterationCount(AgentName.OPPORTUNITY_ANALYSIS)}
+                    onIterationSelect={(iteration) => setIterationForAgent(AgentName.OPPORTUNITY_ANALYSIS, iteration)}
                   />
                   <AgentCard
                     title="Proposer Agent"
@@ -1534,11 +1572,13 @@ ${questionsText}
                </div>
 
               {status === ProcessStatus.FEEDBACK && (
-                <FeedbackPanel 
+                <FeedbackPanel
                   feedback={feedback}
                   setFeedback={setFeedback}
                   onRevision={handleRevision}
                   isLoading={isLoading}
+                  restartChoice={restartChoice}
+                  setRestartChoice={setRestartChoice}
                 />
               )}
 

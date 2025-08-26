@@ -1,8 +1,9 @@
 // LangGraph.js with web environment support
-import { StateGraph, START, END, Annotation } from "@langchain/langgraph/web";
+import { StateGraph, START, END, Annotation, MemorySaver } from "@langchain/langgraph/web";
 import { WorkflowState } from '../types/workflow_LG';
 import { ProcessStatus } from '../types';
 import { createInitialState, shouldRestart, shouldContinue } from './workflowService_LG';
+import type { NodeCallbacks } from './workflowService_LG';
 
 // Define proper LangGraph.js state using Annotations
 const WorkflowStateAnnotation = Annotation.Root({
@@ -69,8 +70,9 @@ const WorkflowStateAnnotation = Annotation.Root({
 
 // Create the LangGraph.js StateGraph for web environments using proper Annotation pattern
 async function createLangGraphWorkflow() {
-  // Use the Annotation-defined state
+  // Use the Annotation-defined state with memory management
   const workflow = new StateGraph(WorkflowStateAnnotation);
+  const memory = new MemorySaver();
 
   // Import workflow nodes - using direct imports for web compatibility
   const {
@@ -83,35 +85,37 @@ async function createLangGraphWorkflow() {
   } = await import('./workflowService_LG');
 
   const searchNode = async (state: typeof WorkflowStateAnnotation.State) => {
-    const callbacks = (globalThis as any).__langgraphCallbacks;
-    return searchNodeFn(state as WorkflowState, callbacks);
+    const callbacks = (globalThis as any).__langgraphCallbacks as NodeCallbacks;
+    const prompts = (globalThis as any).__workflowPrompts;
+    return searchNodeFn(state as WorkflowState, callbacks, prompts);
   };
 
   const learningsNode = async (state: typeof WorkflowStateAnnotation.State) => {
-    const callbacks = (globalThis as any).__langgraphCallbacks;
-    return learningsNodeFn(state as WorkflowState, callbacks);
+    const callbacks = (globalThis as any).__langgraphCallbacks as NodeCallbacks;
+    const prompts = (globalThis as any).__workflowPrompts;
+    return learningsNodeFn(state as WorkflowState, callbacks, prompts);
   };
 
   const opportunityAnalysisNode = async (state: typeof WorkflowStateAnnotation.State) => {
-    const callbacks = (globalThis as any).__langgraphCallbacks;
+    const callbacks = (globalThis as any).__langgraphCallbacks as NodeCallbacks;
     const prompts = (globalThis as any).__workflowPrompts;
     return opportunityAnalysisNodeFn(state as WorkflowState, callbacks, prompts);
   };
 
   const proposerNode = async (state: typeof WorkflowStateAnnotation.State) => {
-    const callbacks = (globalThis as any).__langgraphCallbacks;
+    const callbacks = (globalThis as any).__langgraphCallbacks as NodeCallbacks;
     const prompts = (globalThis as any).__workflowPrompts;
     return proposerNodeFn(state as WorkflowState, callbacks, prompts);
   };
 
   const noveltyCheckerNode = async (state: typeof WorkflowStateAnnotation.State) => {
-    const callbacks = (globalThis as any).__langgraphCallbacks;
+    const callbacks = (globalThis as any).__langgraphCallbacks as NodeCallbacks;
     const prompts = (globalThis as any).__workflowPrompts;
     return noveltyCheckerNodeFn(state as WorkflowState, callbacks, prompts);
   };
 
   const aggregatorNode = async (state: typeof WorkflowStateAnnotation.State) => {
-    const callbacks = (globalThis as any).__langgraphCallbacks;
+    const callbacks = (globalThis as any).__langgraphCallbacks as NodeCallbacks;
     const prompts = (globalThis as any).__workflowPrompts;
     return aggregatorNodeFn(state as WorkflowState, callbacks, prompts);
   };
@@ -132,7 +136,8 @@ async function createLangGraphWorkflow() {
   workflow.addNode(NOVELTY_CHECKER_NODE, noveltyCheckerNode);
   workflow.addNode(AGGREGATOR_NODE, aggregatorNode);
 
-  // Define edges using the typed constants with type assertions
+  // Define edges (keeping working implementation but with better comments)
+  // Note: Using string constants for node names as per our current working pattern
   (workflow as any).addEdge(START, SEARCH_NODE);
   (workflow as any).addEdge(SEARCH_NODE, LEARNINGS_NODE);
   (workflow as any).addEdge(LEARNINGS_NODE, OPPORTUNITY_ANALYSIS_NODE);
@@ -149,7 +154,7 @@ async function createLangGraphWorkflow() {
   (workflow as any).addEdge(NOVELTY_CHECKER_NODE, AGGREGATOR_NODE);
   (workflow as any).addEdge(AGGREGATOR_NODE, END);
 
-  return workflow.compile();
+  return workflow.compile({ checkpointer: memory });
 }
 
 // Create and cache the compiled workflow
@@ -174,11 +179,13 @@ async function getCompiledWorkflow(callbacks?: { onStatus?: (status: string) => 
 export interface WorkflowRunOptions {
   threadId?: string;
   onChunk?: (chunk: Partial<WorkflowState>) => void;
+  onPrompt?: (agentName: string, prompt: string) => void; // Track sent prompts
   config?: {
     recursionLimit?: number;
     maxRestarts?: number;
   };
   prompts?: Record<string, string>;
+  initialState?: WorkflowState;
 }
 
 export class LangGraphWebService {
@@ -196,10 +203,11 @@ export class LangGraphWebService {
    */
   async startWorkflow(
     topic: string,
-    options: WorkflowRunOptions = {}
+    options: WorkflowRunOptions = {},
+    customInitialState?: WorkflowState
   ): Promise<WorkflowState> {
     const threadId = options.threadId || `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    const initialState = createInitialState(topic);
+    const initialState = customInitialState || options.initialState || createInitialState(topic);
 
     // Create workflow with callbacks for streaming and status updates
     let accumulatedSearchContent = '';
@@ -274,7 +282,7 @@ export class LangGraphWebService {
           }
         }
 
-        console.log(`📝 Streaming: ${chunk.substring(0, 100)}...`);
+
       }
     };
 
@@ -297,16 +305,26 @@ export class LangGraphWebService {
 
       let finalState = initialState;
 
-      // Process the stream
-      for await (const chunk of stream) {
-        finalState = { ...finalState, ...chunk };
+      // Process the stream with error handling
+      try {
+        for await (const chunk of stream) {
+          finalState = { ...finalState, ...chunk };
 
-        // Call chunk callback if provided
-        if (options.onChunk) {
-          options.onChunk(chunk);
+          // Call chunk callback if provided
+          if (options.onChunk) {
+            options.onChunk(chunk);
+          }
+
+
         }
-
-        console.log(`📦 Workflow chunk: ${Object.keys(chunk).join(', ')}`);
+      } catch (streamError) {
+        console.error('❌ Error processing workflow stream:', streamError);
+        // Return current state with error information
+        finalState = {
+          ...finalState,
+          aggregations: [...finalState.aggregations, `Workflow execution error: ${streamError instanceof Error ? streamError.message : 'Unknown streaming error'}`],
+          completedSteps: [...finalState.completedSteps, ProcessStatus.AGGREGATING]
+        };
       }
 
       console.log(`✅ LangGraph.js workflow completed for thread: ${threadId}`);
@@ -415,7 +433,7 @@ export class LangGraphWebService {
             }
           }
 
-          console.log(`📝 Streaming: ${chunk.substring(0, 100)}...`);
+  
         }
       };
 
@@ -444,7 +462,7 @@ export class LangGraphWebService {
           options.onChunk(chunk);
         }
 
-        console.log(`📦 Workflow continuation chunk: ${Object.keys(chunk).join(', ')}`);
+
       }
 
       console.log(`✅ LangGraph.js workflow continued for thread: ${threadId}`);

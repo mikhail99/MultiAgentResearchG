@@ -2,12 +2,19 @@ import React from 'react';
 import { FileUploadIcon, StartIcon, ExportIcon, CopyIcon, SaveIcon } from './Icons';
 import { ModelProvider } from '../types';
 
+const StopIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <rect x="6" y="6" width="12" height="12" rx="2" strokeWidth="2" fill="currentColor" />
+  </svg>
+);
+
 interface ControlPanelProps {
   topic: string;
   setTopic: (topic: string) => void;
   files: File[];
   setFiles: (files: File[]) => void;
   onStart: () => void;
+  onInterrupt?: () => void;
   onExport: () => void;
   onExportJson: () => void;
   onCopyLink: () => void;
@@ -26,7 +33,7 @@ interface ControlPanelProps {
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
-    topic, setTopic, files, setFiles, onStart, onExport, onExportJson, onCopyLink, onOpenTemplateModal, isLoading, iteration,
+    topic, setTopic, files, setFiles, onStart, onInterrupt, onExport, onExportJson, onCopyLink, onOpenTemplateModal, isLoading, iteration,
     modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, enableWebSearch, setEnableWebSearch, enableLocalSearch, setEnableLocalSearch, isRunComplete
 }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,6 +178,16 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <StartIcon />
           <span className="ml-2">{isLoading ? 'Processing...' : 'Start Analysis'}</span>
         </button>
+        {onInterrupt && (
+          <button
+            onClick={onInterrupt}
+            disabled={!isLoading}
+            className="w-full flex items-center justify-center bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+          >
+            <StopIcon />
+            <span className="ml-2">Stop Analysis</span>
+          </button>
+        )}
         <button
           onClick={onExport}
           disabled={isLoading || !isRunComplete}

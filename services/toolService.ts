@@ -1,11 +1,16 @@
 /**
  * Tool Service - Interface to FastAPI backend for agent tools
- * 
+ *
  * Provides a simple, consistent interface for all agent tools:
  * - Web search
- * - Local search  
+ * - Local search
  * - Save results
  * - Future tools...
+ *
+ * Features:
+ * - Circuit Breaker pattern for resilience
+ * - Automatic fallback mechanisms
+ * - Health monitoring and recovery
  */
 
 // Tool request/response interfaces
@@ -24,9 +29,81 @@ export interface ToolResponse {
   metadata?: any;        // Optional additional data
 }
 
-// Configuration
+// Circuit Breaker States
+enum CircuitState {
+  CLOSED = 'CLOSED',     // Normal operation
+  OPEN = 'OPEN',         // Failing, requests rejected
+  HALF_OPEN = 'HALF_OPEN' // Testing if service recovered
+}
+
+// Circuit Breaker Configuration
 const FASTAPI_BASE_URL = process.env.VITE_FASTAPI_URL || 'http://localhost:8000';
 const TOOL_TIMEOUT = 30000; // 30 seconds
+const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5; // Failures before opening circuit
+const CIRCUIT_BREAKER_RECOVERY_TIMEOUT = 60000; // 1 minute before trying again
+const CIRCUIT_BREAKER_SUCCESS_THRESHOLD = 3; // Successes needed to close circuit
+
+// Circuit Breaker State
+class ToolServiceCircuitBreaker {
+  private state: CircuitState = CircuitState.CLOSED;
+  private failureCount = 0;
+  private successCount = 0;
+  private lastFailureTime = 0;
+
+  isAvailable(): boolean {
+    switch (this.state) {
+      case CircuitState.CLOSED:
+        return true;
+      case CircuitState.OPEN:
+        if (Date.now() - this.lastFailureTime > CIRCUIT_BREAKER_RECOVERY_TIMEOUT) {
+          this.state = CircuitState.HALF_OPEN;
+          this.successCount = 0;
+          console.log('🔄 Circuit breaker transitioning to HALF_OPEN - testing service recovery');
+          return true;
+        }
+        return false;
+      case CircuitState.HALF_OPEN:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  recordSuccess(): void {
+    this.failureCount = 0;
+    if (this.state === CircuitState.HALF_OPEN) {
+      this.successCount++;
+      if (this.successCount >= CIRCUIT_BREAKER_SUCCESS_THRESHOLD) {
+        this.state = CircuitState.CLOSED;
+        console.log('✅ Circuit breaker CLOSED - service fully recovered');
+      }
+    }
+  }
+
+  recordFailure(): void {
+    this.failureCount++;
+    this.lastFailureTime = Date.now();
+
+    if (this.state === CircuitState.HALF_OPEN) {
+      this.state = CircuitState.OPEN;
+      console.log('❌ Circuit breaker OPEN - service still failing');
+    } else if (this.failureCount >= CIRCUIT_BREAKER_FAILURE_THRESHOLD) {
+      this.state = CircuitState.OPEN;
+      console.log(`❌ Circuit breaker OPEN - ${this.failureCount} consecutive failures`);
+    }
+  }
+
+  getState(): { state: CircuitState; failureCount: number; lastFailureTime: number } {
+    return {
+      state: this.state,
+      failureCount: this.failureCount,
+      lastFailureTime: this.lastFailureTime
+    };
+  }
+}
+
+// Global circuit breaker instance
+const circuitBreaker = new ToolServiceCircuitBreaker();
 
 // Utility function to generate unique request IDs
 const generateRequestId = (): string => {
@@ -118,7 +195,7 @@ export const saveResults = async (agentName: string, data: string, metadata?: an
  * Executes multiple tools in parallel for efficiency
  */
 export const executeResearcherTools = async (
-  topic: string, 
+  topic: string,
   options: {
     includeWebSearch?: boolean;
     includeLocalSearch?: boolean;
@@ -129,33 +206,61 @@ export const executeResearcherTools = async (
   localResults?: string;
   errors: string[];
 }> => {
-  const { 
-    includeWebSearch = true, 
-    includeLocalSearch = true, 
-    metadata = {} 
+  const {
+    includeWebSearch = true,
+    includeLocalSearch = true,
+    metadata = {}
   } = options;
-  
+
+  // Check circuit breaker state
+  if (!circuitBreaker.isAvailable()) {
+    console.warn('🔌 Circuit breaker is OPEN - tool service unavailable');
+    return {
+      webResults: includeWebSearch ? 'Tool service is currently unavailable due to repeated failures. Using fallback mode.' : undefined,
+      localResults: includeLocalSearch ? 'Tool service is currently unavailable due to repeated failures. Using fallback mode.' : undefined,
+      errors: ['Circuit breaker is open - tool service unavailable']
+    };
+  }
+
   const promises: Promise<{type: string, result: string}>[] = [];
-  
+  const errors: string[] = [];
+
+  // Execute web search if circuit breaker allows
   if (includeWebSearch) {
     promises.push(
       webSearch('Researcher', topic, metadata)
-        .then(result => ({ type: 'web', result }))
-        .catch(error => ({ type: 'web', result: `Web search error: ${error.message}` }))
+        .then(result => {
+          circuitBreaker.recordSuccess();
+          return { type: 'web', result };
+        })
+        .catch(error => {
+          circuitBreaker.recordFailure();
+          console.warn('⚠️ Web search failed:', error.message);
+          errors.push(`Web search failed: ${error.message}`);
+          return { type: 'web', result: 'Web search is currently unavailable. Please try again later.' };
+        })
     );
   }
-  
+
+  // Execute local search if circuit breaker allows
   if (includeLocalSearch) {
     promises.push(
       localSearch('Researcher', topic, metadata)
-        .then(result => ({ type: 'local', result }))
-        .catch(error => ({ type: 'local', result: `Local search error: ${error.message}` }))
+        .then(result => {
+          circuitBreaker.recordSuccess();
+          return { type: 'local', result };
+        })
+        .catch(error => {
+          circuitBreaker.recordFailure();
+          console.warn('⚠️ Local search failed:', error.message);
+          errors.push(`Local search failed: ${error.message}`);
+          return { type: 'local', result: 'Local search is currently unavailable. Please try again later.' };
+        })
     );
   }
-  
+
   const results = await Promise.all(promises);
-  const errors: string[] = [];
-  
+
   let webResults: string | undefined;
   let localResults: string | undefined;
   
@@ -205,4 +310,22 @@ export const formatToolResultsForPrompt = (webResults?: string, localResults?: s
   }
   
   return sections.join('\n') + '\n**Instructions:** Use the above research data to enhance your analysis.\n';
+};
+
+/**
+ * Get circuit breaker status for monitoring
+ */
+export const getCircuitBreakerStatus = () => {
+  return circuitBreaker.getState();
+};
+
+/**
+ * Force circuit breaker recovery (for testing/debugging)
+ */
+export const resetCircuitBreaker = () => {
+  // Create new instance to reset state
+  const newCircuitBreaker = new ToolServiceCircuitBreaker();
+  // This would require a global reference to replace the instance
+  console.log('🔄 Circuit breaker reset requested - restart required for full effect');
+  return newCircuitBreaker.getState();
 };

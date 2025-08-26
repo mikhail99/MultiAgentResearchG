@@ -1,8 +1,16 @@
 // Browser-compatible workflow service (no LangGraph.js dependencies)
-import { WorkflowState, NodeResult, AgentConfig } from '../types/workflow_LG';
+import { WorkflowState, NodeResult, AgentConfig, ValidationResult, StateValidationOptions } from '../types/workflow_LG';
 import { AgentName, ProcessStatus, ModelProvider } from '../types';
 import { generateContentStream } from './geminiService';
 import { executeResearcherTools, formatToolResultsForPrompt } from './toolService';
+
+// Standard node callback interface for consistent LangGraphJS integration
+export interface NodeCallbacks {
+  onStatus?: (status: string) => void;
+  onStream?: (chunk: string) => void;
+  onPrompt?: (agentName: string, prompt: string) => void;
+  onError?: (error: Error) => void;
+}
 
 // Initial state factory
 export function createInitialState(topic: string, iteration: number = 1): WorkflowState {
@@ -29,18 +37,12 @@ export function createInitialState(topic: string, iteration: number = 1): Workfl
 }
 
 // Agent Node Implementations
-export async function searchNode(state: WorkflowState, callbacks?: {
-  onStatus?: (status: string) => void;
-  onStream?: (chunk: string) => void;
-}): Promise<Partial<WorkflowState>> {
-  console.log('🔍 Executing Search Node');
+export async function searchNode(state: WorkflowState, callbacks?: NodeCallbacks, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
+  try {
+    // Update status immediately
+    callbacks?.onStatus?.(ProcessStatus.SEARCHING);
 
-  // Update status immediately
-  callbacks?.onStatus?.(ProcessStatus.SEARCHING);
-
-  const config: AgentConfig = {
-    name: AgentName.SEARCH,
-    promptTemplate: `You are a specialist Search Agent. Your goal is to conduct a brief, high-level literature search on the user-provided topic.
+  const promptTemplate = prompts?.[AgentName.SEARCH] || `You are a specialist Search Agent. Your goal is to conduct a brief, high-level literature search on the user-provided topic.
 - Use your internal knowledge and any provided tool search results to gather information.
 - Identify the key themes, major debates, and core concepts related to the topic.
 - The output should be a concise summary that will serve as the foundation for a more detailed analysis.
@@ -48,7 +50,11 @@ export async function searchNode(state: WorkflowState, callbacks?: {
 
 Topic: {topic}
 
-**Tool Results:** {tool_results}`,
+**Tool Results:** {tool_results}`;
+
+  const config: AgentConfig = {
+    name: AgentName.SEARCH,
+    promptTemplate,
   };
 
   // Execute tools if available
@@ -67,6 +73,9 @@ Topic: {topic}
   const prompt = config.promptTemplate
     .replace('{topic}', state.topic)
     .replace('{tool_results}', toolData);
+
+  // Track the sent prompt
+  callbacks?.onPrompt?.(AgentName.SEARCH, prompt);
 
   // Generate content with streaming
   let output = '';
@@ -115,27 +124,40 @@ This is a fallback response generated when the local LLM service is unavailable.
     }
   }
 
-  return {
-    searchResults: [...state.searchResults, output],
-    currentStep: ProcessStatus.SEARCHING,
-    completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.SEARCHING), ProcessStatus.SEARCHING],
-    toolResults: {
-      webResults: toolData,
-      localResults: '',
-      errors: [],
-      timestamp: new Date().toISOString(),
-    },
-  };
+    return {
+      searchResults: [...state.searchResults, output],
+      currentStep: ProcessStatus.SEARCHING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.SEARCHING), ProcessStatus.SEARCHING],
+      toolResults: {
+        webResults: toolData,
+        localResults: '',
+        errors: [],
+        timestamp: new Date().toISOString(),
+      },
+    };
+  } catch (error) {
+    console.error('❌ Search Node execution failed:', error);
+    callbacks?.onError?.(error as Error);
+
+    // Return a safe fallback state
+    return {
+      searchResults: [...state.searchResults, `Error during search: ${error instanceof Error ? error.message : 'Unknown error'}`],
+      currentStep: ProcessStatus.SEARCHING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.SEARCHING), ProcessStatus.SEARCHING],
+      toolResults: {
+        webResults: '',
+        localResults: '',
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+        timestamp: new Date().toISOString(),
+      },
+    };
+  }
 }
 
-export async function learningsNode(state: WorkflowState, callbacks?: {
-  onStatus?: (status: string) => void;
-  onStream?: (chunk: string) => void;
-}): Promise<Partial<WorkflowState>> {
-  console.log('📚 Executing Learnings Node');
-
-  // Update status immediately
-  callbacks?.onStatus?.(ProcessStatus.LEARNING);
+export async function learningsNode(state: WorkflowState, callbacks?: NodeCallbacks, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
+  try {
+    // Update status immediately
+    callbacks?.onStatus?.(ProcessStatus.LEARNING);
 
   const searchResults = state.searchResults.join('\n\n');
   if (!searchResults.trim()) {
@@ -148,9 +170,7 @@ export async function learningsNode(state: WorkflowState, callbacks?: {
     };
   }
 
-  const config: AgentConfig = {
-    name: AgentName.LEARNINGS,
-    promptTemplate: `You are an expert Learnings Agent. Your task is to generate Stylized Facts from the given topic.
+  const promptTemplate = prompts?.[AgentName.LEARNINGS] || `You are an expert Learnings Agent. Your task is to generate Stylized Facts from the given topic.
 - First, extract and create Stylized Facts based ONLY on the provided search results.
 - Each fact should follow the format: "- Fact Name — Brief Description"
 - If you have additional relevant facts from your training knowledge that would enhance the analysis, you may optionally include them after the search-based facts, clearly marking them as "Additional Facts:"
@@ -159,13 +179,20 @@ export async function learningsNode(state: WorkflowState, callbacks?: {
 
 Topic: {topic}
 Research Summary: {researchSummary}
-Feedback: {feedback}`,
+Feedback: {feedback}`;
+
+  const config: AgentConfig = {
+    name: AgentName.LEARNINGS,
+    promptTemplate,
   };
 
   const prompt = config.promptTemplate
     .replace('{topic}', state.topic)
     .replace('{researchSummary}', searchResults)
     .replace('{feedback}', state.feedback);
+
+  // Track the sent prompt
+  callbacks?.onPrompt?.(AgentName.LEARNINGS, prompt);
 
   let output = '';
   let streamingContent = '';
@@ -212,30 +239,55 @@ This is a fallback analysis generated when the local LLM service is unavailable.
     }
   }
 
-  return {
-    learnings: [...state.learnings, output],
-    currentStep: ProcessStatus.LEARNING,
-    completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING],
-  };
+    return {
+      learnings: [...state.learnings, output],
+      currentStep: ProcessStatus.LEARNING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING],
+    };
+  } catch (error) {
+    console.error('❌ Learnings Node execution failed:', error);
+    callbacks?.onError?.(error as Error);
+
+    // Return a safe fallback state
+    return {
+      learnings: [...state.learnings, `Error during analysis: ${error instanceof Error ? error.message : 'Unknown error'}`],
+      currentStep: ProcessStatus.LEARNING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING],
+    };
+  }
 }
 
-export async function opportunityAnalysisNode(state: WorkflowState, callbacks?: {
-  onStatus?: (status: string) => void;
-  onStream?: (chunk: string) => void;
-}, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
-  console.log('🎯 Executing Opportunity Analysis Node');
+export async function opportunityAnalysisNode(state: WorkflowState, callbacks?: NodeCallbacks, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
+  try {
+    // Update status immediately
+    callbacks?.onStatus?.(ProcessStatus.OPPORTUNITY_ANALYZING);
 
-  // Update status immediately
-  callbacks?.onStatus?.(ProcessStatus.OPPORTUNITY_ANALYZING);
+  // Get the most recent learnings, or combine all learnings if available
+  let learnings = '';
+  if (state.learnings.length > 0) {
+    const lastLearning = state.learnings[state.learnings.length - 1];
+    if (lastLearning && lastLearning.trim()) {
+      learnings = lastLearning;
+    } else {
+      // If last learning is empty, try to use all previous learnings
+      const validLearnings = state.learnings.filter(l => l && l.trim());
+      if (validLearnings.length > 0) {
+        learnings = validLearnings.join('\n\n---\n\n');
+      }
+    }
+  }
 
-  const learnings = state.learnings[state.learnings.length - 1] || '';
   if (!learnings.trim()) {
-    const fallback = 'No learnings available for opportunity analysis.';
+    const fallback = 'No learnings available for opportunity analysis. The workflow may need to restart from an earlier step.';
+    console.warn('⚠️ Opportunity Analysis: No valid learnings found, using fallback');
     callbacks?.onStream?.(fallback);
     return {
       opportunityAnalyses: [...state.opportunityAnalyses, fallback],
       currentStep: ProcessStatus.OPPORTUNITY_ANALYZING,
       completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
+      shouldRestart: true, // Force restart if no learnings available
+      restartFromStep: ProcessStatus.SEARCHING,
+      restartCount: state.restartCount,
     };
   }
 
@@ -271,6 +323,9 @@ Learnings to Analyze:
   const prompt = config.promptTemplate
     .replace('{topic}', state.topic)
     .replace('{generatedAnalysis}', learnings);
+
+  // Track the sent prompt
+  callbacks?.onPrompt?.(AgentName.OPPORTUNITY_ANALYSIS, prompt);
 
   let output = '';
   let streamingContent = '';
@@ -328,24 +383,34 @@ This is a fallback analysis generated when the local LLM service is unavailable.
     finalOutput = output + '\n\n[Note: Restart request denied - maximum of 2 search restarts reached. Proceeding with current research.]';
   }
 
-  return {
-    opportunityAnalyses: [...state.opportunityAnalyses, finalOutput],
-    currentStep: ProcessStatus.OPPORTUNITY_ANALYZING,
-    completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
-    shouldRestart,
-    restartFromStep: shouldRestart ? ProcessStatus.SEARCHING : null,
-    restartCount: newRestartCount,
-  };
+    return {
+      opportunityAnalyses: [...state.opportunityAnalyses, finalOutput],
+      currentStep: ProcessStatus.OPPORTUNITY_ANALYZING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
+      shouldRestart,
+      restartFromStep: shouldRestart ? ProcessStatus.SEARCHING : null,
+      restartCount: newRestartCount,
+    };
+  } catch (error) {
+    console.error('❌ Opportunity Analysis Node execution failed:', error);
+    callbacks?.onError?.(error as Error);
+
+    // Return a safe fallback state
+    return {
+      opportunityAnalyses: [...state.opportunityAnalyses, `Error during opportunity analysis: ${error instanceof Error ? error.message : 'Unknown error'}`],
+      currentStep: ProcessStatus.OPPORTUNITY_ANALYZING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
+      shouldRestart: true, // Force restart on error to allow recovery
+      restartFromStep: ProcessStatus.SEARCHING,
+      restartCount: state.restartCount,
+    };
+  }
 }
 
-export async function proposerNode(state: WorkflowState, callbacks?: {
-  onStatus?: (status: string) => void;
-  onStream?: (chunk: string) => void;
-}, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
-  console.log('💡 Executing Proposer Node');
-
-  // Update status immediately
-  callbacks?.onStatus?.(ProcessStatus.PROPOSING);
+export async function proposerNode(state: WorkflowState, callbacks?: NodeCallbacks, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
+  try {
+    // Update status immediately
+    callbacks?.onStatus?.(ProcessStatus.PROPOSING);
 
   const learnings = state.learnings[state.learnings.length - 1] || '';
   const opportunityAnalysis = state.opportunityAnalyses[state.opportunityAnalyses.length - 1] || '';
@@ -417,21 +482,28 @@ This is a fallback proposal generated when the local LLM service is unavailable.
     }
   }
 
-  return {
-    proposals: [...state.proposals, output],
-    currentStep: ProcessStatus.PROPOSING,
-    completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING],
-  };
+    return {
+      proposals: [...state.proposals, output],
+      currentStep: ProcessStatus.PROPOSING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING],
+    };
+  } catch (error) {
+    console.error('❌ Proposer Node execution failed:', error);
+    callbacks?.onError?.(error as Error);
+
+    // Return a safe fallback state
+    return {
+      proposals: [...state.proposals, `Error during proposal generation: ${error instanceof Error ? error.message : 'Unknown error'}`],
+      currentStep: ProcessStatus.PROPOSING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING],
+    };
+  }
 }
 
-export async function noveltyCheckerNode(state: WorkflowState, callbacks?: {
-  onStatus?: (status: string) => void;
-  onStream?: (chunk: string) => void;
-}, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
-  console.log('🔍 Executing Novelty Checker Node');
-
-  // Update status immediately
-  callbacks?.onStatus?.(ProcessStatus.CHECKING_NOVELTY);
+export async function noveltyCheckerNode(state: WorkflowState, callbacks?: NodeCallbacks, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
+  try {
+    // Update status immediately
+    callbacks?.onStatus?.(ProcessStatus.CHECKING_NOVELTY);
 
   const proposal = state.proposals[state.proposals.length - 1] || '';
 
@@ -506,21 +578,28 @@ This is a fallback assessment generated when the local LLM service is unavailabl
     }
   }
 
-  return {
-    noveltyChecks: [...state.noveltyChecks, output],
-    currentStep: ProcessStatus.CHECKING_NOVELTY,
-    completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.CHECKING_NOVELTY), ProcessStatus.CHECKING_NOVELTY],
-  };
+    return {
+      noveltyChecks: [...state.noveltyChecks, output],
+      currentStep: ProcessStatus.CHECKING_NOVELTY,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.CHECKING_NOVELTY), ProcessStatus.CHECKING_NOVELTY],
+    };
+  } catch (error) {
+    console.error('❌ Novelty Checker Node execution failed:', error);
+    callbacks?.onError?.(error as Error);
+
+    // Return a safe fallback state
+    return {
+      noveltyChecks: [...state.noveltyChecks, `Error during novelty check: ${error instanceof Error ? error.message : 'Unknown error'}`],
+      currentStep: ProcessStatus.CHECKING_NOVELTY,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.CHECKING_NOVELTY), ProcessStatus.CHECKING_NOVELTY],
+    };
+  }
 }
 
-export async function aggregatorNode(state: WorkflowState, callbacks?: {
-  onStatus?: (status: string) => void;
-  onStream?: (chunk: string) => void;
-}, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
-  console.log('📊 Executing Aggregator Node');
-
-  // Update status immediately
-  callbacks?.onStatus?.(ProcessStatus.AGGREGATING);
+export async function aggregatorNode(state: WorkflowState, callbacks?: NodeCallbacks, prompts?: Record<string, string>): Promise<Partial<WorkflowState>> {
+  try {
+    // Update status immediately
+    callbacks?.onStatus?.(ProcessStatus.AGGREGATING);
 
   const promptTemplate = prompts?.[AgentName.AGGREGATOR] || `You are an Aggregator Agent. Synthesize all the analysis into a final research report.
 
@@ -599,11 +678,22 @@ The research on ${state.topic} shows strong potential for advancing the field. T
     }
   }
 
-  return {
-    aggregations: [...state.aggregations, output],
-    currentStep: ProcessStatus.AGGREGATING,
-    completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING],
-  };
+    return {
+      aggregations: [...state.aggregations, output],
+      currentStep: ProcessStatus.AGGREGATING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING],
+    };
+  } catch (error) {
+    console.error('❌ Aggregator Node execution failed:', error);
+    callbacks?.onError?.(error as Error);
+
+    // Return a safe fallback state
+    return {
+      aggregations: [...state.aggregations, `Error during final report generation: ${error instanceof Error ? error.message : 'Unknown error'}`],
+      currentStep: ProcessStatus.AGGREGATING,
+      completedSteps: [...state.completedSteps.filter(s => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING],
+    };
+  }
 }
 
 // Routing Functions for LangGraph.js conditional edges
@@ -675,4 +765,188 @@ export function getAgentIterationCount(state: WorkflowState | null, agentName: A
     default:
       return 0;
   }
+}
+
+// State Validation Functions
+
+/**
+ * Comprehensive workflow state validation
+ */
+export function validateWorkflowState(
+  state: WorkflowState | null,
+  options: StateValidationOptions = {}
+): ValidationResult {
+  const result: ValidationResult = {
+    isValid: true,
+    errors: [],
+    warnings: []
+  };
+
+  if (!state) {
+    result.isValid = false;
+    result.errors.push('State is null or undefined');
+    return result;
+  }
+
+  // Basic field validation
+  if (!state.topic || typeof state.topic !== 'string' || state.topic.trim().length === 0) {
+    result.errors.push('Topic is required and must be a non-empty string');
+    result.isValid = false;
+  }
+
+  if (typeof state.iteration !== 'number' || state.iteration < 1) {
+    result.errors.push('Iteration must be a positive number');
+    result.isValid = false;
+  }
+
+  if (!state.modelProvider || typeof state.modelProvider !== 'string') {
+    result.errors.push('Model provider is required');
+    result.isValid = false;
+  }
+
+  // Array validation
+  if (options.checkArrays !== false) {
+    validateArray(state.searchResults, 'searchResults', result);
+    validateArray(state.learnings, 'learnings', result);
+    validateArray(state.opportunityAnalyses, 'opportunityAnalyses', result);
+    validateArray(state.proposals, 'proposals', result);
+    validateArray(state.noveltyChecks, 'noveltyChecks', result);
+    validateArray(state.aggregations, 'aggregations', result);
+    validateArray(state.completedSteps, 'completedSteps', result);
+  }
+
+  // Completion state validation
+  if (options.checkCompletions !== false) {
+    validateCompletionState(state, result);
+  }
+
+  // Workflow logic validation
+  validateWorkflowLogic(state, result);
+
+  // Convert warnings to errors if strict mode
+  if (options.strict && result.warnings.length > 0) {
+    result.errors.push(...result.warnings);
+    result.warnings = [];
+    result.isValid = result.errors.length === 0;
+  }
+
+  return result;
+}
+
+/**
+ * Validate array fields for proper structure
+ */
+function validateArray(array: any[], fieldName: string, result: ValidationResult): void {
+  if (!Array.isArray(array)) {
+    result.errors.push(`${fieldName} must be an array`);
+    result.isValid = false;
+    return;
+  }
+
+  // Check for null/undefined elements
+  const invalidElements = array.filter((item, index) => {
+    if (item === null || item === undefined) {
+      result.warnings.push(`${fieldName}[${index}] is null or undefined`);
+      return true;
+    }
+    return false;
+  });
+
+  // Check for empty strings in critical arrays
+  if (['searchResults', 'learnings'].includes(fieldName)) {
+    const emptyStrings = array.filter((item, index) => typeof item === 'string' && item.trim().length === 0);
+    if (emptyStrings.length > 0) {
+      result.warnings.push(`${fieldName} contains ${emptyStrings.length} empty strings`);
+    }
+  }
+}
+
+/**
+ * Validate completion state consistency
+ */
+function validateCompletionState(state: WorkflowState, result: ValidationResult): void {
+  // Check for logical completion order
+  const hasSearch = state.completedSteps.includes(ProcessStatus.SEARCHING);
+  const hasLearnings = state.completedSteps.includes(ProcessStatus.LEARNING);
+  const hasOpportunity = state.completedSteps.includes(ProcessStatus.OPPORTUNITY_ANALYZING);
+
+  if (hasLearnings && !hasSearch) {
+    result.warnings.push('Learnings completed but search not completed');
+  }
+
+  if (hasOpportunity && (!hasSearch || !hasLearnings)) {
+    result.warnings.push('Opportunity analysis completed but prerequisites not completed');
+  }
+
+  // Check for data consistency
+  if (hasSearch && state.searchResults.length === 0) {
+    result.warnings.push('Search completed but no search results found');
+  }
+
+  if (hasLearnings && state.learnings.length === 0) {
+    result.warnings.push('Learnings completed but no learnings generated');
+  }
+}
+
+/**
+ * Validate workflow logic and state transitions
+ */
+function validateWorkflowLogic(state: WorkflowState, result: ValidationResult): void {
+  // Check restart count limits
+  if (state.restartCount > 2) {
+    result.warnings.push(`Restart count (${state.restartCount}) exceeds recommended limit of 2`);
+  }
+
+  // Check for restart without search results
+  if (state.shouldRestart && state.searchResults.length === 0) {
+    result.warnings.push('Restart requested but no search results available');
+  }
+
+  // Check for inconsistent current step
+  if (state.currentStep === ProcessStatus.IDLE && state.completedSteps.length > 0) {
+    result.warnings.push('Workflow is idle but has completed steps');
+  }
+
+  // Check for missing required transitions
+  const expectedOrder = [
+    ProcessStatus.SEARCHING,
+    ProcessStatus.LEARNING,
+    ProcessStatus.OPPORTUNITY_ANALYZING
+  ];
+
+  for (let i = 0; i < expectedOrder.length - 1; i++) {
+    const currentStep = expectedOrder[i];
+    const nextStep = expectedOrder[i + 1];
+
+    if (state.completedSteps.includes(nextStep) && !state.completedSteps.includes(currentStep)) {
+      result.warnings.push(`${nextStep} completed but ${currentStep} was not`);
+    }
+  }
+}
+
+/**
+ * Sanitize and repair workflow state
+ */
+export function sanitizeWorkflowState(state: WorkflowState): WorkflowState {
+  const sanitized = { ...state };
+
+  // Remove null/undefined from arrays
+  sanitized.searchResults = state.searchResults.filter(item => item != null);
+  sanitized.learnings = state.learnings.filter(item => item != null);
+  sanitized.opportunityAnalyses = state.opportunityAnalyses.filter(item => item != null);
+  sanitized.proposals = state.proposals.filter(item => item != null);
+  sanitized.noveltyChecks = state.noveltyChecks.filter(item => item != null);
+  sanitized.aggregations = state.aggregations.filter(item => item != null);
+  sanitized.completedSteps = state.completedSteps.filter(step => step != null);
+
+  // Ensure topic is trimmed
+  sanitized.topic = state.topic?.trim() || '';
+
+  // Ensure iteration is valid
+  sanitized.iteration = Math.max(1, Math.floor(state.iteration || 1));
+
+  // Cap restart count
+  sanitized.restartCount = Math.min(2, Math.max(0, state.restartCount || 0));
+
+  return sanitized;
 }

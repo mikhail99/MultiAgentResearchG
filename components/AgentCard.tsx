@@ -131,6 +131,15 @@ const AgentCard: React.FC<AgentCardProps> = ({
       return <IdlePlaceholder agent={agent} />;
     }
     if (showSentPrompt) {
+      if (!sentPrompt || sentPrompt.trim() === '') {
+        return (
+          <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+            <PromptIcon />
+            <p className="text-xs mt-2">No prompt sent yet</p>
+            <p className="text-xs opacity-75">Run a research workflow to see the sent prompt</p>
+          </div>
+        );
+      }
       return <p className="whitespace-pre-wrap font-mono text-xs">{sentPrompt}</p>;
     }
     return (
@@ -206,8 +215,7 @@ const AgentCard: React.FC<AgentCardProps> = ({
           </div>
         )}
 
-        {/* Debug info for iterations */}
-        {console.log(`🔍 AgentCard Debug - ${title}: totalIterations=${totalIterations}, currentIteration=${currentIteration}, hasCallback=${!!onIterationSelect}`)}
+        {/* Debug info for iterations - removed for cleaner console */}
 
         {/* Action Buttons */}
         <div className="flex items-center justify-between">
