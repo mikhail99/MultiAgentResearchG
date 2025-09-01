@@ -20,6 +20,8 @@ import StatusBar from '@shared/components/StatusBar';
 // getAgentTaskProfile is now handled by useAgentManagement hook
 import { SunIcon, MoonIcon, HumanIcon, LoopIcon, SparklesIcon, AgentIcon } from '@shared/components/Icons';
 import { runWorkflow } from '@shared/services/workflowRunner';
+import { checkToolServiceHealth } from '@shared/services/toolService';
+import { checkLlmHealth } from '@shared/services/llmService';
 
 // Refactored components
 import AgentGrid from './components/AgentGrid';
@@ -51,6 +53,8 @@ export default function App_LG() {
     [ProcessStatus.AGGREGATING]: '',
   });
   const [status, setStatus] = useState<ProcessStatus>(ProcessStatus.IDLE);
+  const [toolHealthy, setToolHealthy] = useState<boolean>(false);
+  const [llmHealthy, setLlmHealthy] = useState<boolean>(false);
 
   // UI state
   const [isPromptEditorOpen, setIsPromptEditorOpen] = useState(false);
@@ -188,6 +192,13 @@ export default function App_LG() {
     root.style.colorScheme = theme;
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    (async () => {
+      setToolHealthy(await checkToolServiceHealth());
+      setLlmHealthy(await checkLlmHealth(modelSettings.localLlmUrl));
+    })();
+  }, [modelSettings.localLlmUrl]);
 
   // Session management functions are now handled by useSessionManagement hook
   const handleCopyLinkToSession = useCallback(async () => {
@@ -558,27 +569,29 @@ ${questionsText}
             {/* Workflow Controls */}
             <div className="lg:col-span-3">
               <WorkflowControls
-              topic={topic}
-              setTopic={setTopic}
-              files={files}
-              setFiles={setFiles}
-              onStart={handleStart}
-              onInterrupt={handleInterruptWorkflow}
-              onExport={handleExportRun}
-              onExportJson={handleExportJson}
-              onCopyLink={handleCopyLinkToSession}
-              onOpenTemplateModal={() => setShowTemplateModal(true)}
-              isLoading={isLoading}
-              iteration={workflow.iteration}
-              modelProvider={ModelProvider.LOCAL} // Temporary placeholder
-              setModelProvider={() => {}} // Temporary placeholder
-              localLlmUrl={'http://localhost:11434/v1/chat/completions'} // Temporary placeholder
-              setLocalLlmUrl={() => {}} // Temporary placeholder
-              enableWebSearch={true} // Temporary placeholder
-              setEnableWebSearch={() => {}} // Temporary placeholder
-              enableLocalSearch={true} // Temporary placeholder
-              setEnableLocalSearch={() => {}} // Temporary placeholder
-              isRunComplete={isRunComplete}
+                topic={topic}
+                setTopic={setTopic}
+                files={files}
+                setFiles={setFiles}
+                onStart={handleStart}
+                onInterrupt={handleInterruptWorkflow}
+                onExport={handleExportRun}
+                onExportJson={handleExportJson}
+                onCopyLink={handleCopyLinkToSession}
+                onOpenTemplateModal={() => setShowTemplateModal(true)}
+                isLoading={isLoading}
+                iteration={workflow.iteration}
+                modelProvider={ModelProvider.LOCAL}
+                setModelProvider={() => {}}
+                localLlmUrl={modelSettings.localLlmUrl || ''}
+                setLocalLlmUrl={() => {}}
+                enableWebSearch={true}
+                setEnableWebSearch={() => {}}
+                enableLocalSearch={true}
+                setEnableLocalSearch={() => {}}
+                isRunComplete={isRunComplete}
+                toolServiceHealthy={toolHealthy}
+                llmHealthy={llmHealthy}
               />
             </div>
 

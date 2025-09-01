@@ -8,7 +8,8 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:smoke": "node src/tests/smoke_test.mjs"
   },
   "dependencies": {
     "react": "^18.0.0",

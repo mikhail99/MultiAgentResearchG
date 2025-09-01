@@ -7,6 +7,8 @@ import { ProcessStatus, ModelProvider, StylizedFact } from '@shared/types';
 import { useModelSettings } from '@shared/hooks';
 import { runWorkflow } from '@shared/services/workflowRunner';
 import { KE_TEMPLATE } from './workflowTemplates';
+import { checkToolServiceHealth } from '@shared/services/toolService';
+import { checkLlmHealth } from '@shared/services/llmService';
 
 export default function App() {
   const [question, setQuestion] = useState('');
@@ -23,17 +25,29 @@ export default function App() {
 
   const [status, setStatus] = useState<ProcessStatus>(ProcessStatus.IDLE);
   const [completed, setCompleted] = useState<ProcessStatus[]>([]);
-  const [contents, setContents] = useState<Partial<Record<ProcessStatus, string>>>({
-    [ProcessStatus.SEARCHING]: '',
-    [ProcessStatus.LEARNING]: '',
-    [ProcessStatus.OPPORTUNITY_ANALYZING]: '',
-    [ProcessStatus.PROPOSING]: '',
-    [ProcessStatus.AGGREGATING]: '',
-  });
+  const [contents, setContents] = useState<Partial<Record<ProcessStatus, string>>>(
+    {
+      [ProcessStatus.SEARCHING]: '',
+      [ProcessStatus.LEARNING]: '',
+      [ProcessStatus.OPPORTUNITY_ANALYZING]: '',
+      [ProcessStatus.PROPOSING]: '',
+      [ProcessStatus.AGGREGATING]: '',
+    }
+  );
   const [facts, setFacts] = useState<StylizedFact[]>([]);
   const [finalMd, setFinalMd] = useState('');
   const [metrics, setMetrics] = useState<Partial<Record<ProcessStatus, { durationMs?: number; chars?: number }>>>({});
   const [ledger, setLedger] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [toolHealthy, setToolHealthy] = useState<boolean>(false);
+  const [llmHealthy, setLlmHealthy] = useState<boolean>(false);
+
+  useEffect(() => {
+    (async () => {
+      setToolHealthy(await checkToolServiceHealth());
+      setLlmHealthy(await checkLlmHealth(localLlmUrl));
+    })();
+  }, [localLlmUrl]);
 
   useEffect(() => {
     try {
@@ -84,6 +98,7 @@ export default function App() {
     };
     setContents(resetContents);
     setMetrics({});
+    setError(null);
     saveSession({ status: ProcessStatus.SEARCHING, completed: [], contents: resetContents });
 
     const state = await runWorkflow(
@@ -91,7 +106,7 @@ export default function App() {
       question,
       { enableStreaming: true },
       {
-        onStepStart: (s) => { setStatus(s); saveSession({ status: s }); },
+        onStepStart: (s) => { setStatus(s); saveSession({ status: s }); setError(null); },
         onStreamChunk: (s, chunk) => {
           setContents(prev => {
             const next = { ...prev, [s]: (prev[s] || '') + chunk };
@@ -105,6 +120,10 @@ export default function App() {
         onWorkflowComplete: (finalState, runLedger) => {
           setLedger(runLedger);
           try { localStorage.setItem('ke_last_ledger', JSON.stringify(runLedger)); } catch {}
+        },
+        onWorkflowError: (err) => {
+          setError(err.message || String(err));
+          setStatus(ProcessStatus.IDLE);
         }
       }
     );
@@ -158,9 +177,16 @@ export default function App() {
           enableLocalSearch={enableLocalSearch}
           setEnableLocalSearch={setEnableLocalSearch}
           isRunComplete={isRunComplete}
+          toolServiceHealthy={toolHealthy}
+          llmHealthy={llmHealthy}
         />
 
         <StatusBar status={status} completedSteps={completed} metrics={metrics} />
+        {error && (
+          <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-800 dark:text-red-200 p-3 rounded-md">
+            {error}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {agentCards.map(c => (

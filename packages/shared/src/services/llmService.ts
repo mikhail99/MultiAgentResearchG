@@ -386,3 +386,22 @@ export const generateQuestions = async (finalReport: string, options: LlmOptions
       }
     }
 };
+
+export const checkLlmHealth = async (url?: string): Promise<boolean> => {
+  if (!url) return false;
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'qwen3:4b',
+        messages: [{ role: 'user', content: 'ping' }],
+        temperature: 0,
+        stream: false
+      }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};

@@ -25,6 +25,8 @@ interface WorkflowControlsProps {
   enableLocalSearch: boolean;
   setEnableLocalSearch: (enabled: boolean) => void;
   isRunComplete: boolean;
+  toolServiceHealthy?: boolean;
+  llmHealthy?: boolean;
 }
 
 const WorkflowControls: React.FC<WorkflowControlsProps> = ({
@@ -49,6 +51,8 @@ const WorkflowControls: React.FC<WorkflowControlsProps> = ({
   enableLocalSearch,
   setEnableLocalSearch,
   isRunComplete,
+  toolServiceHealthy,
+  llmHealthy,
 }) => {
   return (
     <div className="space-y-6">
@@ -74,6 +78,8 @@ const WorkflowControls: React.FC<WorkflowControlsProps> = ({
         enableLocalSearch={enableLocalSearch}
         setEnableLocalSearch={setEnableLocalSearch}
         isRunComplete={isRunComplete}
+        toolServiceHealthy={toolServiceHealthy}
+        llmHealthy={llmHealthy}
       />
     </div>
   );

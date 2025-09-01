@@ -38,7 +38,8 @@
     "test:comprehensive": "node tests/comprehensive_test.mjs",
     "test:critical": "node tests/critical_tests.mjs",
     "test:final": "node tests/final_test.mjs",
-    "test:all": "npm run test:comprehensive && npm run test:critical && npm run test:final"
+    "test:all": "npm run test:comprehensive && npm run test:critical && npm run test:final",
+    "test:smoke": "node tests/smoke_test.mjs"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",

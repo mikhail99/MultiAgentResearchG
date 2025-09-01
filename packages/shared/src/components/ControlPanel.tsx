@@ -30,11 +30,14 @@ interface ControlPanelProps {
   enableLocalSearch: boolean;
   setEnableLocalSearch: (enabled: boolean) => void;
   isRunComplete: boolean;
+  toolServiceHealthy?: boolean;
+  llmHealthy?: boolean;
 }
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
     topic, setTopic, files, setFiles, onStart, onInterrupt, onExport, onExportJson, onCopyLink, onOpenTemplateModal, isLoading, iteration,
-    modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, enableWebSearch, setEnableWebSearch, enableLocalSearch, setEnableLocalSearch, isRunComplete
+    modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, enableWebSearch, setEnableWebSearch, enableLocalSearch, setEnableLocalSearch, isRunComplete,
+    toolServiceHealthy: toolHealthyProp, llmHealthy: llmHealthyProp
 }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -42,8 +45,9 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     }
   };
 
-  const toolServiceHealthy = true; // placeholder; apps can pass actual status later if ControlPanel accepts it in future
+  const toolServiceHealthy = typeof toolHealthyProp === 'boolean' ? toolHealthyProp : true;
   const llmConfigured = !!localLlmUrl;
+  const llmHealthy = typeof llmHealthyProp === 'boolean' ? llmHealthyProp : llmConfigured;
 
   return (
     <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700 rounded-xl p-6 shadow-lg space-y-6 sticky top-8">
@@ -53,8 +57,8 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
             <span className={`w-2 h-2 mr-1 rounded-full ${toolServiceHealthy ? 'bg-green-600' : 'bg-red-600'}`}></span>
             Tools
           </span>
-          <span className={`inline-flex items-center px-2 py-0.5 rounded-full ${llmConfigured ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-            <span className={`w-2 h-2 mr-1 rounded-full ${llmConfigured ? 'bg-green-600' : 'bg-yellow-600'}`}></span>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full ${llmHealthy ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+            <span className={`w-2 h-2 mr-1 rounded-full ${llmHealthy ? 'bg-green-600' : 'bg-yellow-600'}`}></span>
             LLM
           </span>
         </div>
