@@ -1,15 +1,15 @@
-// Component exports
-export * from './AgentCard';
-export * from './ControlPanel';
-export * from './DspSignaturesModal';
-export * from './ErrorBoundary';
-export * from './FeedbackPanel';
+// Component exports (named re-exports for default components)
+export { default as AgentCard } from './AgentCard';
+export { default as ControlPanel } from './ControlPanel';
+export { default as DspSignaturesModal } from './DspSignaturesModal';
+export { default as ErrorBoundary } from './ErrorBoundary';
+export { default as FeedbackPanel } from './FeedbackPanel';
 export * from './Icons';
-export * from './KeyboardShortcuts';
-export * from './PromptEditorModal';
-export * from './ResultsPanel';
-export * from './StatusBar';
-export * from './TaskBuilder';
-export * from './TaskProfileDialog';
-export * from './WorkflowTemplateModal';
+export { default as KeyboardShortcuts } from './KeyboardShortcuts';
+export { default as PromptEditorModal } from './PromptEditorModal';
+export { default as ResultsPanel } from './ResultsPanel';
+export { default as StatusBar } from './StatusBar';
+export { default as TaskBuilder } from './TaskBuilder';
+export { default as TaskProfileDialog } from './TaskProfileDialog';
+export { default as WorkflowTemplateModal } from './WorkflowTemplateModal';
 export * from './agentTaskProfiles';

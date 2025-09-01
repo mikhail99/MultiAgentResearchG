@@ -3,8 +3,9 @@ import { AgentName, StylizedFact, LlmOptions, ModelProvider } from '../types';
 
 // Initialize Gemini client if API key is available (supports Vite and Node)
 const getGeminiClient = () => {
-  // Prefer Vite env in browser, fallback to Node env
-  const viteKey = (typeof import !== 'undefined' && (import.meta as any)?.env?.VITE_GOOGLE_API_KEY) as string | undefined;
+  // Prefer Vite env (browser/Vitest), fallback to Node env
+  const viteEnv = (import.meta as any)?.env as Record<string, string> | undefined;
+  const viteKey = viteEnv?.VITE_GOOGLE_API_KEY as string | undefined;
   const nodeKey = typeof process !== 'undefined' ? (process as any).env?.API_KEY : undefined;
   const apiKey = viteKey || nodeKey;
   if (!apiKey) {
