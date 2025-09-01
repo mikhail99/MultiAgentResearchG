@@ -79,7 +79,7 @@
 ### Remaining refactoring steps
 - [x] Unify LLM client to `@shared/services/llmService` (done)
 - [x] Consolidate tool service to `@shared/services/toolService` (done)
-- [ ] Shared hooks
+- [x] Shared hooks
   - Move `useModelSettings`, `useWorkflowState`, `useUIState`, `useWorkflowTemplates` to `@shared/hooks`
   - Replace app-local imports; delete duplicates under `apps/*/src/hooks`
 - [ ] Components standardization
