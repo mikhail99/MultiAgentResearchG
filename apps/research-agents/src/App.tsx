@@ -19,6 +19,7 @@ import PromptEditorModal from '@shared/components/PromptEditorModal';
 import StatusBar from '@shared/components/StatusBar';
 // getAgentTaskProfile is now handled by useAgentManagement hook
 import { SunIcon, MoonIcon, HumanIcon, LoopIcon, SparklesIcon, AgentIcon } from '@shared/components/Icons';
+import { runWorkflow } from '@shared/services/workflowRunner';
 
 // Refactored components
 import AgentGrid from './components/AgentGrid';
@@ -39,6 +40,8 @@ export default function App_LG() {
   const [stylizedFacts, setStylizedFacts] = useState<StylizedFact[]>([]);
   const [stylizedQuestions, setStylizedQuestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [metrics, setMetrics] = useState<Partial<Record<ProcessStatus, { durationMs?: number; chars?: number }>>>({});
+  const [ledger, setLedger] = useState<any>(null);
 
   // UI state
   const [isPromptEditorOpen, setIsPromptEditorOpen] = useState(false);
@@ -185,18 +188,65 @@ export default function App_LG() {
 
 
   // Workflow handlers using the workflow hook
-  const runWorkflow = useCallback(async (currentFeedback = '', startFromStep: ProcessStatus = ProcessStatus.SEARCHING) => {
+  const runWorkflowShared = useCallback(async () => {
     if (!topic.trim()) {
       setError("Please enter a topic to start the analysis.");
       return;
     }
 
-    // Reset agent iterations for new workflow
-    agentManagement.resetIterationSelections();
-    resetSentPrompts();
+    try {
+      const template: WorkflowTemplate = {
+        id: 'research-agents-default',
+        name: 'Research Agents Default',
+        description: 'Template for research-agents app',
+        category: 'Research',
+        icon: '🧪',
+        version: '1.0',
+        agentPrompts,
+        modelProvider: modelSettings.modelProvider,
+        localLlmUrl: modelSettings.localLlmUrl,
+        enableWebSearch: modelSettings.enableWebSearch,
+        enableLocalSearch: modelSettings.enableLocalSearch,
+        theme: theme,
+        maxIterations: 1,
+        schedule: [
+          'SEARCHING',
+          ['LEARNING', 'OPPORTUNITY_ANALYZING', 'PROPOSING'],
+          'CHECKING_NOVELTY',
+          'AGGREGATING'
+        ],
+        tags: ['research-agents'],
+        author: 'App',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        usageCount: 0,
+        isBuiltIn: true
+      } as WorkflowTemplate;
 
-    await workflow.runWorkflow(topic, currentFeedback, startFromStep);
-  }, [topic, workflow, agentManagement, resetSentPrompts]);
+      setMetrics({});
+
+      const state = await runWorkflow(
+        template,
+        topic,
+        { enableStreaming: true },
+        {
+          onStepComplete: (s, output) => {
+            setMetrics(prev => ({ ...prev, [s]: { ...(prev[s]||{}), chars: output.length } }));
+          },
+          onWorkflowComplete: (_finalState, runLedger) => {
+            setLedger(runLedger);
+            try { localStorage.setItem('ra_last_ledger', JSON.stringify(runLedger)); } catch {}
+          },
+          onError: (e) => setError(e.message)
+        }
+      );
+
+      setStylizedFacts(state.stylizedFacts as any);
+      setStylizedQuestions(state.stylizedQuestions);
+    } catch (e: any) {
+      setError(e?.message || String(e));
+    }
+  }, [topic, agentPrompts, modelSettings, theme]);
 
   const handleRevision = useCallback(async () => {
     if (!feedback.trim()) {
@@ -239,8 +289,8 @@ export default function App_LG() {
     setStylizedQuestions([]);
     agentManagement.resetIterationSelections();
     resetSentPrompts();
-    runWorkflow('', ProcessStatus.SEARCHING);
-  }, [agentManagement, resetSentPrompts, runWorkflow]);
+    runWorkflowShared();
+  }, [agentManagement, resetSentPrompts, runWorkflowShared]);
 
   const handleOpenPromptEditor = useCallback((agent: AgentName) => {
     setEditingAgent(agent);
@@ -397,6 +447,7 @@ ${questionsText}
       workflowState: workflow.workflowState,
       stylizedFacts,
       stylizedQuestions,
+      ledger
     };
 
     const fileName = createExportFilename(topic || 'session', '.json');
@@ -410,7 +461,7 @@ ${questionsText}
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }, [workflow, topic, modelSettings, stylizedFacts, stylizedQuestions]);
+  }, [workflow, topic, modelSettings, stylizedFacts, stylizedQuestions, ledger, metrics]);
 
   // Agent configurations for data-driven rendering
   const agentConfigs = [
@@ -524,6 +575,7 @@ ${questionsText}
                 completedSteps={workflow.workflowState?.completedSteps || []}
                 onRestartFrom={() => {}} // TODO: Implement restart functionality
                 hasFeedback={feedback.trim().length > 0}
+                metrics={metrics}
               />
 
               {error && (
@@ -597,10 +649,6 @@ ${questionsText}
           }}
           templates={templates}
           onCreateTemplate={handleCreateTemplate}
-          onDeleteTemplate={(templateId) => {
-            // This should be implemented
-            console.log('Delete template:', templateId);
-          }}
         />
 
         <KeyboardShortcuts
