@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ProcessStatus, StylizedFact } from '@shared/types';
+import { ProcessStatus, StylizedFact } from '../types';
 
 export interface WorkflowState {
   topic: string;

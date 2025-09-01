@@ -530,7 +530,7 @@ export class LangGraphWebService {
   /**
    * Check if a workflow is currently running
    */
-  isWorkflowRunning(threadId: string): boolean {
+  isWorkflowRunning(_threadId: string): boolean {
     // In browser environment, we can't easily track running state
     // This is a simplified implementation
     return false;

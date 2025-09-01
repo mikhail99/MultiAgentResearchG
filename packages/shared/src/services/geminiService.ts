@@ -1,7 +1,7 @@
-import { AgentName, StylizedFact, LlmOptions, ModelProvider } from '../types';
+import { AgentName, StylizedFact, LlmOptions } from '../types';
 
 export const generateContentStream = async (
-  agentName: AgentName,
+  _agentName: AgentName,
   fullPrompt: string,
   options: LlmOptions,
   onChunk: (chunk: string) => void
@@ -73,7 +73,7 @@ export const generateContentStream = async (
   return accumulatedText;
 };
 
-export const generateContent = async (agentName: AgentName, fullPrompt: string, options: LlmOptions): Promise<string> => {
+export const generateContent = async (_agentName: AgentName, fullPrompt: string, options: LlmOptions): Promise<string> => {
   if (!options.url) throw new Error("Local LLM URL is not provided.");
 
   try {

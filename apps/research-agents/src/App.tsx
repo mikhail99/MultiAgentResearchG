@@ -8,7 +8,7 @@ import { useTheme } from './hooks/useTheme';
 import { useWorkflow, UseWorkflowOptions } from './hooks/useWorkflow';
 import { useAgentManagement, UseAgentManagementOptions, TaskProfileWithDisplay } from './hooks/useAgentManagement';
 import { useSessionManagement, UseSessionManagementOptions } from './hooks/useSessionManagement';
-import { useModelSettings } from './hooks/useModelSettings';
+import { useModelSettings } from '@shared/hooks';
 import { useWorkflowTemplates } from '@shared/hooks/useWorkflowTemplates';
 
 import { initialPrompts } from '@shared/prompts';

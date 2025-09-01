@@ -18,7 +18,6 @@ interface WorkflowTemplateModalProps {
   };
   templates: WorkflowTemplate[];
   onCreateTemplate: (name: string, description: string, category: WorkflowTemplate['category']) => string;
-  onDeleteTemplate: (templateId: string) => void;
 }
 
 
@@ -31,7 +30,7 @@ const WorkflowTemplateModal: React.FC<WorkflowTemplateModalProps> = ({
   // currentSettings, // unused
   templates,
   onCreateTemplate,
-  onDeleteTemplate
+  _onDeleteTemplate
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');

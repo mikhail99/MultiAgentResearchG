@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { AgentName, AgentPrompts } from '@shared/types';
-import { initialPrompts } from '@shared/prompts';
+import { AgentName, AgentPrompts } from '../types';
+import { initialPrompts } from '../prompts';
 
 export interface UIState {
   isPromptEditorOpen: boolean;

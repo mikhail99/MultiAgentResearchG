@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RevisionIcon } from './Icons';
+import { RevisionIcon } from '@shared/components/Icons';
 
 interface FeedbackPanelProps {
     feedback: string;

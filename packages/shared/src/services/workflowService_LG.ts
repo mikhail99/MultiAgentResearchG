@@ -1,5 +1,5 @@
 // Browser-compatible workflow service (no LangGraph.js dependencies)
-import { WorkflowState, NodeResult, AgentConfig, ValidationResult, StateValidationOptions } from '../types/workflow_LG';
+import { WorkflowState, AgentConfig, ValidationResult, StateValidationOptions } from '../types/workflow_LG';
 import { AgentName, ProcessStatus, ModelProvider } from '../types';
 import { generateContentStream } from './geminiService';
 import { executeResearcherTools, formatToolResultsForPrompt } from './toolService';
@@ -898,9 +898,9 @@ function validateArray(array: any[], fieldName: string, result: ValidationResult
   }
 
   // Check for null/undefined elements
-  const invalidElements = array.filter((item, index) => {
+  const _invalidElements = array.filter((item, _index) => {
     if (item === null || item === undefined) {
-      result.warnings.push(`${fieldName}[${index}] is null or undefined`);
+      result.warnings.push(`${fieldName}[${_index}] is null or undefined`);
       return true;
     }
     return false;
@@ -908,7 +908,7 @@ function validateArray(array: any[], fieldName: string, result: ValidationResult
 
   // Check for empty strings in critical arrays
   if (['searchResults', 'learnings'].includes(fieldName)) {
-    const emptyStrings = array.filter((item, index) => typeof item === 'string' && item.trim().length === 0);
+    const emptyStrings = array.filter((item, _index) => typeof item === 'string' && item.trim().length === 0);
     if (emptyStrings.length > 0) {
       result.warnings.push(`${fieldName} contains ${emptyStrings.length} empty strings`);
     }

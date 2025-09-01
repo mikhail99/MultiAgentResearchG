@@ -2,8 +2,8 @@
 import { WorkflowState } from '@shared/types/workflow_LG';
 import { AgentName, ProcessStatus, ModelProvider } from '@shared/types';
 import type { AgentConfig, ValidationResult, StateValidationOptions } from '@shared/types/workflow_LG';
-import { generateContentStream } from './geminiService';
-import { executeResearcherTools, formatToolResultsForPrompt } from './toolService';
+import { generateContentStream } from '@shared/services';
+import { executeResearcherTools, formatToolResultsForPrompt } from '@shared/services';
 
 // Standard node callback interface for consistent LangGraphJS integration
 export interface NodeCallbacks {
@@ -901,7 +901,7 @@ function validateArray(array: any[], fieldName: string, result: ValidationResult
   }
 
   // Check for null/undefined elements
-  array.forEach((item: unknown, idx: number) => {
+  array.forEach((item: unknown, _idx: number) => {
     if (item === null || item === undefined) {
       result.warnings.push(`${fieldName}[\${idx}] is null or undefined`);
     }

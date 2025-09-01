@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AgentName, AgentPrompts, LlmOptions } from '@shared/types';
-import { improvePrompt } from '../services/geminiService';
+import { improvePrompt } from '@shared/services';
 import { agentTaskDescriptions } from '../prompts';
 
 interface PromptEditorModalProps {

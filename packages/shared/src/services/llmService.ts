@@ -1,11 +1,20 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { AgentName, StylizedFact, LlmOptions, ModelProvider } from '@shared/types';
+import { AgentName, StylizedFact, LlmOptions, ModelProvider } from '../types';
 
-if (!process.env.API_KEY) {
-  console.warn("API_KEY environment variable not set. Gemini models will not be available.");
-}
+// Initialize Gemini client if API key is available (supports Vite and Node)
+const getGeminiClient = () => {
+  // Prefer Vite env in browser, fallback to Node env
+  const viteKey = (typeof import !== 'undefined' && (import.meta as any)?.env?.VITE_GOOGLE_API_KEY) as string | undefined;
+  const nodeKey = typeof process !== 'undefined' ? (process as any).env?.API_KEY : undefined;
+  const apiKey = viteKey || nodeKey;
+  if (!apiKey) {
+    console.warn("GOOGLE API key not set (VITE_GOOGLE_API_KEY or API_KEY). Gemini models will not be available.");
+    return null;
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
-const ai = process.env.API_KEY ? new GoogleGenAI({ apiKey: process.env.API_KEY }) : null;
+const ai = getGeminiClient();
 
 export const generateContentStream = async (
   agentName: AgentName,
@@ -21,10 +30,10 @@ export const generateContentStream = async (
     const isSearch = agentName === AgentName.SEARCH;
     
     const responseStream = await ai.models.generateContentStream({
-      model: 'gemini-2.5-flash',
+      model: options.model || 'gemini-2.5-flash',
       contents: fullPrompt,
       config: {
-        temperature: 0.5,
+        temperature: options.temperature || 0.5,
         topP: 0.95,
         ...(isSearch && { tools: [{ googleSearch: {} }] }),
       }
@@ -60,9 +69,9 @@ export const generateContentStream = async (
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'qwen3:4b',
+          model: options.model || 'qwen3:4b',
           messages: [{ role: 'user', content: fullPrompt }],
-          temperature: 0.5,
+          temperature: options.temperature || 0.5,
           stream: true, // Enable streaming
         }),
       });
@@ -126,10 +135,10 @@ export const generateContent = async (agentName: AgentName, fullPrompt: string, 
     const isSearch = agentName === AgentName.SEARCH;
     
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: options.model || 'gemini-2.5-flash',
       contents: fullPrompt,
       config: {
-        temperature: 0.5,
+        temperature: options.temperature || 0.5,
         topP: 0.95,
         ...(isSearch && { tools: [{ googleSearch: {} }] }),
       }
@@ -154,9 +163,9 @@ export const generateContent = async (agentName: AgentName, fullPrompt: string, 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'qwen3:4b',
+          model: options.model || 'qwen3:4b',
           messages: [{ role: 'user', content: fullPrompt }],
-          temperature: 0.5,
+          temperature: options.temperature || 0.5,
           stream: false,
         }),
       });
@@ -215,7 +224,7 @@ export const generateFacts = async (finalReport: string, options: LlmOptions): P
     
     try {
       const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: options.model || "gemini-2.5-flash",
         contents: prompt,
         config: {
           responseMimeType: "application/json",
@@ -269,9 +278,9 @@ export const generateFacts = async (finalReport: string, options: LlmOptions): P
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'qwen3:4b',
+          model: options.model || 'qwen3:4b',
           messages: [{ role: 'user', content: prompt }],
-          temperature: 0.5,
+          temperature: options.temperature || 0.5,
           stream: false,
         }),
       });
@@ -308,7 +317,7 @@ export const generateQuestions = async (finalReport: string, options: LlmOptions
       `;
       try {
         const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash",
+          model: options.model || "gemini-2.5-flash",
           contents: prompt,
           config: {
             responseMimeType: "application/json",
@@ -351,9 +360,9 @@ export const generateQuestions = async (finalReport: string, options: LlmOptions
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            model: 'qwen3:4b',
+            model: options.model || 'qwen3:4b',
             messages: [{ role: 'user', content: prompt }],
-            temperature: 0.5,
+            temperature: options.temperature || 0.5,
             stream: false,
           }),
         });

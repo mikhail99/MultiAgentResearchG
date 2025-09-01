@@ -1,7 +1,7 @@
 import { ProcessStatus, ModelProvider } from '@shared/types';
 import { WorkflowState } from '@shared/types/workflow_LG';
 import { executeResearcherTools, formatToolResultsForPrompt } from '@shared/services/toolService';
-import { generateContentStream } from '@shared/services/geminiService';
+import { generateContentStream } from '@shared/services';
 import { KE_TEMPLATE } from '../workflowTemplates';
 
 export interface KECallbacks {

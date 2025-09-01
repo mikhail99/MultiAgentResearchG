@@ -5,7 +5,7 @@ import {
   generateFacts,
   generateQuestions,
   improvePrompt
-} from '../services/geminiService';
+} from '../services/llmService';
 import type { LlmOptions } from '../types';
 import { ModelProvider } from '../types';
 

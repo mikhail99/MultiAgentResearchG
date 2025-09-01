@@ -5,7 +5,7 @@ import { AgentName, ToolResults } from '@shared/types';
 import {
     AggregatorIcon, EvaluatorIcon, GeneratorIcon, ProposerIcon, ResearcherIcon,
     EditIcon, CopyIcon, SaveIcon, CheckIcon, PromptIcon
-} from './Icons';
+} from '@shared/components/Icons';
 
 // Add new icon for task profile
 const TaskProfileIcon: React.FC = () => (

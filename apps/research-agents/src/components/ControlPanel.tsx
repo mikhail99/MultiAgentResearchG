@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileUploadIcon, StartIcon, ExportIcon, CopyIcon, SaveIcon } from './Icons';
+import { FileUploadIcon, StartIcon, ExportIcon, CopyIcon, SaveIcon } from '@shared/components/Icons';
 import { ModelProvider } from '@shared/types';
 
 const StopIcon = () => (

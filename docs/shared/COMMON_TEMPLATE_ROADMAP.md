@@ -74,13 +74,4 @@
 6. TS cleanup and alias consistency
 7. Add Playwright smokes
 
-### Effort estimate
-- LLM + tool consolidation: 0.5–1 day
-- Hooks standardization: 0.5 day
-- Runner + KE integration: 0.5–1 day
-- Research-agents migration: 0.5–1 day
-- Data-preprocessing migration: 0.5–1 day
-- TS cleanup + tests: 0.5–1 day
-
-Total: ~3–5 days depending on polish.
 
