@@ -17,8 +17,9 @@ import { createInitialState, NodeCallbacks } from './workflowService_LG';
 
 export interface WorkflowRunnerCallbacks extends NodeCallbacks {
   onStepStart?: (step: ProcessStatus) => void;
+  onStreamChunk?: (step: ProcessStatus, chunk: string) => void;
   onStepComplete?: (step: ProcessStatus, output: string) => void;
-  onWorkflowComplete?: (finalState: WorkflowState) => void;
+  onWorkflowComplete?: (finalState: WorkflowState, ledger: RunLedger) => void;
   onWorkflowError?: (error: Error) => void;
 }
 
@@ -28,11 +29,29 @@ export interface WorkflowRunnerOptions {
   llmOptions?: LlmOptions;
 }
 
+export interface RunLedgerStep {
+  step: ProcessStatus;
+  startedAt: string;
+  endedAt?: string;
+  durationMs?: number;
+  chars?: number;
+}
+
+export interface RunLedger {
+  templateId: string;
+  topic: string;
+  modelProvider: string;
+  startedAt: string;
+  endedAt?: string;
+  steps: RunLedgerStep[];
+}
+
 export class WorkflowRunner {
   private template: WorkflowTemplate;
   private options: WorkflowRunnerOptions;
   private callbacks?: WorkflowRunnerCallbacks;
   private currentState: WorkflowState;
+  private ledger: RunLedger;
 
   constructor(template: WorkflowTemplate, options: WorkflowRunnerOptions = {}) {
     this.template = template;
@@ -42,6 +61,13 @@ export class WorkflowRunner {
       ...options
     };
     this.currentState = createInitialState('', 1);
+    this.ledger = {
+      templateId: template.id,
+      topic: '',
+      modelProvider: String(template.modelProvider),
+      startedAt: new Date().toISOString(),
+      steps: []
+    };
   }
 
   /**
@@ -50,19 +76,21 @@ export class WorkflowRunner {
   async run(topic: string, callbacks?: WorkflowRunnerCallbacks): Promise<WorkflowState> {
     this.callbacks = callbacks;
     this.currentState = createInitialState(topic, 1);
+    this.ledger.topic = topic;
+    this.ledger.startedAt = new Date().toISOString();
     
     try {
-      // Execute steps in sequence as defined by the template
-      // This is a simplified version - in a full implementation, 
-      // you would parse the template.schedule and execute accordingly
-      await this.executeStep(ProcessStatus.SEARCHING);
-      await this.executeStep(ProcessStatus.LEARNING);
-      await this.executeStep(ProcessStatus.OPPORTUNITY_ANALYZING);
-      await this.executeStep(ProcessStatus.PROPOSING);
-      await this.executeStep(ProcessStatus.CHECKING_NOVELTY);
-      await this.executeStep(ProcessStatus.AGGREGATING);
+      const stages = this.getScheduleStages();
+      for (const stage of stages) {
+        if (Array.isArray(stage)) {
+          await Promise.all(stage.map(s => this.executeStep(s)));
+        } else {
+          await this.executeStep(stage);
+        }
+      }
       
-      this.callbacks?.onWorkflowComplete?.(this.currentState);
+      this.ledger.endedAt = new Date().toISOString();
+      this.callbacks?.onWorkflowComplete?.(this.currentState, this.ledger);
       return this.currentState;
     } catch (error) {
       this.callbacks?.onWorkflowError?.(error as Error);
@@ -71,10 +99,30 @@ export class WorkflowRunner {
   }
 
   /**
+   * Build stages from template schedule or default linear flow
+   */
+  private getScheduleStages(): Array<ProcessStatus | ProcessStatus[]> {
+    if (this.template.schedule && this.template.schedule.length > 0) {
+      return this.template.schedule;
+    }
+    // Default: linear path
+    return [
+      ProcessStatus.SEARCHING,
+      ProcessStatus.LEARNING,
+      ProcessStatus.OPPORTUNITY_ANALYZING,
+      ProcessStatus.PROPOSING,
+      ProcessStatus.CHECKING_NOVELTY,
+      ProcessStatus.AGGREGATING,
+    ];
+  }
+
+  /**
    * Execute a single step of the workflow
    */
   private async executeStep(step: ProcessStatus): Promise<void> {
     this.callbacks?.onStepStart?.(step);
+    const stepStart = Date.now();
+    this.ledger.steps.push({ step, startedAt: new Date(stepStart).toISOString() });
     
     try {
       let output = '';
@@ -116,16 +164,26 @@ export class WorkflowRunner {
           (chunk) => {
             output += chunk;
             this.callbacks?.onStream?.(chunk);
+            this.callbacks?.onStreamChunk?.(step, chunk);
           }
         );
       } else {
         output = await generateContent(agentName, prompt, this.getLlmOptions());
         // Send the complete output as a single chunk
         this.callbacks?.onStream?.(output);
+        this.callbacks?.onStreamChunk?.(step, output);
       }
       
       // Update state based on the step
       this.updateState(step, output);
+      
+      // Metrics
+      const rec = this.ledger.steps.find(r => r.step === step && !r.endedAt);
+      if (rec) {
+        rec.endedAt = new Date().toISOString();
+        rec.durationMs = Date.now() - stepStart;
+        rec.chars = output.length;
+      }
       
       this.callbacks?.onStepComplete?.(step, output);
     } catch (error) {

@@ -6,6 +6,7 @@ interface StatusBarProps {
   completedSteps?: ProcessStatus[];
   onRestartFrom?: (step: ProcessStatus) => void;
   hasFeedback?: boolean;
+  metrics?: Partial<Record<ProcessStatus, { durationMs?: number; chars?: number }>>;
 }
 
 const steps = [
@@ -18,7 +19,7 @@ const steps = [
   { id: ProcessStatus.FEEDBACK, label: 'Feedback' },
 ];
 
-const StatusBar: React.FC<StatusBarProps> = React.memo(({ status, completedSteps = [], onRestartFrom, hasFeedback = false }) => {
+const StatusBar: React.FC<StatusBarProps> = React.memo(({ status, completedSteps = [], onRestartFrom, hasFeedback = false, metrics }) => {
   const [hoveredStep, setHoveredStep] = useState<ProcessStatus | null>(null);
 
   const getStepState = useMemo(() => {
@@ -32,8 +33,6 @@ const StatusBar: React.FC<StatusBarProps> = React.memo(({ status, completedSteps
       return { isCompleted, isCurrent, isHovered, willRerun };
     };
   }, [status, completedSteps, hoveredStep]);
-
-
 
   const getAffectedSteps = useCallback((fromStep: ProcessStatus): string[] => {
     const fromIndex = steps.findIndex(step => step.id === fromStep);
@@ -81,13 +80,18 @@ const StatusBar: React.FC<StatusBarProps> = React.memo(({ status, completedSteps
                   )}
                 </div>
                 
-                <p className={`
-                  ml-2 text-xs md:text-sm font-medium transition-all duration-300
-                  ${isCurrent || isCompleted ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}
-                  ${isHovered ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''}
-                `}>
-                  {step.label}
-                </p>
+                <div className="ml-2 flex flex-col items-start">
+                  <p className={`
+                    text-xs md:text-sm font-medium transition-all duration-300
+                    ${isCurrent || isCompleted ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-gray-400'}
+                    ${isHovered ? 'text-blue-600 dark:text-blue-400 font-semibold' : ''}
+                  `}>
+                    {step.label}
+                  </p>
+                  {metrics?.[step.id]?.durationMs != null && (
+                    <p className="text-[10px] text-gray-500 dark:text-gray-400">{Math.round((metrics[step.id]?.durationMs || 0)/1000)}s</p>
+                  )}
+                </div>
                 
                 {/* Restart Tooltip */}
                 {canRestart && (

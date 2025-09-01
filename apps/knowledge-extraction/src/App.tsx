@@ -5,7 +5,7 @@ import AgentCard from '@shared/components/AgentCard';
 import ResultsPanel from '@shared/components/ResultsPanel';
 import { ProcessStatus, ModelProvider, StylizedFact } from '@shared/types';
 import { useModelSettings } from '@shared/hooks';
-import { runKnowledgeExtraction } from './services/workflowService_KE';
+import { runWorkflow } from '@shared/services/workflowRunner';
 import { KE_TEMPLATE } from './workflowTemplates';
 
 export default function App() {
@@ -32,6 +32,8 @@ export default function App() {
   });
   const [facts, setFacts] = useState<StylizedFact[]>([]);
   const [finalMd, setFinalMd] = useState('');
+  const [metrics, setMetrics] = useState<Partial<Record<ProcessStatus, { durationMs?: number; chars?: number }>>>({});
+  const [ledger, setLedger] = useState<any>(null);
 
   useEffect(() => {
     try {
@@ -81,19 +83,29 @@ export default function App() {
       [ProcessStatus.AGGREGATING]: '',
     };
     setContents(resetContents);
+    setMetrics({});
     saveSession({ status: ProcessStatus.SEARCHING, completed: [], contents: resetContents });
 
-    const state = await runKnowledgeExtraction(
-      { question, modelProvider, localLlmUrl, enableWebSearch, enableLocalSearch },
+    const state = await runWorkflow(
+      { ...KE_TEMPLATE, modelProvider, localLlmUrl, enableWebSearch, enableLocalSearch },
+      question,
+      { enableStreaming: true },
       {
-        onStatus: (s) => { setStatus(s); saveSession({ status: s }); },
-        onStream: (agent, chunk) => {
+        onStepStart: (s) => { setStatus(s); saveSession({ status: s }); },
+        onStreamChunk: (s, chunk) => {
           setContents(prev => {
-            const next = { ...prev, [agent]: (prev[agent] || '') + chunk };
+            const next = { ...prev, [s]: (prev[s] || '') + chunk };
             saveSession({ contents: next });
             return next;
           });
         },
+        onStepComplete: (s, output) => {
+          setMetrics(prev => ({ ...prev, [s]: { ...(prev[s]||{}), chars: output.length } }));
+        },
+        onWorkflowComplete: (finalState, runLedger) => {
+          setLedger(runLedger);
+          try { localStorage.setItem('ke_last_ledger', JSON.stringify(runLedger)); } catch {}
+        }
       }
     );
 
@@ -114,8 +126,25 @@ export default function App() {
           setFiles={() => {}}
           onStart={onStart}
           onInterrupt={() => {}}
-          onExport={() => {}}
-          onExportJson={() => {}}
+          onExport={() => {
+            const blob = new Blob([finalMd || ''], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ke_result.md';
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+          onExportJson={() => {
+            const data = { question, metrics, ledger, contents };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ke_run_ledger.json';
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
           onCopyLink={() => {}}
           onOpenTemplateModal={() => {}}
           isLoading={status !== ProcessStatus.IDLE && !isRunComplete}
@@ -131,7 +160,7 @@ export default function App() {
           isRunComplete={isRunComplete}
         />
 
-        <StatusBar status={status} completedSteps={completed} />
+        <StatusBar status={status} completedSteps={completed} metrics={metrics} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {agentCards.map(c => (

@@ -17,6 +17,10 @@ export interface WorkflowTemplate {
   theme: 'light' | 'dark';
   maxIterations: number;
 
+  // Declarative schedule: sequential steps or parallel groups
+  // Example: ['SEARCHING', ['LEARNING','OPPORTUNITY_ANALYZING','PROPOSING'], 'AGGREGATING']
+  schedule?: Array<ProcessStatus | ProcessStatus[]>;
+
   // Workflow state to restore
   completedSteps?: ProcessStatus[];
   iteration?: number;

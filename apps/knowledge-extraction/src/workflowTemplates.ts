@@ -30,6 +30,12 @@ Provide a “Sources” section with title + link/DOI when available.`,
   enableLocalSearch: true,
   theme: 'light',
   maxIterations: 1,
+  // NEW: schedule with parallel middle stage
+  schedule: [
+    'SEARCHING',
+    ['LEARNING', 'OPPORTUNITY_ANALYZING', 'PROPOSING'],
+    'AGGREGATING'
+  ],
   tags: ['knowledge-extraction', 'cascade'],
   author: 'Built-in',
   createdAt: new Date().toISOString(),
