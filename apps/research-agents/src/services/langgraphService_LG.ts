@@ -1,8 +1,8 @@
 // LangGraph.js with web environment support
 import { StateGraph, START, END, Annotation, MemorySaver } from "@langchain/langgraph/web";
-import { WorkflowState } from '../types/workflow_LG';
-import { ProcessStatus } from '../types';
-import { createInitialState, shouldRestart, shouldContinue } from './workflowService_LG';
+import { WorkflowState } from '@shared/types/workflow_LG';
+import { ProcessStatus } from '@shared/types';
+import { createInitialState } from './workflowService_LG';
 import type { NodeCallbacks } from './workflowService_LG';
 
 // Define proper LangGraph.js state using Annotations
@@ -530,7 +530,7 @@ export class LangGraphWebService {
   /**
    * Check if a workflow is currently running
    */
-  isWorkflowRunning(threadId: string): boolean {
+  isWorkflowRunning(_threadId: string): boolean {
     // In browser environment, we can't easily track running state
     // This is a simplified implementation
     return false;

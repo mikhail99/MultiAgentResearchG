@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { AgentPrompts, ModelProvider } from '../types';
-import { WorkflowTemplate, TEMPLATE_CATEGORIES } from '../types/workflowTemplates';
+import { WorkflowTemplate } from '../types/workflowTemplates';
 
 interface WorkflowTemplateModalProps {
   isOpen: boolean;
@@ -27,8 +27,8 @@ const WorkflowTemplateModal: React.FC<WorkflowTemplateModalProps> = ({
   isOpen,
   onClose,
   onSelectTemplate,
-  currentPrompts,
-  currentSettings,
+  // currentPrompts, // unused
+  // currentSettings, // unused
   templates,
   onCreateTemplate,
   onDeleteTemplate

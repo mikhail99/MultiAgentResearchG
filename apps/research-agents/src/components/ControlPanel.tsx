@@ -1,6 +1,6 @@
 import React from 'react';
 import { FileUploadIcon, StartIcon, ExportIcon, CopyIcon, SaveIcon } from './Icons';
-import { ModelProvider } from '../types';
+import { ModelProvider } from '@shared/types';
 
 const StopIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

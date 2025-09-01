@@ -56,6 +56,8 @@ export interface AgentStates {
 export interface LlmOptions {
     provider: ModelProvider;
     url: string;
+    model?: string;
+    temperature?: number;
 }
 
 export type AgentPrompts = {

@@ -1,9 +1,9 @@
 // Browser-compatible workflow service (no LangGraph.js dependencies)
-import { WorkflowState, NodeResult, AgentConfig, ValidationResult, StateValidationOptions } from '../types/workflow_LG';
-import { AgentName, ProcessStatus, ModelProvider } from '../types';
+import { WorkflowState } from '@shared/types/workflow_LG';
+import { AgentName, ProcessStatus, ModelProvider } from '@shared/types';
+import type { AgentConfig, ValidationResult, StateValidationOptions } from '@shared/types/workflow_LG';
 import { generateContentStream } from './geminiService';
 import { executeResearcherTools, formatToolResultsForPrompt } from './toolService';
-import { amemService } from './amemService';
 
 // Standard node callback interface for consistent LangGraphJS integration
 export interface NodeCallbacks {
@@ -49,99 +49,13 @@ export function createInitialState(topic: string, iteration: number = 1): Workfl
   };
 }
 
-// Memory-enabled helper function
+// No-op memory processing (A-Mem removed)
 async function processWithMemory(
   state: WorkflowState,
-  agentName: AgentName,
-  output: string
+  _agentName: AgentName,
+  _output: string
 ): Promise<Partial<WorkflowState>> {
-  console.log(`🧠 Processing ${agentName} output through A-Mem...`);
-  console.log(`🧠 Current State Memory:`, {
-    existingNotes: state.memoryNotes?.length || 0,
-    existingLinks: state.memoryLinks?.length || 0,
-    existingNotesIds: state.memoryNotes?.map(n => `${n.agentName}:${n.id}`) || []
-  });
-
-  try {
-    // Step 1: Note Construction
-    const memoryNote = await amemService.constructNote(
-      agentName,
-      output,
-      state.topic,
-      state.iteration,
-      state.modelProvider
-    );
-
-    console.log(`🧠 Created memory note:`, {
-      id: memoryNote.id,
-      agent: memoryNote.agentName,
-      contentLength: memoryNote.content.length
-    });
-
-    // Step 2: Link Generation
-    const safeExistingNotes = Array.isArray(state.memoryNotes) ? state.memoryNotes : [];
-    const newLinks = await amemService.generateLinks(
-      memoryNote,
-      safeExistingNotes,
-      state.modelProvider
-    );
-
-    console.log(`🧠 Generated links:`, newLinks.length);
-
-    // Step 3: Memory Evolution (if there are connected notes)
-    let evolutionActions: any[] = [];
-    if (newLinks.length > 0) {
-      const connectedNoteIds = newLinks.map(link => link.targetNoteId);
-      const connectedNotes = safeExistingNotes.filter(note =>
-        connectedNoteIds.includes(note.id)
-      );
-
-      evolutionActions = await amemService.evolveMemories(
-        memoryNote,
-        connectedNotes,
-        state.modelProvider
-      );
-    }
-
-    // Apply evolution actions to get updated state
-    const evolvedState = amemService.applyEvolutionActions(state, evolutionActions);
-
-    console.log(`🧠 Final memory state:`, {
-      totalNotes: (evolvedState.memoryNotes || []).length + 1, // +1 for new note
-      totalLinks: (evolvedState.memoryLinks || []).length + newLinks.length,
-      newNote: memoryNote.id
-    });
-
-    return {
-      ...evolvedState,
-      memoryNotes: [...(evolvedState.memoryNotes || []), memoryNote],
-      memoryLinks: [...(evolvedState.memoryLinks || []), ...newLinks],
-      memoryEvolutionQueue: [...(evolvedState.memoryEvolutionQueue || []), ...evolutionActions],
-    };
-
-  } catch (error) {
-    console.error('❌ A-Mem processing failed:', error);
-
-    // Return original state with minimal memory update
-    const fallbackNote = {
-      id: `mem_fallback_${Date.now()}`,
-      content: output,
-      context: `Agent ${agentName} output for topic: ${state.topic}`,
-      keywords: [agentName, state.topic],
-      tags: [agentName, 'research'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      agentName,
-      iteration: state.iteration,
-      links: [],
-      metadata: { error: 'A-Mem processing failed' }
-    };
-
-    return {
-      ...state,
-      memoryNotes: [...(state.memoryNotes || []), fallbackNote],
-    };
-  }
+  return state;
 }
 
 // Agent Node Implementations
@@ -232,7 +146,7 @@ This is a fallback response generated when the local LLM service is unavailable.
     }
   }
 
-    // Process output through A-Mem system
+    // Memory processing disabled
     const memoryResult = await processWithMemory(state, AgentName.SEARCH, output);
 
     // Stream memory updates if callback is available
@@ -248,7 +162,7 @@ This is a fallback response generated when the local LLM service is unavailable.
       ...memoryResult,
       searchResults: [...(memoryResult.searchResults || state.searchResults), output],
       currentStep: ProcessStatus.SEARCHING,
-      completedSteps: [...(memoryResult.completedSteps || state.completedSteps || []).filter(s => s !== ProcessStatus.SEARCHING), ProcessStatus.SEARCHING],
+      completedSteps: [...(memoryResult.completedSteps || state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.SEARCHING), ProcessStatus.SEARCHING],
       toolResults: {
         webResults: toolData,
         localResults: '',
@@ -264,7 +178,7 @@ This is a fallback response generated when the local LLM service is unavailable.
     return {
       searchResults: [...state.searchResults, `Error during search: ${error instanceof Error ? error.message : 'Unknown error'}`],
       currentStep: ProcessStatus.SEARCHING,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.SEARCHING), ProcessStatus.SEARCHING],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.SEARCHING), ProcessStatus.SEARCHING],
       toolResults: {
         webResults: '',
         localResults: '',
@@ -287,7 +201,7 @@ export async function learningsNode(state: WorkflowState, callbacks?: NodeCallba
     return {
       learnings: [...state.learnings, fallback],
       currentStep: ProcessStatus.LEARNING,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING],
     };
   }
 
@@ -360,7 +274,7 @@ This is a fallback analysis generated when the local LLM service is unavailable.
     }
   }
 
-    // Process output through A-Mem system
+    // Memory processing disabled
     const memoryResult = await processWithMemory(state, AgentName.LEARNINGS, output);
 
     // Stream memory updates if callback is available
@@ -376,7 +290,7 @@ This is a fallback analysis generated when the local LLM service is unavailable.
       ...memoryResult,
       learnings: [...(memoryResult.learnings || state.learnings), output],
       currentStep: ProcessStatus.LEARNING,
-      completedSteps: [...(memoryResult.completedSteps || state.completedSteps || []).filter(s => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING],
+      completedSteps: [...(memoryResult.completedSteps || state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING],
     };
   } catch (error) {
     console.error('❌ Learnings Node execution failed:', error);
@@ -386,7 +300,7 @@ This is a fallback analysis generated when the local LLM service is unavailable.
     return {
       learnings: [...state.learnings, `Error during analysis: ${error instanceof Error ? error.message : 'Unknown error'}`],
       currentStep: ProcessStatus.LEARNING,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.LEARNING), ProcessStatus.LEARNING],
     };
   }
 }
@@ -404,7 +318,7 @@ export async function opportunityAnalysisNode(state: WorkflowState, callbacks?: 
       learnings = lastLearning;
     } else {
       // If last learning is empty, try to use all previous learnings
-      const validLearnings = (state.learnings || []).filter(l => l && l.trim());
+      const validLearnings = (state.learnings || []).filter((l: string) => l && l.trim());
       if (validLearnings.length > 0) {
         learnings = validLearnings.join('\n\n---\n\n');
       }
@@ -418,7 +332,7 @@ export async function opportunityAnalysisNode(state: WorkflowState, callbacks?: 
     return {
       opportunityAnalyses: [...state.opportunityAnalyses, fallback],
       currentStep: ProcessStatus.OPPORTUNITY_ANALYZING,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
       shouldRestart: true, // Force restart if no learnings available
       restartFromStep: ProcessStatus.SEARCHING,
       restartCount: state.restartCount,
@@ -517,14 +431,14 @@ This is a fallback analysis generated when the local LLM service is unavailable.
     finalOutput = output + '\n\n[Note: Restart request denied - maximum of 2 search restarts reached. Proceeding with current research.]';
   }
 
-    // Process output through A-Mem system
+    // Memory processing disabled
     const memoryResult = await processWithMemory(state, AgentName.OPPORTUNITY_ANALYSIS, finalOutput);
 
     return {
       ...memoryResult,
       opportunityAnalyses: [...(memoryResult.opportunityAnalyses || state.opportunityAnalyses), finalOutput],
       currentStep: ProcessStatus.OPPORTUNITY_ANALYZING,
-      completedSteps: [...(memoryResult.completedSteps || state.completedSteps || []).filter(s => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
+      completedSteps: [...(memoryResult.completedSteps || state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
       shouldRestart,
       restartFromStep: shouldRestart ? ProcessStatus.SEARCHING : null,
       restartCount: newRestartCount,
@@ -537,7 +451,7 @@ This is a fallback analysis generated when the local LLM service is unavailable.
     return {
       opportunityAnalyses: [...state.opportunityAnalyses, `Error during opportunity analysis: ${error instanceof Error ? error.message : 'Unknown error'}`],
       currentStep: ProcessStatus.OPPORTUNITY_ANALYZING,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.OPPORTUNITY_ANALYZING), ProcessStatus.OPPORTUNITY_ANALYZING],
       shouldRestart: true, // Force restart on error to allow recovery
       restartFromStep: ProcessStatus.SEARCHING,
       restartCount: state.restartCount,
@@ -623,7 +537,7 @@ This is a fallback proposal generated when the local LLM service is unavailable.
     return {
       proposals: [...state.proposals, output],
       currentStep: ProcessStatus.PROPOSING,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING],
     };
   } catch (error) {
     console.error('❌ Proposer Node execution failed:', error);
@@ -633,7 +547,7 @@ This is a fallback proposal generated when the local LLM service is unavailable.
     return {
       proposals: [...state.proposals, `Error during proposal generation: ${error instanceof Error ? error.message : 'Unknown error'}`],
       currentStep: ProcessStatus.PROPOSING,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.PROPOSING), ProcessStatus.PROPOSING],
     };
   }
 }
@@ -719,7 +633,7 @@ This is a fallback assessment generated when the local LLM service is unavailabl
     return {
       noveltyChecks: [...state.noveltyChecks, output],
       currentStep: ProcessStatus.CHECKING_NOVELTY,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.CHECKING_NOVELTY), ProcessStatus.CHECKING_NOVELTY],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.CHECKING_NOVELTY), ProcessStatus.CHECKING_NOVELTY],
     };
   } catch (error) {
     console.error('❌ Novelty Checker Node execution failed:', error);
@@ -729,7 +643,7 @@ This is a fallback assessment generated when the local LLM service is unavailabl
     return {
       noveltyChecks: [...state.noveltyChecks, `Error during novelty check: ${error instanceof Error ? error.message : 'Unknown error'}`],
       currentStep: ProcessStatus.CHECKING_NOVELTY,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.CHECKING_NOVELTY), ProcessStatus.CHECKING_NOVELTY],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.CHECKING_NOVELTY), ProcessStatus.CHECKING_NOVELTY],
     };
   }
 }
@@ -819,7 +733,7 @@ The research on ${state.topic} shows strong potential for advancing the field. T
     return {
       aggregations: [...state.aggregations, output],
       currentStep: ProcessStatus.AGGREGATING,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING],
     };
   } catch (error) {
     console.error('❌ Aggregator Node execution failed:', error);
@@ -829,7 +743,7 @@ The research on ${state.topic} shows strong potential for advancing the field. T
     return {
       aggregations: [...state.aggregations, `Error during final report generation: ${error instanceof Error ? error.message : 'Unknown error'}`],
       currentStep: ProcessStatus.AGGREGATING,
-      completedSteps: [...(state.completedSteps || []).filter(s => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING],
+      completedSteps: [...(state.completedSteps || []).filter((s: ProcessStatus) => s !== ProcessStatus.AGGREGATING), ProcessStatus.AGGREGATING],
     };
   }
 }
@@ -987,17 +901,15 @@ function validateArray(array: any[], fieldName: string, result: ValidationResult
   }
 
   // Check for null/undefined elements
-  const invalidElements = array.filter((item, index) => {
+  array.forEach((item: unknown, idx: number) => {
     if (item === null || item === undefined) {
-      result.warnings.push(`${fieldName}[${index}] is null or undefined`);
-      return true;
+      result.warnings.push(`${fieldName}[\${idx}] is null or undefined`);
     }
-    return false;
   });
 
   // Check for empty strings in critical arrays
   if (['searchResults', 'learnings'].includes(fieldName)) {
-    const emptyStrings = array.filter((item, index) => typeof item === 'string' && item.trim().length === 0);
+    const emptyStrings = array.filter((item: unknown) => typeof item === 'string' && (item as string).trim().length === 0);
     if (emptyStrings.length > 0) {
       result.warnings.push(`${fieldName} contains ${emptyStrings.length} empty strings`);
     }
@@ -1074,13 +986,13 @@ export function sanitizeWorkflowState(state: WorkflowState): WorkflowState {
   const sanitized = { ...state };
 
   // Remove null/undefined from arrays
-  sanitized.searchResults = state.searchResults?.filter(item => item != null) || [];
-  sanitized.learnings = state.learnings?.filter(item => item != null) || [];
-  sanitized.opportunityAnalyses = state.opportunityAnalyses?.filter(item => item != null) || [];
-  sanitized.proposals = state.proposals?.filter(item => item != null) || [];
-  sanitized.noveltyChecks = state.noveltyChecks?.filter(item => item != null) || [];
-  sanitized.aggregations = state.aggregations?.filter(item => item != null) || [];
-  sanitized.completedSteps = state.completedSteps?.filter(step => step != null) || [];
+  sanitized.searchResults = state.searchResults?.filter((item: string | null | undefined) => item != null) || [];
+  sanitized.learnings = state.learnings?.filter((item: string | null | undefined) => item != null) || [];
+  sanitized.opportunityAnalyses = state.opportunityAnalyses?.filter((item: string | null | undefined) => item != null) || [];
+  sanitized.proposals = state.proposals?.filter((item: string | null | undefined) => item != null) || [];
+  sanitized.noveltyChecks = state.noveltyChecks?.filter((item: string | null | undefined) => item != null) || [];
+  sanitized.aggregations = state.aggregations?.filter((item: string | null | undefined) => item != null) || [];
+  sanitized.completedSteps = state.completedSteps?.filter((step: ProcessStatus | null | undefined) => step != null) || [];
 
   // Ensure topic is trimmed
   sanitized.topic = state.topic?.trim() || '';

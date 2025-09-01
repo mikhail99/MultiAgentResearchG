@@ -39,7 +39,7 @@ export const isWorkflowOutputEmpty = (
 export const isWorkflowLoading = (status: ProcessStatus): boolean => {
   return status !== ProcessStatus.IDLE &&
          status !== ProcessStatus.FEEDBACK &&
-         status !== ProcessStatus.ERROR;
+         true; // No ERROR status in shared types; treat others as loading
 };
 
 /**

@@ -3,4 +3,4 @@
 
 export * from './agentUtils';
 export * from './workflowUtils';
-export * from './formatUtils';
+export { formatTopicForFilename, formatTimestampForFilename, formatFactsAsMarkdown, formatQuestionsAsMarkdown, formatAgentContentAsMarkdown, generateMarkdownReport, generateJsonExport } from './formatUtils';

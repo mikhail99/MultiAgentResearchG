@@ -2,7 +2,7 @@
 import { StateGraph, START, END, Annotation, MemorySaver } from "@langchain/langgraph/web";
 import { WorkflowState } from '../types/workflow_LG';
 import { ProcessStatus } from '../types';
-import { createInitialState, shouldRestart, shouldContinue } from './workflowService_LG';
+import { createInitialState } from './workflowService_LG';
 import type { NodeCallbacks } from './workflowService_LG';
 
 // Define proper LangGraph.js state using Annotations

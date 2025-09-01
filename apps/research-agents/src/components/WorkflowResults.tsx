@@ -3,7 +3,6 @@ import { ProcessStatus, StylizedFact } from '@shared/types';
 import { WorkflowState } from '@shared/types/workflow_LG';
 import FeedbackPanel from '@shared/components/FeedbackPanel';
 import ResultsPanel from '@shared/components/ResultsPanel';
-import MemoryVisualization from '@memory-system/visualization/MemoryVisualization';
 
 interface WorkflowResultsProps {
   // State
@@ -23,7 +22,7 @@ interface WorkflowResultsProps {
 
 const WorkflowResults: React.FC<WorkflowResultsProps> = ({
   status,
-  workflowState,
+  workflowState: _workflowState,
   stylizedFacts,
   stylizedQuestions,
   feedback,
@@ -35,14 +34,7 @@ const WorkflowResults: React.FC<WorkflowResultsProps> = ({
 }) => {
   return (
     <>
-      {/* A-Mem Memory Visualization */}
-      {workflowState?.memoryNotes && workflowState.memoryNotes.length > 0 && (
-        <MemoryVisualization
-          memoryNotes={workflowState.memoryNotes}
-          memoryLinks={workflowState.memoryLinks || []}
-          memoryQuality={workflowState.memoryStats?.memoryQuality || 0}
-        />
-      )}
+      {/* Memory Visualization removed */}
 
       {/* Feedback Panel */}
       {status === ProcessStatus.FEEDBACK && (

@@ -12,7 +12,7 @@ const BUILT_IN_TEMPLATES: WorkflowTemplate[] = [
     icon: '🎓',
     version: '2.1',
     agentPrompts: {
-      Researcher: `You are a specialist Research Agent with expertise in [YOUR_FIELD]. Your goal is to conduct a comprehensive literature review on the user-provided topic with a focus on recent developments and emerging trends.
+      Search: `You are a specialist Research Agent with expertise in [YOUR_FIELD]. Your goal is to conduct a comprehensive literature review on the user-provided topic with a focus on recent developments and emerging trends.
 
 CRITICAL INSTRUCTIONS:
 - Prioritize sources from the last 3 years when available
@@ -32,7 +32,7 @@ Format your response as a structured literature review with:
 2. Key findings and methodologies
 3. Research gaps identified
 4. Citation list with DOIs`,
-      Generator: `You are an expert Analyst Agent specializing in evidence-based analysis and critical evaluation. Your task is to generate a comprehensive, evidence-based analysis that follows academic standards.
+      Learnings: `You are an expert Analyst Agent specializing in evidence-based analysis and critical evaluation. Your task is to generate a comprehensive, evidence-based analysis that follows academic standards.
 
 ANALYSIS FRAMEWORK:
 1. **Contextual Background**: Synthesize the research summary with broader field context
@@ -65,7 +65,7 @@ File Contents:
 Feedback from previous iteration: {feedback}
 
 Structure your analysis with clear headings and include confidence levels for each major claim.`,
-      Evaluator: `You are a meticulous Critical Evaluator Agent. Your role is to scrutinize the provided analysis.
+      'Opportunity Analysis': `You are a meticulous Critical Evaluator Agent. Your role is to scrutinize the provided analysis.
 - Identify potential weaknesses, logical fallacies, biases, or gaps in the reasoning.
 - Do NOT propose solutions or alternatives. Your focus is solely on critique.
 - The critique should be constructive, specific, and help identify areas for improvement.
@@ -196,7 +196,7 @@ File Contents:
     icon: '⚙️',
     version: '1.8',
     agentPrompts: {
-      Researcher: `You are a Technical Research Agent. Your goal is to conduct a focused technical literature review on the user-provided topic.
+      Search: `You are a Technical Research Agent. Your goal is to conduct a focused technical literature review on the user-provided topic.
 - Use your internal knowledge and any provided tool search results to gather information.
 - Identify the key technical concepts, implementations, and best practices related to the topic.
 - Focus on practical applications, code examples, and technical specifications.
@@ -205,7 +205,7 @@ File Contents:
 Topic: {topic}
 
 {tool_results}`,
-      Generator: `You are a Technical Analyst Agent. Your task is to generate a comprehensive technical analysis of the given topic.
+      Learnings: `You are a Technical Analyst Agent. Your task is to generate a comprehensive technical analysis of the given topic.
 - Base your analysis on the provided research summary and technical documentation.
 - Incorporate the context from the provided file contents, focusing on technical details.
 - If feedback is provided from a previous iteration, use it to guide and refine your analysis.
@@ -223,7 +223,7 @@ File Contents:
 {fileContents}
 ---
 Feedback from previous iteration: {feedback}`,
-      Evaluator: `You are a Technical Evaluator Agent. Your role is to scrutinize the provided technical analysis.
+      'Opportunity Analysis': `You are a Technical Evaluator Agent. Your role is to scrutinize the provided technical analysis.
 - Identify potential technical flaws, implementation issues, or architectural problems.
 - Consider scalability, security, performance, and maintainability aspects.
 - Do NOT propose solutions or alternatives. Your focus is solely on technical critique.

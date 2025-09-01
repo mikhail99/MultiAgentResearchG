@@ -1,4 +1,4 @@
-import { AgentPrompts, ModelProvider, ProcessStatus } from './index';
+import { AgentPrompts, ModelProvider, ProcessStatus } from '@shared/types';
 
 export interface WorkflowTemplate {
   id: string;

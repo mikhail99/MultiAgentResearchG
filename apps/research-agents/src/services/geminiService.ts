@@ -1,5 +1,5 @@
 import { GoogleGenAI, Type } from "@google/genai";
-import { AgentName, StylizedFact, LlmOptions, ModelProvider } from '../types';
+import { AgentName, StylizedFact, LlmOptions, ModelProvider } from '@shared/types';
 
 if (!process.env.API_KEY) {
   console.warn("API_KEY environment variable not set. Gemini models will not be available.");
@@ -135,7 +135,7 @@ export const generateContent = async (agentName: AgentName, fullPrompt: string, 
       }
     });
     
-    let text = response.text;
+    let text = response.text || '';
     if (isSearch && response.candidates?.[0]?.groundingMetadata?.groundingChunks) {
         const sources = response.candidates[0].groundingMetadata.groundingChunks
             .map((chunk: any) => chunk.web?.uri && `- ${chunk.web.title}: ${chunk.web.uri}`)
@@ -245,7 +245,7 @@ export const generateFacts = async (finalReport: string, options: LlmOptions): P
           },
         },
       });
-      const jsonStr = response.text.trim();
+      const jsonStr = (response.text || '').trim();
       const parsed = JSON.parse(jsonStr);
       return Array.isArray(parsed.facts) ? parsed.facts : [];
     } catch (error) {
@@ -327,7 +327,7 @@ export const generateQuestions = async (finalReport: string, options: LlmOptions
             },
           },
         });
-        const jsonStr = response.text.trim();
+        const jsonStr = (response.text || '').trim();
         const parsed = JSON.parse(jsonStr);
         return Array.isArray(parsed.questions) ? parsed.questions : [];
       } catch (error) {

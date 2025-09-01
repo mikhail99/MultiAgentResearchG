@@ -17,8 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../../packages/shared/src/*"],
-      "@memory-system/*": ["../../packages/memory-system/src/*"]
+      "@shared/*": ["../../packages/shared/src/*"]
     }
   },
   "include": ["src"],

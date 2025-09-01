@@ -17,7 +17,6 @@ import KeyboardShortcuts from '@shared/components/KeyboardShortcuts';
 import WorkflowTemplateModal from '@shared/components/WorkflowTemplateModal';
 import PromptEditorModal from '@shared/components/PromptEditorModal';
 import StatusBar from '@shared/components/StatusBar';
-import KnowledgeExtractionDialog from '@memory-system/components/KnowledgeExtractionDialog';
 // getAgentTaskProfile is now handled by useAgentManagement hook
 import { SunIcon, MoonIcon, HumanIcon, LoopIcon, SparklesIcon, AgentIcon } from '@shared/components/Icons';
 
@@ -46,7 +45,6 @@ export default function App_LG() {
   const [editingAgent, setEditingAgent] = useState<AgentName | null>(null);
   const [agentPrompts, setAgentPrompts] = useState<AgentPrompts>(initialPrompts);
   const [showTemplateModal, setShowTemplateModal] = useState<boolean>(false);
-  const [showKnowledgeExtraction, setShowKnowledgeExtraction] = useState<boolean>(false);
 
   // Theme
   const { theme, setTheme } = useTheme();
@@ -482,13 +480,6 @@ ${questionsText}
             </p>
             <div className="absolute top-0 right-0 flex gap-2">
               <button
-                onClick={() => setShowKnowledgeExtraction(true)}
-                className="p-2 rounded-full bg-blue-200 dark:bg-blue-800 text-blue-600 dark:text-blue-300 hover:bg-blue-300 dark:hover:bg-blue-700 transition-colors"
-                title="Extract Knowledge from Papers"
-              >
-                🧠
-              </button>
-              <button
                 onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                 className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
                 title="Toggle Theme"
@@ -624,19 +615,7 @@ ${questionsText}
 
         {/* TaskProfileDialog temporarily disabled until hook integration is complete */}
 
-        {/* Knowledge Extraction Dialog */}
-        <KnowledgeExtractionDialog
-          open={showKnowledgeExtraction}
-          onOpenChange={setShowKnowledgeExtraction}
-          llmOptions={{ provider: modelSettings.modelProvider, url: modelSettings.localLlmUrl }}
-          paperContent={files.length > 0 ? undefined : undefined}
-          paperMetadata={files.length > 0 ? {
-            id: `paper_${Date.now()}`,
-            title: files[0]?.name || 'Research Paper',
-            authors: ['Unknown'],
-            publicationDate: new Date().toISOString().split('T')[0]
-          } : undefined}
-        />
+        {/* Knowledge Extraction Dialog removed */}
       </div>
 
       {/* Session Management Toasts */}

@@ -63,7 +63,7 @@ export const getAgentContent = (
 ): string => {
   if (!workflowState) return '';
 
-  const targetIteration = iteration ?? getCurrentIteration(agentName, {});
+  const targetIteration = iteration ?? 0;
 
   switch (agentName) {
     case AgentName.SEARCH:

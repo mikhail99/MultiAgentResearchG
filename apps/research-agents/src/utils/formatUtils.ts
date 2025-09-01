@@ -1,4 +1,4 @@
-import { AgentName, StylizedFact } from '@shared/types';
+import { StylizedFact } from '@shared/types';
 
 /**
  * Utility functions for data formatting and export

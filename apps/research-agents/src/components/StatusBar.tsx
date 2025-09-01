@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ProcessStatus } from '../types';
+import { ProcessStatus } from '@shared/types';
 
 interface StatusBarProps {
   status: ProcessStatus;

@@ -3,7 +3,7 @@ import { WorkflowState, NodeResult, AgentConfig, ValidationResult, StateValidati
 import { AgentName, ProcessStatus, ModelProvider } from '../types';
 import { generateContentStream } from './geminiService';
 import { executeResearcherTools, formatToolResultsForPrompt } from './toolService';
-import { amemService } from '@memory-system/core/amemService';
+// import removed: '@memory-system/core/amemService'
 
 // Standard node callback interface for consistent LangGraphJS integration
 export interface NodeCallbacks {
@@ -30,7 +30,7 @@ export function createInitialState(topic: string, iteration: number = 1): Workfl
     stylizedQuestions: [],
     toolResults: null,
 
-    // A-Mem Agentic Memory System
+    // Memory fields present for type compatibility (feature disabled)
     memoryNotes: [],
     memoryLinks: [],
     memoryEvolutionQueue: [],
@@ -49,99 +49,13 @@ export function createInitialState(topic: string, iteration: number = 1): Workfl
   };
 }
 
-// Memory-enabled helper function
+// Memory disabled
 async function processWithMemory(
   state: WorkflowState,
-  agentName: AgentName,
-  output: string
+  _agentName: AgentName,
+  _output: string
 ): Promise<Partial<WorkflowState>> {
-  console.log(`🧠 Processing ${agentName} output through A-Mem...`);
-  console.log(`🧠 Current State Memory:`, {
-    existingNotes: state.memoryNotes?.length || 0,
-    existingLinks: state.memoryLinks?.length || 0,
-    existingNotesIds: state.memoryNotes?.map(n => `${n.agentName}:${n.id}`) || []
-  });
-
-  try {
-    // Step 1: Note Construction
-    const memoryNote = await amemService.constructNote(
-      agentName,
-      output,
-      state.topic,
-      state.iteration,
-      state.modelProvider
-    );
-
-    console.log(`🧠 Created memory note:`, {
-      id: memoryNote.id,
-      agent: memoryNote.agentName,
-      contentLength: memoryNote.content.length
-    });
-
-    // Step 2: Link Generation
-    const safeExistingNotes = Array.isArray(state.memoryNotes) ? state.memoryNotes : [];
-    const newLinks = await amemService.generateLinks(
-      memoryNote,
-      safeExistingNotes,
-      state.modelProvider
-    );
-
-    console.log(`🧠 Generated links:`, newLinks.length);
-
-    // Step 3: Memory Evolution (if there are connected notes)
-    let evolutionActions: any[] = [];
-    if (newLinks.length > 0) {
-      const connectedNoteIds = newLinks.map(link => link.targetNoteId);
-      const connectedNotes = safeExistingNotes.filter(note =>
-        connectedNoteIds.includes(note.id)
-      );
-
-      evolutionActions = await amemService.evolveMemories(
-        memoryNote,
-        connectedNotes,
-        state.modelProvider
-      );
-    }
-
-    // Apply evolution actions to get updated state
-    const evolvedState = amemService.applyEvolutionActions(state, evolutionActions);
-
-    console.log(`🧠 Final memory state:`, {
-      totalNotes: (evolvedState.memoryNotes || []).length + 1, // +1 for new note
-      totalLinks: (evolvedState.memoryLinks || []).length + newLinks.length,
-      newNote: memoryNote.id
-    });
-
-    return {
-      ...evolvedState,
-      memoryNotes: [...(evolvedState.memoryNotes || []), memoryNote],
-      memoryLinks: [...(evolvedState.memoryLinks || []), ...newLinks],
-      memoryEvolutionQueue: [...(evolvedState.memoryEvolutionQueue || []), ...evolutionActions],
-    };
-
-  } catch (error) {
-    console.error('❌ A-Mem processing failed:', error);
-
-    // Return original state with minimal memory update
-    const fallbackNote = {
-      id: `mem_fallback_${Date.now()}`,
-      content: output,
-      context: `Agent ${agentName} output for topic: ${state.topic}`,
-      keywords: [agentName, state.topic],
-      tags: [agentName, 'research'],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      agentName,
-      iteration: state.iteration,
-      links: [],
-      metadata: { error: 'A-Mem processing failed' }
-    };
-
-    return {
-      ...state,
-      memoryNotes: [...(state.memoryNotes || []), fallbackNote],
-    };
-  }
+  return state;
 }
 
 // Agent Node Implementations
@@ -232,7 +146,7 @@ This is a fallback response generated when the local LLM service is unavailable.
     }
   }
 
-    // Process output through A-Mem system
+    // Memory processing disabled
     const memoryResult = await processWithMemory(state, AgentName.SEARCH, output);
 
     // Stream memory updates if callback is available
@@ -360,7 +274,7 @@ This is a fallback analysis generated when the local LLM service is unavailable.
     }
   }
 
-    // Process output through A-Mem system
+    // Memory processing disabled
     const memoryResult = await processWithMemory(state, AgentName.LEARNINGS, output);
 
     // Stream memory updates if callback is available
@@ -517,7 +431,7 @@ This is a fallback analysis generated when the local LLM service is unavailable.
     finalOutput = output + '\n\n[Note: Restart request denied - maximum of 2 search restarts reached. Proceeding with current research.]';
   }
 
-    // Process output through A-Mem system
+    // Memory processing disabled
     const memoryResult = await processWithMemory(state, AgentName.OPPORTUNITY_ANALYSIS, finalOutput);
 
     return {
@@ -952,10 +866,7 @@ export function validateWorkflowState(
     validateArray(state.aggregations, 'aggregations', result);
     validateArray(state.completedSteps, 'completedSteps', result);
 
-    // A-Mem memory fields validation
-    validateArray(state.memoryNotes || [], 'memoryNotes', result);
-    validateArray(state.memoryLinks || [], 'memoryLinks', result);
-    validateArray(state.memoryEvolutionQueue || [], 'memoryEvolutionQueue', result);
+    // Memory fields removed
   }
 
   // Completion state validation
@@ -1091,7 +1002,7 @@ export function sanitizeWorkflowState(state: WorkflowState): WorkflowState {
   // Cap restart count
   sanitized.restartCount = Math.min(2, Math.max(0, state.restartCount || 0));
 
-  // Initialize A-Mem memory fields if they don't exist (for backward compatibility)
+  // Keep memory fields initialized for type compatibility (feature disabled)
   sanitized.memoryNotes = state.memoryNotes || [];
   sanitized.memoryLinks = state.memoryLinks || [];
   sanitized.memoryEvolutionQueue = state.memoryEvolutionQueue || [];

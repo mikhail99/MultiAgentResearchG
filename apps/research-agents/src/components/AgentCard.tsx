@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { AgentName, ToolResults } from '../types';
+import { AgentName, ToolResults } from '@shared/types';
 import {
     AggregatorIcon, EvaluatorIcon, GeneratorIcon, ProposerIcon, ResearcherIcon,
     EditIcon, CopyIcon, SaveIcon, CheckIcon, PromptIcon
@@ -60,7 +60,6 @@ const MarkdownComponents = {
     ol: ({node, ...props}: any) => <ol className="list-decimal list-inside mb-4 space-y-2" {...props} />,
     p: ({node, ...props}: any) => <p className="mb-4 last:mb-0" {...props} />,
     code: ({node, inline, className, children, ...props}: any) => {
-        const match = /language-(\w+)/.exec(className || '');
         return !inline ? (
             <pre className="bg-gray-200 dark:bg-gray-900 p-3 rounded-md overflow-x-auto my-4">
                 <code className={`text-sm ${className}`} {...props}>{children}</code>

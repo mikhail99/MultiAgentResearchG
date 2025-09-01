@@ -39,7 +39,7 @@ enum CircuitState {
 }
 
 // Circuit Breaker Configuration
-const FASTAPI_BASE_URL = process.env.VITE_FASTAPI_URL || 'http://localhost:8000';
+const FASTAPI_BASE_URL = (typeof process !== 'undefined' && (process as any).env?.VITE_FASTAPI_URL) || 'http://localhost:8000';
 const TOOL_TIMEOUT = 30000; // 30 seconds
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5; // Failures before opening circuit
 const CIRCUIT_BREAKER_RECOVERY_TIMEOUT = 60000; // 1 minute before trying again
@@ -165,14 +165,14 @@ export const callTool = async (
       return `Tool execution failed: ${result.error}`;
     }
     
-  } catch (error) {
-    if (error.name === 'AbortError') {
+  } catch (error: unknown) {
+    if ((error as any)?.name === 'AbortError') {
       console.error(`⏰ Tool Timeout: ${agentName} -> ${task}`);
       return `Tool request timed out after ${TOOL_TIMEOUT/1000} seconds. Please try again.`;
     }
     
     console.error(`💥 Tool Connection Error: ${agentName} -> ${task}:`, error);
-    return `Failed to connect to tool service: ${error.message}. Please check if the FastAPI server is running.`;
+    return `Failed to connect to tool service: ${(error as any)?.message}. Please check if the FastAPI server is running.`;
   }
 };
 

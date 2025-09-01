@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AgentName, AgentPrompts, LlmOptions } from '../types';
+import { AgentName, AgentPrompts, LlmOptions } from '@shared/types';
 import { improvePrompt } from '../services/geminiService';
 import { agentTaskDescriptions } from '../prompts';
 
