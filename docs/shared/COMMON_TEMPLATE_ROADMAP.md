@@ -75,3 +75,29 @@
 7. Add Playwright smokes
 
 
+
+### Remaining refactoring steps
+- [x] Unify LLM client to `@shared/services/llmService` (done)
+- [x] Consolidate tool service to `@shared/services/toolService` (done)
+- [ ] Shared hooks
+  - Move `useModelSettings`, `useWorkflowState`, `useUIState`, `useWorkflowTemplates` to `@shared/hooks`
+  - Replace app-local imports; delete duplicates under `apps/*/src/hooks`
+- [ ] Components standardization
+  - Ensure `ControlPanel`, `StatusBar`, `AgentCard`, `ResultsPanel` are consumed from `@shared/components`
+  - Remove/merge app-local duplicates or thin wrappers
+- [ ] Template-driven workflows
+  - Implement `template.schedule` parsing in `@shared/services/workflowRunner` (support parallel arrays)
+  - Migrate `knowledge-extraction` to runner (fast → parallel analyzers → synth)
+  - Migrate `research-agents` to runner; adapt `data-preprocessing` pipeline
+- [ ] TS strict cleanup & aliases
+  - Remove unused vars/params; validate `ProcessStatus` usages only
+  - Ensure `@shared` alias matches in Vite + tsconfig for all apps
+  - `pnpm -w type-check` must pass
+- [ ] Minimal test coverage
+  - Add Playwright smoke per app (launch → run → stream visible → export visible)
+  - Add script: `"test:smoke": "playwright test"`
+
+### Quick verification commands
+- `pnpm -w type-check`
+- `pnpm -w -r build`
+- `pnpm -w -r test:smoke`

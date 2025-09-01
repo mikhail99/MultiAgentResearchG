@@ -4,15 +4,21 @@ import StatusBar from '@shared/components/StatusBar';
 import AgentCard from '@shared/components/AgentCard';
 import ResultsPanel from '@shared/components/ResultsPanel';
 import { ProcessStatus, ModelProvider, StylizedFact } from '@shared/types';
+import { useModelSettings } from '@shared/hooks';
 import { runKnowledgeExtraction } from './services/workflowService_KE';
 import { KE_TEMPLATE } from './workflowTemplates';
 
 export default function App() {
   const [question, setQuestion] = useState('');
-  const [modelProvider, setModelProvider] = useState<ModelProvider>(ModelProvider.LOCAL);
-  const [localLlmUrl, setLocalLlmUrl] = useState(KE_TEMPLATE.localLlmUrl);
-  const [enableWebSearch, setEnableWebSearch] = useState(true);
-  const [enableLocalSearch, setEnableLocalSearch] = useState(true);
+  const { state: modelSettings, actions: modelActions } = useModelSettings();
+  const modelProvider = modelSettings.modelProvider;
+  const setModelProvider = modelActions.setModelProvider;
+  const localLlmUrl = modelSettings.localLlmUrl || KE_TEMPLATE.localLlmUrl;
+  const setLocalLlmUrl = modelActions.setLocalLlmUrl;
+  const enableWebSearch = modelSettings.enableWebSearch;
+  const setEnableWebSearch = modelActions.setEnableWebSearch;
+  const enableLocalSearch = modelSettings.enableLocalSearch;
+  const setEnableLocalSearch = modelActions.setEnableLocalSearch;
   const [iteration] = useState(1);
 
   const [status, setStatus] = useState<ProcessStatus>(ProcessStatus.IDLE);
