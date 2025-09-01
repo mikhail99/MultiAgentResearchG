@@ -42,6 +42,15 @@ export default function App_LG() {
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<Partial<Record<ProcessStatus, { durationMs?: number; chars?: number }>>>({});
   const [ledger, setLedger] = useState<any>(null);
+  const [contents, setContents] = useState<Partial<Record<ProcessStatus, string>>>({
+    [ProcessStatus.SEARCHING]: '',
+    [ProcessStatus.LEARNING]: '',
+    [ProcessStatus.OPPORTUNITY_ANALYZING]: '',
+    [ProcessStatus.PROPOSING]: '',
+    [ProcessStatus.CHECKING_NOVELTY]: '',
+    [ProcessStatus.AGGREGATING]: '',
+  });
+  const [status, setStatus] = useState<ProcessStatus>(ProcessStatus.IDLE);
 
   // UI state
   const [isPromptEditorOpen, setIsPromptEditorOpen] = useState(false);
@@ -230,10 +239,15 @@ export default function App_LG() {
         topic,
         { enableStreaming: true },
         {
+          onStepStart: (s) => setStatus(s),
+          onStreamChunk: (s, chunk) => {
+            setContents(prev => ({ ...prev, [s]: (prev[s] || '') + chunk }));
+          },
           onStepComplete: (s, output) => {
             setMetrics(prev => ({ ...prev, [s]: { ...(prev[s]||{}), chars: output.length } }));
           },
           onWorkflowComplete: (_finalState, runLedger) => {
+            setStatus(ProcessStatus.AGGREGATING);
             setLedger(runLedger);
             try { localStorage.setItem('ra_last_ledger', JSON.stringify(runLedger)); } catch {}
           },
@@ -571,7 +585,7 @@ ${questionsText}
             {/* Status Bar and Agent Grid and Workflow Results */}
             <div className="lg:col-span-9 space-y-6">
               <StatusBar
-                status={ProcessStatus.IDLE} // This should come from workflow hook
+                status={status}
                 completedSteps={workflow.workflowState?.completedSteps || []}
                 onRestartFrom={() => {}} // TODO: Implement restart functionality
                 hasFeedback={feedback.trim().length > 0}
@@ -588,7 +602,7 @@ ${questionsText}
                 agentConfigs={agentConfigs}
                 workflowState={workflow.workflowState}
                 toolServiceAvailable={false} // Temporary placeholder
-                status={ProcessStatus.IDLE} // This should come from workflow hook
+                status={status}
                 selectedIterations={agentManagement.selectedIterations}
                 sentPrompts={agentManagement.sentPrompts}
                 onEditPrompt={handleOpenPromptEditor}
@@ -599,9 +613,7 @@ ${questionsText}
                 onIterationSelect={(agentName, iteration) => {
                   agentManagement.setIterationForAgent(agentName, iteration);
                 }}
-                getAgentContent={(agentName, workflowState) =>
-                  agentManagement.getAgentContent(agentName, workflowState)
-                }
+                getAgentContent={(agentName, _state) => contents[agentName as unknown as ProcessStatus] || ''}
                 getAgentIterationCount={(agentName, workflowState) =>
                   agentManagement.getAgentIterationCount(agentName, workflowState)
                 }

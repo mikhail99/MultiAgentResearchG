@@ -42,9 +42,22 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
     }
   };
 
+  const toolServiceHealthy = true; // placeholder; apps can pass actual status later if ControlPanel accepts it in future
+  const llmConfigured = !!localLlmUrl;
+
   return (
     <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700 rounded-xl p-6 shadow-lg space-y-6 sticky top-8">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-xs">
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full ${toolServiceHealthy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            <span className={`w-2 h-2 mr-1 rounded-full ${toolServiceHealthy ? 'bg-green-600' : 'bg-red-600'}`}></span>
+            Tools
+          </span>
+          <span className={`inline-flex items-center px-2 py-0.5 rounded-full ${llmConfigured ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+            <span className={`w-2 h-2 mr-1 rounded-full ${llmConfigured ? 'bg-green-600' : 'bg-yellow-600'}`}></span>
+            LLM
+          </span>
+        </div>
         <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs font-semibold px-2.5 py-1 rounded-full">
           Iteration: {iteration}
         </span>

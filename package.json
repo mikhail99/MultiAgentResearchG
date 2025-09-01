@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "smoke:ra": "node apps/research-agents/tests/smoke_test.mjs",
+    "smoke:ke": "node apps/knowledge-extraction/src/tests/smoke_test.mjs",
+    "smoke:dp": "node apps/data-preprocessing/tests/smoke_test.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.14.0",
