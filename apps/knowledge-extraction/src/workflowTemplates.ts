@@ -1,5 +1,5 @@
 import { WorkflowTemplate } from '@shared/types/workflowTemplates';
-import { ModelProvider } from '@shared/types';
+import { ModelProvider, ProcessStatus } from '@shared/types';
 
 export const KE_TEMPLATE: WorkflowTemplate = {
   id: 'ke-fast-to-precise',
@@ -32,9 +32,9 @@ Provide a “Sources” section with title + link/DOI when available.`,
   maxIterations: 1,
   // NEW: schedule with parallel middle stage
   schedule: [
-    'SEARCHING',
-    ['LEARNING', 'OPPORTUNITY_ANALYZING', 'PROPOSING'],
-    'AGGREGATING'
+    ProcessStatus.SEARCHING,
+    [ProcessStatus.LEARNING, ProcessStatus.OPPORTUNITY_ANALYZING, ProcessStatus.PROPOSING],
+    ProcessStatus.AGGREGATING
   ],
   tags: ['knowledge-extraction', 'cascade'],
   author: 'Built-in',

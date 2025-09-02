@@ -73,7 +73,7 @@ interface StepResults {
 
 // Enhanced API functions for paper preparation workflow
 const api = {
-  async searchPapers(description: string, maxPapers: number): Promise<Paper[]> {
+  async searchPapers(_description: string, _maxPapers: number): Promise<Paper[]> {
     // Mock implementation - replace with actual API call
     await new Promise(resolve => setTimeout(resolve, 2000));
     return [
@@ -184,13 +184,13 @@ const api = {
     return results;
   },
 
-  async startPreprocessing(config: PreprocessingConfig): Promise<{ taskId: string }> {
+  async startPreprocessing(_config: PreprocessingConfig): Promise<{ taskId: string }> {
     // Mock implementation - replace with actual API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     return { taskId: 'task-123' };
   },
 
-  async getProgress(taskId: string): Promise<ProgressState> {
+  async getProgress(_taskId: string): Promise<ProgressState> {
     // Mock implementation - replace with actual API call
     await new Promise(resolve => setTimeout(resolve, 500));
     return {
@@ -201,7 +201,7 @@ const api = {
     };
   },
 
-  async getStatus(taskId: string): Promise<ProcessStatus> {
+  async getStatus(_taskId: string): Promise<ProcessStatus> {
     // Mock implementation - replace with actual API call
     await new Promise(resolve => setTimeout(resolve, 500));
     const statuses: ProcessStatus[] = [
@@ -637,7 +637,7 @@ const WorkflowComponent: React.FC<{
 }> = ({
   selectedCollection,
   papers,
-  searchResults,
+  
   selectedPapers,
   status,
   progress,
@@ -903,7 +903,7 @@ export default function DataPreprocessingApp() {
   const [progress, setProgress] = useState<ProgressState | undefined>();
   const [papers, setPapers] = useState<Paper[]>([]);
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
-  const [config, setConfig] = useState<PreprocessingConfig>({
+  const [config, _setConfig] = useState<PreprocessingConfig>({
     description: '',
     maxPapers: 10,
     chunkSize: 1000,
@@ -912,7 +912,7 @@ export default function DataPreprocessingApp() {
     selectionCriteria: 'relevance_score > 0.7'
   });
   const [error, setError] = useState<string | null>(null);
-  const [taskId, setTaskId] = useState<string | null>(null);
+  const [taskId, _setTaskId] = useState<string | null>(null);
   const [collections, setCollections] = useState<Collection[]>([
     { id: '1', name: 'Machine Learning', description: 'ML research papers', paperCount: 0, color: 'bg-blue-500' },
     { id: '2', name: 'NLP', description: 'Natural Language Processing', paperCount: 0, color: 'bg-green-500' },
@@ -975,7 +975,8 @@ export default function DataPreprocessingApp() {
     return () => clearInterval(interval);
   }, [taskId, status]);
 
-  const startCrawling = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _startCrawling = async () => {
     if (!config.description.trim()) {
       setError('Please enter a description to crawl for papers');
       return;
@@ -1002,7 +1003,8 @@ export default function DataPreprocessingApp() {
     );
   };
 
-    const startPreprocessing = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _startPreprocessing = async () => {
     // This function is no longer needed in collection-centric approach
     // Each collection handles its own processing
     console.log('Processing is now handled per collection');
@@ -1015,7 +1017,8 @@ export default function DataPreprocessingApp() {
 
 
   // Collection-centric functions
-  const addPapersToCollection = async (collectionId: string, files: FileList) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _addPapersToCollection = async (collectionId: string, files: FileList) => {
     // Convert files to papers (mock implementation)
     const newPapers: Paper[] = [];
     for (let i = 0; i < files.length; i++) {
@@ -1041,7 +1044,8 @@ export default function DataPreprocessingApp() {
     ));
   };
 
-  const removePaperFromCollection = (collectionId: string, paperId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _removePaperFromCollection = (collectionId: string, paperId: string) => {
     const paper = papers.find(p => p.id === paperId);
     if (!paper) return;
 
@@ -1061,7 +1065,8 @@ export default function DataPreprocessingApp() {
     ));
   };
 
-  const processCollection = async (collectionId: string) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _processCollection = async (collectionId: string) => {
     // This is now handled by the convertPapers function in the workflow
     console.log('Processing collection:', collectionId);
   };
@@ -1381,12 +1386,14 @@ export default function DataPreprocessingApp() {
   };
 
   // Legacy functions for backward compatibility
-  const downloadPapers = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _downloadPapers = async () => {
     const approvedPapers = papers.filter(p => selectedPapers.includes(p.id));
     await downloadApprovedPapers(approvedPapers);
   };
 
-  const convertPapers = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _convertPapers = async () => {
     const approvedPapers = papers.filter(p => selectedPapers.includes(p.id));
     await convertPapersToMarkdown(approvedPapers);
   };

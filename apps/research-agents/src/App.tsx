@@ -19,9 +19,9 @@ import PromptEditorModal from '@shared/components/PromptEditorModal';
 import StatusBar from '@shared/components/StatusBar';
 // getAgentTaskProfile is now handled by useAgentManagement hook
 import { SunIcon, MoonIcon, HumanIcon, LoopIcon, SparklesIcon, AgentIcon } from '@shared/components/Icons';
-import { runWorkflow } from '@shared/services/workflowRunner';
+import { langGraphService } from '@shared/services/langgraphService_LG';
 import { checkToolServiceHealth } from '@shared/services/toolService';
-import { checkLlmHealth } from '@shared/services/llmService';
+import { checkLlmHealth, generateFacts, generateQuestions } from '@shared/services/llmService';
 
 // Refactored components
 import AgentGrid from './components/AgentGrid';
@@ -43,7 +43,7 @@ export default function App_LG() {
   const [stylizedQuestions, setStylizedQuestions] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [metrics, setMetrics] = useState<Partial<Record<ProcessStatus, { durationMs?: number; chars?: number }>>>({});
-  const [ledger, setLedger] = useState<any>(null);
+  const [ledger] = useState<any>(null);
   const [contents, setContents] = useState<Partial<Record<ProcessStatus, string>>>({
     [ProcessStatus.SEARCHING]: '',
     [ProcessStatus.LEARNING]: '',
@@ -53,6 +53,8 @@ export default function App_LG() {
     [ProcessStatus.AGGREGATING]: '',
   });
   const [status, setStatus] = useState<ProcessStatus>(ProcessStatus.IDLE);
+  const [completed, setCompleted] = useState<ProcessStatus[]>([]);
+  const [threadId, setThreadId] = useState<string | null>(null);
   const [toolHealthy, setToolHealthy] = useState<boolean>(false);
   const [llmHealthy, setLlmHealthy] = useState<boolean>(false);
 
@@ -205,9 +207,27 @@ export default function App_LG() {
     await sessionManagement.handleCopyLinkToSession();
   }, [sessionManagement]);
 
+  // Helper to map agent to step for streaming content lookup
+  const getStepForAgent = useCallback((agent: AgentName): ProcessStatus => {
+    switch (agent) {
+      case AgentName.SEARCH:
+        return ProcessStatus.SEARCHING;
+      case AgentName.LEARNINGS:
+        return ProcessStatus.LEARNING;
+      case AgentName.OPPORTUNITY_ANALYSIS:
+        return ProcessStatus.OPPORTUNITY_ANALYZING;
+      case AgentName.PROPOSER:
+        return ProcessStatus.PROPOSING;
+      case AgentName.NOVELTY_CHECKER:
+        return ProcessStatus.CHECKING_NOVELTY;
+      case AgentName.AGGREGATOR:
+        return ProcessStatus.AGGREGATING;
+      default:
+        return ProcessStatus.IDLE;
+    }
+  }, []);
 
-
-  // Workflow handlers using the workflow hook
+  // Workflow handlers using LangGraph.js service
   const runWorkflowShared = useCallback(async () => {
     if (!topic.trim()) {
       setError("Please enter a topic to start the analysis.");
@@ -215,59 +235,70 @@ export default function App_LG() {
     }
 
     try {
-      const template: WorkflowTemplate = {
-        id: 'research-agents-default',
-        name: 'Research Agents Default',
-        description: 'Template for research-agents app',
-        category: 'Research',
-        icon: '🧪',
-        version: '1.0',
-        agentPrompts,
-        modelProvider: modelSettings.modelProvider,
-        localLlmUrl: modelSettings.localLlmUrl,
-        enableWebSearch: modelSettings.enableWebSearch,
-        enableLocalSearch: modelSettings.enableLocalSearch,
-        theme: theme,
-        maxIterations: 1,
-        schedule: [
-          'SEARCHING',
-          ['LEARNING', 'OPPORTUNITY_ANALYZING', 'PROPOSING'],
-          'CHECKING_NOVELTY',
-          'AGGREGATING'
-        ],
-        tags: ['research-agents'],
-        author: 'App',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        usageCount: 0,
-        isBuiltIn: true
-      } as WorkflowTemplate;
-
       setMetrics({});
+      setCompleted([]);
 
-      const state = await runWorkflow(
-        template,
+      // Clear contents for a fresh run
+      setContents({
+        [ProcessStatus.SEARCHING]: '',
+        [ProcessStatus.LEARNING]: '',
+        [ProcessStatus.OPPORTUNITY_ANALYZING]: '',
+        [ProcessStatus.PROPOSING]: '',
+        [ProcessStatus.CHECKING_NOVELTY]: '',
+        [ProcessStatus.AGGREGATING]: '',
+      });
+
+      const tid = `workflow_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+      setThreadId(tid);
+
+      const state = await langGraphService.startWorkflow(
         topic,
-        { enableStreaming: true },
         {
-          onStepStart: (s) => setStatus(s),
-          onStreamChunk: (s, chunk) => {
-            setContents(prev => ({ ...prev, [s]: (prev[s] || '') + chunk }));
-          },
-          onStepComplete: (s, output) => {
-            setMetrics(prev => ({ ...prev, [s]: { ...(prev[s]||{}), chars: output.length } }));
-          },
-          onWorkflowComplete: (_finalState, runLedger) => {
-            setStatus(ProcessStatus.AGGREGATING);
-            setLedger(runLedger);
-            try { localStorage.setItem('ra_last_ledger', JSON.stringify(runLedger)); } catch {}
-          },
-          onError: (e) => setError(e.message)
+          prompts: agentPrompts as any,
+          threadId: tid,
+          onChunk: (chunk) => {
+            const step = (chunk as any).currentStep as ProcessStatus | undefined;
+            if (step) {
+              setStatus(step);
+              setCompleted(prev => (prev.includes(step) ? prev : [...prev, step]));
+            }
+            if ((chunk as any).searchResults) {
+              const t = (chunk as any).searchResults[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.SEARCHING]: t }));
+            }
+            if ((chunk as any).learnings) {
+              const t = (chunk as any).learnings[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.LEARNING]: t }));
+            }
+            if ((chunk as any).opportunityAnalyses) {
+              const t = (chunk as any).opportunityAnalyses[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.OPPORTUNITY_ANALYZING]: t }));
+            }
+            if ((chunk as any).proposals) {
+              const t = (chunk as any).proposals[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.PROPOSING]: t }));
+            }
+            if ((chunk as any).noveltyChecks) {
+              const t = (chunk as any).noveltyChecks[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.CHECKING_NOVELTY]: t }));
+            }
+            if ((chunk as any).aggregations) {
+              const t = (chunk as any).aggregations[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.AGGREGATING]: t }));
+            }
+          }
         }
       );
 
-      setStylizedFacts(state.stylizedFacts as any);
-      setStylizedQuestions(state.stylizedQuestions);
+      const finalMd = state.aggregations[state.aggregations.length - 1] || '';
+      try {
+        const facts = await generateFacts(finalMd, { provider: modelSettings.modelProvider, url: modelSettings.localLlmUrl, model: 'qwen3:4b', temperature: 0.3 } as any);
+        setStylizedFacts(facts as any);
+      } catch {}
+      try {
+        const questions = await generateQuestions(finalMd, { provider: modelSettings.modelProvider, url: modelSettings.localLlmUrl, model: 'qwen3:4b', temperature: 0.3 } as any);
+        setStylizedQuestions(questions);
+      } catch {}
     } catch (e: any) {
       setError(e?.message || String(e));
     }
@@ -283,18 +314,52 @@ export default function App_LG() {
     resetSentPrompts();
 
     try {
-      // Handle different restart choices
-      if (restartChoice === 'search') {
-        console.log('🔄 Restarting from Search (preserving existing search results and learnings)');
-        await workflow.runWorkflow(topic, feedback, ProcessStatus.SEARCHING);
-      } else if (restartChoice === 'proposal') {
-        console.log('🔄 Restarting from Proposal (keeping Search + Learnings)');
-        await workflow.runWorkflow(topic, feedback, ProcessStatus.OPPORTUNITY_ANALYZING);
-      } else {
-        // Continue normally - use existing workflow if available
-        console.log('➡️ Continuing normally with feedback');
-        await workflow.handleRevision();
+      if (!threadId) {
+        setError('No active workflow thread. Please start a new run.');
+        return;
       }
+
+      setStatus(ProcessStatus.SEARCHING);
+      setCompleted([]);
+
+      await langGraphService.continueWorkflow(
+        threadId,
+        feedback,
+        {
+          prompts: agentPrompts as any,
+          onChunk: (chunk) => {
+            const step = (chunk as any).currentStep as ProcessStatus | undefined;
+            if (step) {
+              setStatus(step);
+              setCompleted(prev => (prev.includes(step) ? prev : [...prev, step]));
+            }
+            if ((chunk as any).searchResults) {
+              const t = (chunk as any).searchResults[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.SEARCHING]: t }));
+            }
+            if ((chunk as any).learnings) {
+              const t = (chunk as any).learnings[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.LEARNING]: t }));
+            }
+            if ((chunk as any).opportunityAnalyses) {
+              const t = (chunk as any).opportunityAnalyses[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.OPPORTUNITY_ANALYZING]: t }));
+            }
+            if ((chunk as any).proposals) {
+              const t = (chunk as any).proposals[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.PROPOSING]: t }));
+            }
+            if ((chunk as any).noveltyChecks) {
+              const t = (chunk as any).noveltyChecks[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.CHECKING_NOVELTY]: t }));
+            }
+            if ((chunk as any).aggregations) {
+              const t = (chunk as any).aggregations[0] || '';
+              setContents(prev => ({ ...prev, [ProcessStatus.AGGREGATING]: t }));
+            }
+          }
+        }
+      );
 
       console.log('✅ Workflow revision completed successfully');
     } catch (error) {
@@ -599,7 +664,7 @@ ${questionsText}
             <div className="lg:col-span-9 space-y-6">
               <StatusBar
                 status={status}
-                completedSteps={workflow.workflowState?.completedSteps || []}
+                completedSteps={completed}
                 onRestartFrom={() => {}} // TODO: Implement restart functionality
                 hasFeedback={feedback.trim().length > 0}
                 metrics={metrics}
@@ -626,7 +691,10 @@ ${questionsText}
                 onIterationSelect={(agentName, iteration) => {
                   agentManagement.setIterationForAgent(agentName, iteration);
                 }}
-                getAgentContent={(agentName, _state) => contents[agentName as unknown as ProcessStatus] || ''}
+                getAgentContent={(agentName, _state) => {
+                  const step = getStepForAgent(agentName);
+                  return contents[step] || '';
+                }}
                 getAgentIterationCount={(agentName, workflowState) =>
                   agentManagement.getAgentIterationCount(agentName, workflowState)
                 }
@@ -674,6 +742,7 @@ ${questionsText}
           }}
           templates={templates}
           onCreateTemplate={handleCreateTemplate}
+          onDeleteTemplate={(templateId) => console.log(`Delete template ${templateId}`)}
         />
 
         <KeyboardShortcuts
