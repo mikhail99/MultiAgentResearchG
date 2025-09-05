@@ -50,7 +50,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   const llmHealthy = typeof llmHealthyProp === 'boolean' ? llmHealthyProp : llmConfigured;
 
   return (
-    <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700 rounded-xl p-6 shadow-lg space-y-6 sticky top-8">
+    <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-300 dark:border-gray-700 rounded-xl p-6 shadow-lg space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs">
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full ${toolServiceHealthy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
@@ -176,18 +176,18 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         <button
           onClick={onOpenTemplateModal}
           disabled={isLoading}
-          className="w-full flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span className="text-lg mr-2">📝</span>
           <span>Choose Template</span>
         </button>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3 sm:space-y-0 sm:flex sm:flex-wrap sm:items-center sm:gap-2">
         <button
           onClick={onStart}
           disabled={isLoading || !topic.trim()}
-          className="w-full flex items-center justify-center bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+          className="w-full sm:w-auto flex items-center justify-center bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-bold py-3 px-5 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <StartIcon />
           <span className="ml-2">{isLoading ? 'Processing...' : 'Start Analysis'}</span>
@@ -196,7 +196,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <button
             onClick={onInterrupt}
             disabled={!isLoading}
-            className="w-full flex items-center justify-center bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
+            className="w-full sm:w-auto flex items-center justify-center bg-gradient-to-r from-red-500 to-orange-600 hover:from-red-600 hover:to-orange-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <StopIcon />
             <span className="ml-2">Stop Analysis</span>
@@ -205,16 +205,16 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         <button
           onClick={onExport}
           disabled={isLoading || !isRunComplete}
-          className="w-full flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg shadow-sm transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <ExportIcon />
           <span className="ml-2">Export Run</span>
         </button>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2 sm:inline-flex sm:gap-2">
           <button
             onClick={onExportJson}
             disabled={isLoading || !isRunComplete}
-            className="w-full flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg shadow-sm transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg shadow-sm transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <SaveIcon />
             <span className="ml-2 text-sm">Export JSON</span>
@@ -222,7 +222,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <button
             onClick={onCopyLink}
             disabled={isLoading || !isRunComplete}
-            className="w-full flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg shadow-sm transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto flex items-center justify-center bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-3 rounded-lg shadow-sm transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <CopyIcon />
             <span className="ml-2 text-sm">Copy Link</span>

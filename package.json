@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "smoke:ra": "node apps/research-agents/tests/smoke_test.mjs",
     "smoke:ke": "node apps/knowledge-extraction/src/tests/smoke_test.mjs",
-    "smoke:dp": "node apps/data-preprocessing/tests/smoke_test.mjs"
+    "smoke:dp": "node apps/data-preprocessing/tests/smoke_test.mjs",
+    "type-check:all": "pnpm --filter research-agents type-check && pnpm --filter knowledge-extraction type-check && pnpm --filter data-preprocessing type-check && pnpm --filter @shared/components tsc --noEmit"
   },
   "dependencies": {
     "@google/genai": "^1.14.0",

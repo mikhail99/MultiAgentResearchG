@@ -898,13 +898,17 @@ function validateArray(array: any[], fieldName: string, result: ValidationResult
   }
 
   // Check for null/undefined elements
-  const _invalidElements = array.filter((item, _index) => {
+  const invalidCount = array.filter((item, _index) => {
     if (item === null || item === undefined) {
       result.warnings.push(`${fieldName}[${_index}] is null or undefined`);
       return true;
     }
     return false;
-  });
+  }).length;
+
+  if (invalidCount > 0) {
+    result.warnings.push(`${fieldName} contains ${invalidCount} invalid elements`);
+  }
 
   // Check for empty strings in critical arrays
   if (['searchResults', 'learnings'].includes(fieldName)) {

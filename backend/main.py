@@ -5,6 +5,7 @@ Provides tool endpoints for research agents including ChromaDB search
 """
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List
@@ -13,6 +14,8 @@ import os
 import sys
 import logging
 from datetime import datetime
+import asyncio
+import json
 
 # Add the parent directory to path to import chromadb_search_tool
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -34,6 +37,18 @@ app = FastAPI(
     description="FastAPI backend for research agent tools including ChromaDB search",
     version="1.0.0"
 )
+
+# Try to import AgentScope and related components (optional dependency)
+try:
+    import agentscope
+    from agentscope.agent import ReActAgent, UserAgent
+    from agentscope.message import Msg
+    from agentscope.model import OllamaChatModel
+    from agentscope.formatter import OllamaChatFormatter
+    from agentscope.memory import InMemoryMemory
+    AGENTSCOPE_AVAILABLE = True
+except Exception as e:
+    AGENTSCOPE_AVAILABLE = False
 
 # Add CORS middleware for frontend integration
 app.add_middleware(
@@ -66,6 +81,11 @@ class HealthResponse(BaseModel):
 # Global search tool instance
 search_tool = None
 
+# AgentScope globals
+agentscope_initialized = False
+advisor_agent = None
+human_agent = None
+
 
 def initialize_search_tool():
     """Initialize ChromaDB search tool"""
@@ -88,11 +108,56 @@ def initialize_search_tool():
     else:
         logger.warning("⚠️ ChromaDB search tool not available")
 
+
+def initialize_agentscope():
+    """Initialize AgentScope runtime and a simple advisor agent using Ollama."""
+    global agentscope_initialized, advisor_agent, human_agent
+    if not AGENTSCOPE_AVAILABLE:
+        logger.warning("⚠️ AgentScope not available - skipping initialization")
+        return
+    if agentscope_initialized:
+        return
+    try:
+        studio_url = os.getenv("AGENTSCOPE_STUDIO_URL", "http://localhost:3000")
+        agentscope.init(
+            project="KnowledgeExtraction",
+            name="KEBridge",
+            studio_url=studio_url,
+        )
+
+        model_name = os.getenv("OLLAMA_MODEL", "qwen3:4b")
+        model = OllamaChatModel(
+            model_name=model_name,
+            options={"temperature": 0.5},
+        )
+
+        advisor = ReActAgent(
+            name="Advisor",
+            sys_prompt=(
+                "You are an analytical research advisor. Given a topic, you extract key points, "
+                "list 3-5 insights, and propose next steps. Be concise."
+            ),
+            model=model,
+            memory=InMemoryMemory(),
+            formatter=OllamaChatFormatter(),
+        )
+
+        user = UserAgent(name="Human")
+
+        advisor_agent = advisor
+        human_agent = user
+        agentscope_initialized = True
+        logger.info("✅ AgentScope initialized (model=%s, studio=%s)", model_name, studio_url)
+    except Exception as e:
+        logger.error("❌ Failed to initialize AgentScope: %s", str(e))
+        agentscope_initialized = False
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize services on startup"""
     logger.info("🚀 Starting Multi-Agent Research Assistant API...")
     initialize_search_tool()
+    initialize_agentscope()
 
 @app.get("/", response_model=Dict[str, str])
 async def root():
@@ -116,6 +181,39 @@ async def health_check():
         timestamp=datetime.now().isoformat(),
         services=services
     )
+
+
+async def _agentscope_stream_generator(topic: str):
+    """Stream simple AgentScope advice messages for a given topic via SSE."""
+    if not (AGENTSCOPE_AVAILABLE and agentscope_initialized and advisor_agent and human_agent):
+        yield f"data: {json.dumps({'agent': 'system', 'content': 'AgentScope unavailable on server'})}\n\n"
+        return
+    try:
+        initial_msg = Msg(name="system", role="system", content=f"Knowledge extraction topic: {topic}")
+        msg = initial_msg
+        # Run a few advisor turns
+        for _ in range(2):
+            msg = await advisor_agent(msg)  # type: ignore[arg-type]
+            content = getattr(msg, "content", None)
+            if isinstance(content, str) and content:
+                event = {"agent": "Advisor", "content": content}
+                yield f"data: {json.dumps(event)}\n\n"
+        yield f"data: {json.dumps({'agent': 'system', 'content': '[done]'})}\n\n"
+    except Exception as e:
+        err = {"agent": "system", "content": f"error: {str(e)}"}
+        yield f"data: {json.dumps(err)}\n\n"
+
+
+@app.get("/agentscope/stream")
+async def agentscope_stream(topic: str = "Extract insights about LLM reasoning agents"):
+    """SSE endpoint to stream AgentScope outputs for the provided topic."""
+    headers = {
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "X-Accel-Buffering": "no",
+        "Access-Control-Allow-Origin": "*",
+    }
+    return StreamingResponse(_agentscope_stream_generator(topic), media_type="text/event-stream", headers=headers)
 
 @app.post("/tool", response_model=ToolResponse)
 async def execute_tool(request: ToolRequest):

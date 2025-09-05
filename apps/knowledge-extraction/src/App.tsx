@@ -6,6 +6,7 @@ import ResultsPanel from '@shared/components/ResultsPanel';
 import { ProcessStatus, ModelProvider, StylizedFact } from '@shared/types';
 import { useModelSettings } from '@shared/hooks';
 import { runWorkflow } from '@shared/services/workflowRunner';
+import { useAgentScopeStream } from '@shared/hooks';
 import { KE_TEMPLATE } from './workflowTemplates';
 import { checkToolServiceHealth } from '@shared/services/toolService';
 import { checkLlmHealth } from '@shared/services/llmService';
@@ -41,6 +42,9 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [toolHealthy, setToolHealthy] = useState<boolean>(false);
   const [llmHealthy, setLlmHealthy] = useState<boolean>(false);
+
+  // AgentScope stream (optional demo)
+  const { messages: asMessages, isLoading: asLoading, error: asError, submit: asSubmit } = useAgentScopeStream('http://localhost:8000');
 
   useEffect(() => {
     (async () => {
@@ -182,6 +186,29 @@ export default function App() {
         />
 
         <StatusBar status={status} completedSteps={completed} metrics={metrics} />
+        {/* AgentScope live stream demo area */}
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md p-3">
+          <div className="flex items-center justify-between mb-2">
+            <div className="font-semibold">AgentScope Stream</div>
+            <button
+              className="px-3 py-1 rounded bg-indigo-600 text-white disabled:opacity-50"
+              disabled={asLoading}
+              onClick={() => asSubmit(question || 'Explain the concept of knowledge extraction in simple terms')}
+            >
+              {asLoading ? 'Streaming…' : 'Run AgentScope'}
+            </button>
+          </div>
+          {asError && (
+            <div className="text-sm text-red-600 mb-2">{asError}</div>
+          )}
+          <div className="space-y-2 max-h-64 overflow-auto text-sm">
+            {asMessages.map((m, i) => (
+              <div key={i} className="whitespace-pre-wrap">
+                <span className="font-medium">{m.agent}:</span> {m.content}
+              </div>
+            ))}
+          </div>
+        </div>
         {error && (
           <div className="bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-600 text-red-800 dark:text-red-200 p-3 rounded-md">
             {error}

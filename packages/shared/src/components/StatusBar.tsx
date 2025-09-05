@@ -41,7 +41,7 @@ const StatusBar: React.FC<StatusBarProps> = React.memo(({ status, completedSteps
   }, []);
 
   return (
-    <div className="w-full p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur supports-[backdrop-filter]:backdrop-blur sticky top-0 z-40 border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg">
+    <div className="w-full p-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur supports-[backdrop-filter]:backdrop-blur border border-gray-300 dark:border-gray-700 rounded-xl shadow-lg">
       <div className="flex items-center">
         {steps.map((step, index) => {
           const { isCompleted, isCurrent, isHovered, willRerun } = getStepState(step, index);

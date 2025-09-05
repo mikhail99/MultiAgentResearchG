@@ -28,7 +28,7 @@ def main():
     print(f"🔄 Reload: {reload}")
     print(f"📝 Log Level: {log_level}")
     print("=" * 60)
-    
+    ng 
     # Start the server
     uvicorn.run(
         "main:app",
