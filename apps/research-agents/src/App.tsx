@@ -4,7 +4,7 @@ import { WorkflowTemplate } from '@shared/types/workflowTemplates';
 import { createExportFilename } from './utils/helpers';
 
 // Custom hooks
-import { useTheme } from './hooks/useTheme';
+import { useTheme } from '@shared/hooks';
 import { useWorkflow, UseWorkflowOptions } from './hooks/useWorkflow';
 import { useAgentManagement, UseAgentManagementOptions, TaskProfileWithDisplay } from './hooks/useAgentManagement';
 import { useSessionManagement, UseSessionManagementOptions } from './hooks/useSessionManagement';
@@ -186,14 +186,6 @@ export default function App_LG() {
     agentManagement.resetSentPrompts();
   }, [agentManagement]);
 
-  // Theme effect
-  useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.toggle('dark', theme === 'dark');
-    document.body.classList.toggle('dark', theme === 'dark');
-    root.style.colorScheme = theme;
-    localStorage.setItem('theme', theme);
-  }, [theme]);
 
   useEffect(() => {
     (async () => {

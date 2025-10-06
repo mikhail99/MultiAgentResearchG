@@ -17,6 +17,7 @@ import MemoryVisualization from './components/MemoryVisualization';
 import MemoryTestApp from './components/MemoryTestApp';
 import { getAgentTaskProfile } from './components/agentTaskProfiles';
 import { useWorkflowTemplates } from './hooks/useWorkflowTemplates';
+import { useTheme } from './packages/shared/src/hooks';
 import { WorkflowTemplate } from './types/workflowTemplates';
 import { SunIcon, MoonIcon, HumanIcon, LoopIcon, SparklesIcon, AgentIcon } from './components/Icons';
 import { WorkflowState } from './types/workflow_LG';
@@ -161,15 +162,7 @@ export default function App_LG() {
   const [showMemoryTestApp, setShowMemoryTestApp] = useState<boolean>(false);
 
   // Theme
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    if (typeof window !== 'undefined' && localStorage.getItem('theme')) {
-      return localStorage.getItem('theme') as 'light' | 'dark';
-    }
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    return 'light';
-  });
+  const { theme, toggleTheme } = useTheme();
 
   // Template management
   const { templates, createTemplate, trackUsage, deleteTemplate, updateTemplate } = useWorkflowTemplates();
@@ -294,14 +287,6 @@ export default function App_LG() {
     });
   };
 
-  // Theme effect
-  useEffect(() => {
-    const root = window.document.documentElement;
-    root.classList.toggle('dark', theme === 'dark');
-    document.body.classList.toggle('dark', theme === 'dark');
-    root.style.colorScheme = theme;
-    localStorage.setItem('theme', theme);
-  }, [theme]);
 
   // Check tool service health
   useEffect(() => {
@@ -1113,7 +1098,7 @@ ${questionsText}
                 🧠
               </button>
               <button
-                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                onClick={toggleTheme}
                 className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
                 title="Toggle Theme"
               >
@@ -1312,7 +1297,7 @@ ${questionsText}
           onStart={handleStart}
           onRevision={handleRevision}
           onExport={handleExportRun}
-          onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onToggleTheme={toggleTheme}
           isLoading={isLoading}
           hasCompletedRun={status === ProcessStatus.FEEDBACK || (stylizedFacts.length > 0 || stylizedQuestions.length > 0)}
           hasFeedback={feedback.trim().length > 0}
