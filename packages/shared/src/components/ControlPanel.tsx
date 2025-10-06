@@ -29,6 +29,8 @@ interface ControlPanelProps {
   setEnableWebSearch: (enabled: boolean) => void;
   enableLocalSearch: boolean;
   setEnableLocalSearch: (enabled: boolean) => void;
+  enableArxivSearch: boolean;
+  setEnableArxivSearch: (enabled: boolean) => void;
   isRunComplete: boolean;
   toolServiceHealthy?: boolean;
   llmHealthy?: boolean;
@@ -36,7 +38,8 @@ interface ControlPanelProps {
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
     topic, setTopic, files, setFiles, onStart, onInterrupt, onExport, onExportJson, onCopyLink, onOpenTemplateModal, isLoading, iteration,
-    modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, enableWebSearch, setEnableWebSearch, enableLocalSearch, setEnableLocalSearch, isRunComplete,
+    modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, enableWebSearch, setEnableWebSearch, enableLocalSearch, setEnableLocalSearch, 
+    enableArxivSearch, setEnableArxivSearch, isRunComplete,
     toolServiceHealthy: toolHealthyProp, llmHealthy: llmHealthyProp
 }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,22 +133,12 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <label className="flex items-center">
             <input
               type="checkbox"
-              checked={enableWebSearch}
-              onChange={(e) => setEnableWebSearch(e.target.checked)}
+              checked={enableArxivSearch}
+              onChange={(e) => setEnableArxivSearch(e.target.checked)}
               disabled={isLoading}
               className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             />
-            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Web Search</span>
-          </label>
-          <label className="flex items-center">
-            <input
-              type="checkbox"
-              checked={enableLocalSearch}
-              onChange={(e) => setEnableLocalSearch(e.target.checked)}
-              disabled={isLoading}
-              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-            />
-            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Local Search</span>
+            <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Arxiv Search</span>
           </label>
         </div>
       </div>

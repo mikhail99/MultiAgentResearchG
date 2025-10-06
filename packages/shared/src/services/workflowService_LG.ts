@@ -84,9 +84,9 @@ Topic: {topic}
   try {
     const results = await executeResearcherTools(state.topic, {
       includeWebSearch: true,
-      includeLocalSearch: true,
+      includeArxivSearch: true,
     });
-    toolData = formatToolResultsForPrompt(results.webResults, results.localResults);
+    toolData = formatToolResultsForPrompt(results.webResults, results.arxivResults);
   } catch (error) {
     toolData = '**Tool Results:** Tools unavailable for this research.';
   }
@@ -564,10 +564,10 @@ export async function noveltyCheckerNode(state: WorkflowState, callbacks?: NodeC
   try {
     const results = await executeResearcherTools(proposal, {
       includeWebSearch: true,
-      includeLocalSearch: true,
+      includeArxivSearch: true,
       metadata: { purpose: 'novelty_check' }
     });
-    toolData = formatToolResultsForPrompt(results.webResults, results.localResults);
+    toolData = formatToolResultsForPrompt(results.webResults, results.arxivResults);
   } catch (error) {
     toolData = '**Tool Results:** Tools unavailable for novelty check.';
   }

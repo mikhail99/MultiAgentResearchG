@@ -39,7 +39,7 @@ enum CircuitState {
 }
 
 // Circuit Breaker Configuration
-const FASTAPI_BASE_URL = process.env.VITE_FASTAPI_URL || 'http://localhost:8000';
+const FASTAPI_BASE_URL = process.env.VITE_FASTAPI_URL || 'http://localhost:8001';
 const TOOL_TIMEOUT = 30000; // 30 seconds
 const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5; // Failures before opening circuit
 const CIRCUIT_BREAKER_RECOVERY_TIMEOUT = 60000; // 1 minute before trying again
@@ -192,6 +192,10 @@ export const saveResults = async (agentName: string, data: string, metadata?: an
   return callTool(agentName, 'save_results', data, metadata);
 };
 
+export const arxivSearch = async (agentName: string, query: string, metadata?: any): Promise<string> => {
+  return callTool(agentName, 'arxiv_search', query, metadata);
+};
+
 /**
  * Research Agent specific tool execution
  * Executes multiple tools in parallel for efficiency
@@ -200,17 +204,17 @@ export const executeResearcherTools = async (
   topic: string,
   options: {
     includeWebSearch?: boolean;
-    includeLocalSearch?: boolean;
+    includeArxivSearch?: boolean;
     metadata?: any;
   } = {}
 ): Promise<{
   webResults?: string;
-  localResults?: string;
+  arxivResults?: string;
   errors: string[];
 }> => {
   const {
     includeWebSearch = true,
-    includeLocalSearch = true,
+    includeArxivSearch = true,
     metadata = {}
   } = options;
 
@@ -219,7 +223,7 @@ export const executeResearcherTools = async (
     console.warn('🔌 Circuit breaker is OPEN - tool service unavailable');
     return {
       webResults: includeWebSearch ? 'Tool service is currently unavailable due to repeated failures. Using fallback mode.' : undefined,
-      localResults: includeLocalSearch ? 'Tool service is currently unavailable due to repeated failures. Using fallback mode.' : undefined,
+      arxivResults: includeArxivSearch ? 'Tool service is currently unavailable due to repeated failures. Using fallback mode.' : undefined,
       errors: ['Circuit breaker is open - tool service unavailable']
     };
   }
@@ -244,19 +248,19 @@ export const executeResearcherTools = async (
     );
   }
 
-  // Execute local search if circuit breaker allows
-  if (includeLocalSearch) {
+  // Execute arxiv search if circuit breaker allows
+  if (includeArxivSearch) {
     promises.push(
-      localSearch('Researcher', topic, metadata)
+      arxivSearch('Researcher', topic, metadata)
         .then(result => {
           circuitBreaker.recordSuccess();
-          return { type: 'local', result };
+          return { type: 'arxiv', result };
         })
         .catch(error => {
           circuitBreaker.recordFailure();
-          console.warn('⚠️ Local search failed:', error.message);
-          errors.push(`Local search failed: ${error.message}`);
-          return { type: 'local', result: 'Local search is currently unavailable. Please try again later.' };
+          console.warn('⚠️ Arxiv search failed:', error.message);
+          errors.push(`Arxiv search failed: ${error.message}`);
+          return { type: 'arxiv', result: 'Arxiv search is currently unavailable. Please try again later.' };
         })
     );
   }
@@ -264,18 +268,18 @@ export const executeResearcherTools = async (
   const results = await Promise.all(promises);
 
   let webResults: string | undefined;
-  let localResults: string | undefined;
+  let arxivResults: string | undefined;
   
   results.forEach(({ type, result }) => {
     if (result.includes('error:') || result.includes('failed:') || result.includes('Failed to connect')) {
       errors.push(`${type}: ${result}`);
     } else {
       if (type === 'web') webResults = result;
-      if (type === 'local') localResults = result;
+      if (type === 'arxiv') arxivResults = result;
     }
   });
   
-  return { webResults, localResults, errors };
+  return { webResults, arxivResults, errors };
 };
 
 /**
@@ -296,15 +300,15 @@ export const checkToolServiceHealth = async (): Promise<boolean> => {
 /**
  * Format tool results for display in agent prompts
  */
-export const formatToolResultsForPrompt = (webResults?: string, localResults?: string): string => {
+export const formatToolResultsForPrompt = (webResults?: string, arxivResults?: string): string => {
   const sections: string[] = [];
   
   if (webResults && !webResults.includes('error:') && !webResults.includes('failed:')) {
     sections.push(`**Web Search Results:**\n${webResults}\n`);
   }
   
-  if (localResults && !localResults.includes('error:') && !localResults.includes('failed:')) {
-    sections.push(`**Local Search Results:**\n${localResults}\n`);
+  if (arxivResults && !arxivResults.includes('error:') && !arxivResults.includes('failed:')) {
+    sections.push(`**Arxiv Search Results:**\n${arxivResults}\n`);
   }
   
   if (sections.length === 0) {
