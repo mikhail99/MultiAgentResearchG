@@ -5,3 +5,4 @@ export * from './useUIState';
 export * from './useWorkflowTemplates';
 export * from './useAgentScopeStream';
 export * from './useTheme';
+export * from './useSessionManagement';

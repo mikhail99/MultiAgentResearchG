@@ -17,7 +17,7 @@ import MemoryVisualization from './components/MemoryVisualization';
 import MemoryTestApp from './components/MemoryTestApp';
 import { getAgentTaskProfile } from './components/agentTaskProfiles';
 import { useWorkflowTemplates } from './hooks/useWorkflowTemplates';
-import { useTheme } from './packages/shared/src/hooks';
+import { useTheme, useSessionManagement } from './packages/shared/src/hooks';
 import { WorkflowTemplate } from './types/workflowTemplates';
 import { SunIcon, MoonIcon, HumanIcon, LoopIcon, SparklesIcon, AgentIcon } from './components/Icons';
 import { WorkflowState } from './types/workflow_LG';
@@ -157,12 +157,31 @@ export default function App_LG() {
   const [selectedAgentProfile, setSelectedAgentProfile] = useState<{ agentName: AgentName; profile: any } | null>(null);
 
   // Session management state
-  const [showRestoreToast, setShowRestoreToast] = useState<boolean>(false);
-  const [showLinkToast, setShowLinkToast] = useState<boolean>(false);
   const [showMemoryTestApp, setShowMemoryTestApp] = useState<boolean>(false);
 
   // Theme
   const { theme, toggleTheme } = useTheme();
+
+  // Session management
+  const sessionManagement = useSessionManagement(
+    {
+      onTopicChange: setTopic,
+      onModelProviderChange: setModelProvider,
+      onWorkflowStateChange: setWorkflowState,
+      onCurrentThreadIdChange: setCurrentThreadId,
+      onStylizedFactsChange: setStylizedFacts,
+      onStylizedQuestionsChange: setStylizedQuestions,
+      onStatusChange: setStatus,
+    },
+    topic,
+    iteration,
+    modelProvider,
+    workflowState,
+    currentThreadId,
+    stylizedFacts,
+    stylizedQuestions,
+    status
+  );
 
   // Template management
   const { templates, createTemplate, trackUsage, deleteTemplate, updateTemplate } = useWorkflowTemplates();
@@ -304,237 +323,6 @@ export default function App_LG() {
     checkTools();
   }, []);
 
-  // --- Autosave / Restore last run ---
-  type SavedRun = {
-    timestamp: string;
-    topic: string;
-    iteration: number;
-    modelProvider: ModelProvider;
-    researchSummary: string;
-    generatedAnalysis: string;
-    critique: string;
-    proposal: string;
-    noveltyAssessment: string;
-    finalReport: string;
-    stylizedFacts: StylizedFact[];
-    stylizedQuestions: string[];
-    completedSteps: ProcessStatus[];
-    toolResults?: ToolResults;
-    workflowState?: WorkflowState;
-    currentThreadId?: string;
-  };
-
-  const LAST_RUN_KEY = 'mars:lastRun';
-
-  const saveLastRun = () => {
-    try {
-      const payload: SavedRun = {
-        timestamp: new Date().toISOString(),
-        topic,
-        iteration,
-        modelProvider,
-        researchSummary: workflowState?.searchResults.join('\n\n') || '',
-        generatedAnalysis: workflowState?.learnings[workflowState.learnings.length - 1] || '',
-        critique: workflowState?.opportunityAnalyses[workflowState.opportunityAnalyses.length - 1] || '',
-        proposal: workflowState?.proposals[workflowState.proposals.length - 1] || '',
-        noveltyAssessment: workflowState?.noveltyChecks[workflowState.noveltyChecks.length - 1] || '',
-        finalReport: workflowState?.aggregations[workflowState.aggregations.length - 1] || '',
-        stylizedFacts,
-        stylizedQuestions,
-        completedSteps: workflowState?.completedSteps || [],
-        toolResults: workflowState?.toolResults,
-        workflowState,
-        currentThreadId,
-      };
-      console.log('💾 Saving data:', {
-        topic,
-        hasResearchSummary: !!payload.researchSummary,
-        hasGeneratedAnalysis: !!payload.generatedAnalysis,
-        completedSteps: payload.completedSteps
-      });
-      localStorage.setItem(LAST_RUN_KEY, JSON.stringify(payload));
-    } catch (error) {
-      console.error('❌ Error saving data:', error);
-    }
-  };
-
-  const tryGetSavedRun = (): SavedRun | null => {
-    try {
-      const raw = localStorage.getItem(LAST_RUN_KEY);
-      console.log('💾 tryGetSavedRun:', { hasRawData: !!raw, rawLength: raw?.length });
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as SavedRun;
-      console.log('💾 Parsed saved data:', {
-        hasTopic: !!parsed.topic,
-        hasResearchSummary: !!parsed.researchSummary,
-        hasGeneratedAnalysis: !!parsed.generatedAnalysis
-      });
-      return parsed;
-    } catch (error) {
-      console.error('❌ Error parsing saved data:', error);
-      return null;
-    }
-  };
-
-  // Helper function to determine completed steps based on current state (for backward compatibility)
-  const deriveCompletedSteps = (data: Partial<SavedRun>): ProcessStatus[] => {
-    const steps: ProcessStatus[] = [];
-    if (data.researchSummary) steps.push(ProcessStatus.SEARCHING);
-    if (data.generatedAnalysis) steps.push(ProcessStatus.LEARNING);
-    if (data.critique) steps.push(ProcessStatus.OPPORTUNITY_ANALYZING);
-    if (data.proposal) steps.push(ProcessStatus.PROPOSING);
-    if (data.noveltyAssessment) steps.push(ProcessStatus.CHECKING_NOVELTY);
-    if (data.finalReport) steps.push(ProcessStatus.AGGREGATING);
-    if (data.stylizedFacts && data.stylizedFacts.length > 0) steps.push(ProcessStatus.GENERATING_FACTS);
-    if (data.stylizedQuestions && data.stylizedQuestions.length > 0) steps.push(ProcessStatus.GENERATING_QUESTIONS);
-    if (steps.length > 0) steps.push(ProcessStatus.FEEDBACK);
-    return steps;
-  };
-
-  const isOutputsEmpty = () => (
-    !workflowState ||
-    (workflowState.searchResults.length === 0 &&
-     workflowState.learnings.length === 0 &&
-     workflowState.opportunityAnalyses.length === 0 &&
-     workflowState.proposals.length === 0 &&
-     workflowState.noveltyChecks.length === 0 &&
-     workflowState.aggregations.length === 0 &&
-     stylizedFacts.length === 0 &&
-     stylizedQuestions.length === 0)
-  );
-
-  const restoreLastRun = () => {
-    const data = tryGetSavedRun();
-    if (!data) return;
-
-    // Validate and sanitize the workflow state before restoring
-    let validatedWorkflowState = data.workflowState;
-    if (validatedWorkflowState) {
-      const validation = validateWorkflowState(validatedWorkflowState, { strict: false });
-      if (!validation.isValid) {
-        console.warn('⚠️ Invalid saved workflow state:', validation.errors);
-        validatedWorkflowState = sanitizeWorkflowState(validatedWorkflowState);
-        console.log('🔧 Saved state sanitized during restoration');
-      }
-      if (validation.warnings.length > 0) {
-        console.warn('⚠️ Saved workflow state warnings:', validation.warnings);
-      }
-    }
-
-    setTopic(data.topic);
-    setIteration(data.iteration);
-    setModelProvider(data.modelProvider);
-    setWorkflowState(validatedWorkflowState);
-    setCurrentThreadId(data.currentThreadId || null);
-    setStylizedFacts(data.stylizedFacts || []);
-    setStylizedQuestions(data.stylizedQuestions || []);
-    setStatus(ProcessStatus.FEEDBACK);
-    setShowRestoreToast(false);
-
-    // Set tool results if available
-    if (data.toolResults) {
-      // Note: In LangGraph version, tool results are part of workflow state
-      // They will be restored when workflow state is restored
-    }
-
-    console.log('✅ Restored session:', {
-      topic: data.topic,
-      iteration: data.iteration,
-      hasWorkflowState: !!data.workflowState
-    });
-  };
-
-  const dismissRestoreToast = () => setShowRestoreToast(false);
-
-  const buildSessionSnapshot = () => ({
-    v: 1,
-    timestamp: new Date().toISOString(),
-    topic,
-    iteration,
-    modelProvider,
-    researchSummary: workflowState?.searchResults.join('\n\n') || '',
-    generatedAnalysis: workflowState?.learnings[workflowState.learnings.length - 1] || '',
-    critique: workflowState?.opportunityAnalyses[workflowState.opportunityAnalyses.length - 1] || '',
-    proposal: workflowState?.proposals[workflowState.proposals.length - 1] || '',
-    noveltyAssessment: workflowState?.noveltyChecks[workflowState.noveltyChecks.length - 1] || '',
-    finalReport: workflowState?.aggregations[workflowState.aggregations.length - 1] || '',
-    stylizedFacts,
-    stylizedQuestions,
-    completedSteps: workflowState?.completedSteps || [],
-    toolResults: workflowState?.toolResults,
-    workflowState,
-    currentThreadId,
-  });
-
-  const handleCopyLinkToSession = async () => {
-    try {
-      const snapshot = buildSessionSnapshot();
-      const encoded = encodeURIComponent(JSON.stringify(snapshot));
-      const shareUrl = `${window.location.origin}${window.location.pathname}#s=${encoded}`;
-      await navigator.clipboard.writeText(shareUrl);
-      setShowLinkToast(true);
-      setTimeout(() => setShowLinkToast(false), 2000);
-    } catch (e) {
-      console.error('Failed to copy link:', e);
-    }
-  };
-
-  // Auto-restore functionality
-  useEffect(() => {
-    // If a share link is provided, restore from URL hash
-    if (typeof window !== 'undefined' && window.location.hash.startsWith('#s=')) {
-      try {
-        const encoded = window.location.hash.substring(3);
-        const json = decodeURIComponent(encoded);
-        const data = JSON.parse(json) as SavedRun & { v?: number };
-        setTopic(data.topic || '');
-        setIteration(data.iteration || 1);
-        setModelProvider(data.modelProvider || ModelProvider.LOCAL);
-        setWorkflowState(data.workflowState || null);
-        setCurrentThreadId(data.currentThreadId || null);
-        setStylizedFacts(data.stylizedFacts || []);
-        setStylizedQuestions(data.stylizedQuestions || []);
-        setStatus(ProcessStatus.FEEDBACK);
-        // Optionally clear the hash to avoid repeated restores
-        history.replaceState(null, '', window.location.pathname);
-        return; // Skip autosave toast if we restored from hash
-      } catch {
-        // Ignore malformed hashes
-      }
-    }
-
-    // On first load, if there's a saved run and current state is empty, offer restore
-    const savedData = tryGetSavedRun();
-    const hasSaved = !!savedData;
-    const outputsEmpty = isOutputsEmpty();
-
-    console.log('🔄 Auto-restore check:', {
-      hasSaved,
-      topic: !!topic,
-      outputsEmpty,
-      savedDataKeys: savedData ? Object.keys(savedData) : null
-    });
-
-    if (hasSaved && !topic && outputsEmpty) {
-      console.log('📋 Showing restore toast');
-      setShowRestoreToast(true);
-    } else {
-      console.log('📋 Not showing restore toast:', {
-        hasSaved,
-        hasTopic: !!topic,
-        outputsEmpty
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Auto-save when workflow completes
-  useEffect(() => {
-    if (status === ProcessStatus.FEEDBACK && workflowState) {
-      saveLastRun();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, workflowState]);
 
   // LangGraph workflow handlers
   const runWorkflow_LG = async (currentFeedback = '', startFromStep: ProcessStatus = ProcessStatus.SEARCHING) => {
@@ -1118,7 +906,7 @@ ${questionsText}
                 onInterrupt={handleInterruptWorkflow}
                 onExport={handleExportRun}
                 onExportJson={handleExportJson}
-                onCopyLink={handleCopyLinkToSession}
+                onCopyLink={sessionManagement.handleCopyLinkToSession}
                 onOpenTemplateModal={() => setShowTemplateModal(true)}
                 isLoading={isLoading}
                 iteration={iteration}
@@ -1338,20 +1126,20 @@ ${questionsText}
       </div>
 
       {/* Session Management Toasts */}
-      {showRestoreToast && (
+      {sessionManagement.showRestoreToast && (
         <div className="fixed bottom-4 right-4 z-50 max-w-sm">
           <div className="bg-gray-900 text-white dark:bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-4">
             <p className="text-sm font-semibold">Restore last session?</p>
             <p className="text-xs text-gray-300 mt-1">A previous run was found from local storage. You can restore it now.</p>
             <div className="mt-3 flex items-center gap-2">
-              <button onClick={restoreLastRun} className="px-3 py-1.5 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-xs">Restore</button>
-              <button onClick={dismissRestoreToast} className="px-3 py-1.5 rounded-md bg-gray-700 hover:bg-gray-600 text-white text-xs">Dismiss</button>
+              <button onClick={sessionManagement.restoreLastRun} className="px-3 py-1.5 rounded-md bg-blue-500 hover:bg-blue-600 text-white text-xs">Restore</button>
+              <button onClick={sessionManagement.dismissRestoreToast} className="px-3 py-1.5 rounded-md bg-gray-700 hover:bg-gray-600 text-white text-xs">Dismiss</button>
             </div>
           </div>
         </div>
       )}
 
-      {showLinkToast && (
+      {sessionManagement.showLinkToast && (
         <div className="fixed bottom-4 right-4 z-50 max-w-sm">
           <div className="bg-gray-900 text-white dark:bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-3 text-sm">
             Link copied to clipboard
