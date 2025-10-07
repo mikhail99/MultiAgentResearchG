@@ -30,7 +30,7 @@ async function testApp() {
     console.log('👥 Agents found:', {
       search: searchAgent,
       learnings: learningsAgent,
-      gapAnalysis: gapAnalysisAgent
+      opportunityAnalysis: opportunityAnalysisAgent
     });
     
     // Test 3: Check if topic input exists
