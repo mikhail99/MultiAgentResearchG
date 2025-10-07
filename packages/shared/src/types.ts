@@ -77,3 +77,6 @@ export interface AgentToolConfig {
   enableLocalSearch: boolean;
   toolServiceUrl: string;
 }
+
+// Re-export WorkflowState from workflow_LG
+export type { WorkflowState } from './types/workflow_LG';

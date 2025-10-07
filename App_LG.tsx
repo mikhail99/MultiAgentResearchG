@@ -6,6 +6,7 @@ import { initialPrompts } from './prompts';
 import ControlPanel from './components/ControlPanel';
 import StatusBar from './components/StatusBar';
 import AgentCard from './components/AgentCard';
+import AgentGrid from './packages/shared/src/components/AgentGrid';
 import FeedbackPanel from './components/FeedbackPanel';
 import ResultsPanel from './components/ResultsPanel';
 import PromptEditorModal from './components/PromptEditorModal';
@@ -685,7 +686,7 @@ export default function App_LG() {
     setLocalLlmUrl(template.localLlmUrl);
     setEnableWebSearch(template.enableWebSearch);
     setEnableLocalSearch(template.enableLocalSearch);
-    setTheme(template.theme);
+    // Note: Theme is managed by useTheme hook, template theme application would need different approach
     setIteration(template.maxIterations);
     setShowTemplateModal(false);
     console.log(`✅ Applied template: ${template.name}`);
@@ -936,89 +937,56 @@ ${questionsText}
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <AgentCard
-                  title="Search Agent"
-                  content={getAgentContent(AgentName.SEARCH)}
-                  sentPrompt={getAgentSentPrompt(AgentName.SEARCH)}
-                  isLoading={status === ProcessStatus.SEARCHING}
-                  agent={AgentName.SEARCH}
-                  onEditPrompt={() => handleOpenPromptEditor(AgentName.SEARCH)}
-                  onViewTaskProfile={() => handleViewTaskProfile(AgentName.SEARCH)}
-                  toolResults={workflowState?.toolResults || null}
-                  toolServiceAvailable={toolServiceAvailable}
-                  currentIteration={getCurrentIteration(AgentName.SEARCH)}
-                  totalIterations={getAgentIterationCount(AgentName.SEARCH)}
-                  onIterationSelect={createIterationSelector(AgentName.SEARCH)}
-                />
-
-                <AgentCard
-                  title="Learnings Agent"
-                  content={getAgentContent(AgentName.LEARNINGS)}
-                  sentPrompt={getAgentSentPrompt(AgentName.LEARNINGS)}
-                  isLoading={status === ProcessStatus.LEARNING}
-                  agent={AgentName.LEARNINGS}
-                  onEditPrompt={() => handleOpenPromptEditor(AgentName.LEARNINGS)}
-                  onViewTaskProfile={() => handleViewTaskProfile(AgentName.LEARNINGS)}
-                  currentIteration={getCurrentIteration(AgentName.LEARNINGS)}
-                  totalIterations={getAgentIterationCount(AgentName.LEARNINGS)}
-                  onIterationSelect={createIterationSelector(AgentName.LEARNINGS)}
-                />
-
-                <AgentCard
-                  title="Opportunity Analysis Agent"
-                  content={getAgentContent(AgentName.OPPORTUNITY_ANALYSIS)}
-                  sentPrompt={getAgentSentPrompt(AgentName.OPPORTUNITY_ANALYSIS)}
-                  isLoading={status === ProcessStatus.OPPORTUNITY_ANALYZING}
-                  agent={AgentName.OPPORTUNITY_ANALYSIS}
-                  onEditPrompt={() => handleOpenPromptEditor(AgentName.OPPORTUNITY_ANALYSIS)}
-                  onViewTaskProfile={() => handleViewTaskProfile(AgentName.OPPORTUNITY_ANALYSIS)}
-                  currentIteration={getCurrentIteration(AgentName.OPPORTUNITY_ANALYSIS)}
-                  totalIterations={getAgentIterationCount(AgentName.OPPORTUNITY_ANALYSIS)}
-                  onIterationSelect={createIterationSelector(AgentName.OPPORTUNITY_ANALYSIS)}
-                />
-
-                <AgentCard
-                  title="Proposer Agent"
-                  content={getAgentContent(AgentName.PROPOSER)}
-                  sentPrompt={getAgentSentPrompt(AgentName.PROPOSER)}
-                  isLoading={status === ProcessStatus.PROPOSING}
-                  agent={AgentName.PROPOSER}
-                  onEditPrompt={() => handleOpenPromptEditor(AgentName.PROPOSER)}
-                  onViewTaskProfile={() => handleViewTaskProfile(AgentName.PROPOSER)}
-                  currentIteration={getCurrentIteration(AgentName.PROPOSER)}
-                  totalIterations={getAgentIterationCount(AgentName.PROPOSER)}
-                  onIterationSelect={createIterationSelector(AgentName.PROPOSER)}
-                />
-
-                <AgentCard
-                  title="Novelty Checker Agent"
-                  content={getAgentContent(AgentName.NOVELTY_CHECKER)}
-                  sentPrompt={getAgentSentPrompt(AgentName.NOVELTY_CHECKER)}
-                  isLoading={status === ProcessStatus.CHECKING_NOVELTY}
-                  agent={AgentName.NOVELTY_CHECKER}
-                  onEditPrompt={() => handleOpenPromptEditor(AgentName.NOVELTY_CHECKER)}
-                  onViewTaskProfile={() => handleViewTaskProfile(AgentName.NOVELTY_CHECKER)}
-                  currentIteration={getCurrentIteration(AgentName.NOVELTY_CHECKER)}
-                  totalIterations={getAgentIterationCount(AgentName.NOVELTY_CHECKER)}
-                  onIterationSelect={createIterationSelector(AgentName.NOVELTY_CHECKER)}
-                />
-              </div>
-
-              <div className="grid grid-cols-1">
-                <AgentCard
-                  title="Aggregator Agent"
-                  content={getAgentContent(AgentName.AGGREGATOR)}
-                  sentPrompt={getAgentSentPrompt(AgentName.AGGREGATOR)}
-                  isLoading={status === ProcessStatus.AGGREGATING}
-                  agent={AgentName.AGGREGATOR}
-                  onEditPrompt={() => handleOpenPromptEditor(AgentName.AGGREGATOR)}
-                  onViewTaskProfile={() => handleViewTaskProfile(AgentName.AGGREGATOR)}
-                  currentIteration={getCurrentIteration(AgentName.AGGREGATOR)}
-                  totalIterations={getAgentIterationCount(AgentName.AGGREGATOR)}
-                  onIterationSelect={createIterationSelector(AgentName.AGGREGATOR)}
-                />
-              </div>
+              <AgentGrid
+                agentConfigs={[
+                  {
+                    name: AgentName.SEARCH,
+                    title: "Search Agent",
+                    status: ProcessStatus.SEARCHING,
+                    hasToolResults: true,
+                  },
+                  {
+                    name: AgentName.LEARNINGS,
+                    title: "Learnings Agent",
+                    status: ProcessStatus.LEARNING,
+                    hasToolResults: false,
+                  },
+                  {
+                    name: AgentName.OPPORTUNITY_ANALYSIS,
+                    title: "Opportunity Analysis Agent",
+                    status: ProcessStatus.OPPORTUNITY_ANALYZING,
+                    hasToolResults: false,
+                  },
+                  {
+                    name: AgentName.PROPOSER,
+                    title: "Proposer Agent",
+                    status: ProcessStatus.PROPOSING,
+                    hasToolResults: false,
+                  },
+                  {
+                    name: AgentName.NOVELTY_CHECKER,
+                    title: "Novelty Checker Agent",
+                    status: ProcessStatus.CHECKING_NOVELTY,
+                    hasToolResults: false,
+                  },
+                  {
+                    name: AgentName.AGGREGATOR,
+                    title: "Aggregator Agent",
+                    status: ProcessStatus.AGGREGATING,
+                    hasToolResults: false,
+                  },
+                ]}
+                workflowState={workflowState}
+                toolServiceAvailable={toolServiceAvailable}
+                status={status}
+                selectedIterations={selectedIterations}
+                sentPrompts={sentPrompts}
+                onEditPrompt={handleOpenPromptEditor}
+                onViewTaskProfile={handleViewTaskProfile}
+                onIterationSelect={(agentName, iteration) => setIterationForAgent(agentName, iteration)}
+                getAgentContent={getAgentContent}
+                getAgentIterationCount={getAgentIterationCount}
+              />
 
               {/* A-Mem Memory Visualization */}
               {workflowState?.memoryNotes && workflowState.memoryNotes.length > 0 && (

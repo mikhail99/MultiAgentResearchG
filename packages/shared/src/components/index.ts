@@ -1,5 +1,6 @@
 // Component exports (named re-exports for default components)
 export { default as AgentCard } from './AgentCard';
+export { default as AgentGrid } from './AgentGrid';
 export { default as ControlPanel } from './ControlPanel';
 export { default as DspSignaturesModal } from './DspSignaturesModal';
 export { default as ErrorBoundary } from './ErrorBoundary';
