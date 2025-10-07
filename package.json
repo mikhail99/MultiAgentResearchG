@@ -1,37 +1,35 @@
 {
   "name": "multi-agent-research-assistant",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
+  "description": "LangGraph.js powered multi-agent research assistant",
+  "main": "src/index.tsx",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc && vite build",
     "preview": "vite preview",
-    "smoke:ra": "node apps/research-agents/tests/smoke_test.mjs",
-    "smoke:ke": "node apps/knowledge-extraction/src/tests/smoke_test.mjs",
-    "smoke:dp": "node apps/data-preprocessing/tests/smoke_test.mjs",
-    "type-check:all": "pnpm --filter research-agents type-check && pnpm --filter knowledge-extraction type-check && pnpm --filter data-preprocessing type-check && pnpm --filter @shared/components tsc --noEmit"
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "@google/genai": "^1.14.0",
-    "@langchain/anthropic": "^0.3.26",
-    "@langchain/core": "^0.3.72",
-    "@langchain/langgraph": "^0.4.6",
-    "playwright": "^1.55.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-markdown": "^9.0.1",
     "remark-gfm": "^4.0.0",
-    "uuid": "^11.1.0",
-    "zod": "^3.25.76"
+    "@google/genai": "^0.2.0",
+    "@langchain/langgraph": "^0.0.15",
+    "tailwindcss": "^3.4.0"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@types/uuid": "^10.0.0",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.12",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.0"
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "postcss": "^8.4.38",
+    "typescript": "^5.2.2",
+    "vite": "^5.2.0"
   }
 }
