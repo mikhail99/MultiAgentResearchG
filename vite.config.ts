@@ -18,6 +18,10 @@ export default defineConfig(({ mode }) => {
       root: 'src',
       server: {
         port: 5175
+      },
+      worker: {
+        format: 'es',
+        plugins: () => [react()]
       }
     };
 });

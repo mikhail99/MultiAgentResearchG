@@ -9,7 +9,6 @@ interface WorkflowTemplateModalProps {
   currentPrompts: AgentPrompts;
   currentSettings: {
     modelProvider: ModelProvider;
-    localLlmUrl: string;
     enableWebSearch: boolean;
     enableLocalSearch: boolean;
     theme: 'light' | 'dark';
@@ -291,10 +290,6 @@ const WorkflowTemplateModal: React.FC<WorkflowTemplateModalProps> = ({
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">LLM Provider:</span>
                       <span className="font-medium">{previewTemplate.modelProvider}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-300">Local LLM URL:</span>
-                      <span className="font-medium text-xs break-all">{previewTemplate.localLlmUrl}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600 dark:text-gray-300">Web Search:</span>

@@ -11,6 +11,7 @@ export interface NodeCallbacks {
   onStream?: (chunk: string) => void;
   onPrompt?: (agentName: string, prompt: string) => void;
   onError?: (error: Error) => void;
+  llmOptions?: { provider: ModelProvider; url?: string };
 }
 
 // Initial state factory
@@ -18,7 +19,7 @@ export function createInitialState(topic: string, iteration: number = 1): Workfl
   return {
     topic,
     iteration,
-    modelProvider: ModelProvider.LOCAL,
+    modelProvider: ModelProvider.TRANSFORMERS,
     feedback: '',
     searchResults: [],
     learnings: [],
@@ -193,7 +194,7 @@ Topic: {topic}
     await generateContentStream(
       AgentName.SEARCH,
       prompt,
-      { provider: ModelProvider.LOCAL, url: 'http://localhost:11434/v1/chat/completions' },
+      callbacks?.llmOptions || { provider: ModelProvider.TRANSFORMERS },
       (chunk) => {
         output += chunk;
         streamingContent += chunk;
@@ -205,31 +206,8 @@ Topic: {topic}
       }
     );
   } catch (error) {
-    console.warn('Local LLM failed, using fallback response:', error);
-    // Fallback response when local LLM is not available
-    const fallback = `Fallback search results for "${state.topic}":
-
-Based on general knowledge about ${state.topic}, here are key themes and concepts:
-
-1. **Core Definition**: ${state.topic} refers to AI systems capable of logical reasoning and decision-making.
-
-2. **Key Applications**: Used in problem-solving, planning, and complex decision scenarios.
-
-3. **Current Trends**: Integration with machine learning and neural networks for enhanced performance.
-
-4. **Challenges**: Handling uncertainty, computational complexity, and real-world constraints.
-
-**Tool Results:** ${toolData}
-
-This is a fallback response generated when the local LLM service is unavailable. Please ensure Ollama is running with a compatible model (e.g., 'qwen3:4b').`;
-
-    output = fallback;
-    streamingContent = fallback;
-
-    // Send fallback content to UI
-    if (callbacks?.onStream) {
-      callbacks.onStream(fallback);
-    }
+    console.error('❌ LLM generation failed:', error);
+    throw new Error(`Failed to generate search results: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
     // Process output through A-Mem system
@@ -322,7 +300,7 @@ Feedback: {feedback}`;
     await generateContentStream(
       AgentName.LEARNINGS,
       prompt,
-      { provider: ModelProvider.LOCAL, url: 'http://localhost:11434/v1/chat/completions' },
+      callbacks?.llmOptions || { provider: ModelProvider.TRANSFORMERS },
       (chunk) => {
         output += chunk;
         streamingContent += chunk;
@@ -334,30 +312,8 @@ Feedback: {feedback}`;
       }
     );
   } catch (error) {
-    console.warn('Local LLM failed for learnings, using fallback:', error);
-    const fallback = `Fallback analysis for "${state.topic}":
-
-Based on the search results, I can identify several key themes:
-
-1. **Research Foundation**: The search results provide a solid foundation for understanding ${state.topic}
-
-2. **Key Insights**: Multiple perspectives and approaches are represented in the research
-
-3. **Knowledge Gaps**: Some areas require deeper investigation and more recent studies
-
-4. **Practical Applications**: Real-world implementation considerations and challenges
-
-**Recommendation**: More research needed in emerging trends and recent developments.
-
-This is a fallback analysis generated when the local LLM service is unavailable.`;
-
-    output = fallback;
-    streamingContent = fallback;
-
-    // Send fallback content to UI
-    if (callbacks?.onStream) {
-      callbacks.onStream(fallback);
-    }
+    console.error('❌ LLM generation failed for learnings:', error);
+    throw new Error(`Failed to generate learnings: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
     // Process output through A-Mem system
@@ -468,7 +424,7 @@ Learnings to Analyze:
     await generateContentStream(
       AgentName.OPPORTUNITY_ANALYSIS,
       prompt,
-      { provider: ModelProvider.LOCAL, url: 'http://localhost:11434/v1/chat/completions' },
+      callbacks?.llmOptions || { provider: ModelProvider.TRANSFORMERS },
       (chunk) => {
         output += chunk;
         streamingContent += chunk;
@@ -480,26 +436,8 @@ Learnings to Analyze:
       }
     );
   } catch (error) {
-    console.warn('Local LLM failed for opportunity analysis, using fallback:', error);
-    const fallback = `Fallback opportunity analysis for "${state.topic}":
-
-After reviewing the learnings, I recommend continuing with the current research direction:
-
-**Assessment**: The learnings provide sufficient depth for meaningful analysis.
-
-**Recommendation**: Proceed with proposal development using the current research foundation.
-
-**No restart needed**: The available information is adequate for the next steps in the research process.
-
-This is a fallback analysis generated when the local LLM service is unavailable.`;
-
-    output = fallback;
-    streamingContent = fallback;
-
-    // Send fallback content to UI for real-time display
-    if (callbacks?.onStream) {
-      callbacks.onStream(fallback);
-    }
+    console.error('❌ LLM generation failed for opportunity analysis:', error);
+    throw new Error(`Failed to generate opportunity analysis: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
   // Analyze output for restart keywords, but respect the 2-time limit
@@ -578,7 +516,7 @@ Propose specific research ideas or directions. Keep your response under 100 word
     await generateContentStream(
       AgentName.PROPOSER,
       prompt,
-      { provider: ModelProvider.LOCAL, url: 'http://localhost:11434/v1/chat/completions' },
+      callbacks?.llmOptions || { provider: ModelProvider.TRANSFORMERS },
       (chunk) => {
         output += chunk;
         streamingContent += chunk;
@@ -590,34 +528,8 @@ Propose specific research ideas or directions. Keep your response under 100 word
       }
     );
   } catch (error) {
-    console.warn('Local LLM failed for proposer, using fallback:', error);
-    const fallback = `Fallback research proposal for "${state.topic}":
-
-**Proposed Research Direction**:
-
-1. **Problem Statement**: Address key challenges in ${state.topic} implementation and optimization
-
-2. **Methodology**: Combine theoretical analysis with practical implementation approaches
-
-3. **Expected Outcomes**: Improved understanding and new techniques for ${state.topic} applications
-
-4. **Impact**: Contribute to the advancement of AI reasoning and decision-making systems
-
-**Implementation Plan**:
-- Conduct thorough literature review
-- Develop proof-of-concept implementation
-- Evaluate performance and limitations
-- Identify areas for future research
-
-This is a fallback proposal generated when the local LLM service is unavailable.`;
-
-    output = fallback;
-    streamingContent = fallback;
-
-    // Send fallback content to UI for real-time display
-    if (callbacks?.onStream) {
-      callbacks.onStream(fallback);
-    }
+    console.error('❌ LLM generation failed for proposer:', error);
+    throw new Error(`Failed to generate proposal: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
     return {
@@ -681,7 +593,7 @@ Assess whether this proposal is novel and identify similar existing work. Keep y
     await generateContentStream(
       AgentName.NOVELTY_CHECKER,
       prompt,
-      { provider: ModelProvider.LOCAL, url: 'http://localhost:11434/v1/chat/completions' },
+      callbacks?.llmOptions || { provider: ModelProvider.TRANSFORMERS },
       (chunk) => {
         output += chunk;
         streamingContent += chunk;
@@ -693,27 +605,8 @@ Assess whether this proposal is novel and identify similar existing work. Keep y
       }
     );
   } catch (error) {
-    console.warn('Local LLM failed for novelty checker, using fallback:', error);
-    const fallback = `Fallback novelty assessment for the proposed research:
-
-**Novelty Analysis**:
-The proposal appears to build upon existing work in ${state.topic} while potentially offering new perspectives or approaches.
-
-**Similar Work**: Related research exists in the field, but this proposal may offer unique contributions.
-
-**Recommendation**: The research direction is promising and warrants further investigation.
-
-**Risk Assessment**: Moderate - builds on existing knowledge while exploring new applications.
-
-This is a fallback assessment generated when the local LLM service is unavailable.`;
-
-    output = fallback;
-    streamingContent = fallback;
-
-    // Send fallback content to UI for real-time display
-    if (callbacks?.onStream) {
-      callbacks.onStream(fallback);
-    }
+    console.error('❌ LLM generation failed for novelty checker:', error);
+    throw new Error(`Failed to generate novelty check: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
     return {
@@ -772,7 +665,7 @@ Create a comprehensive final report. Keep your response under 100 words.`;
     await generateContentStream(
       AgentName.AGGREGATOR,
       prompt,
-      { provider: ModelProvider.LOCAL, url: 'http://localhost:11434/v1/chat/completions' },
+      callbacks?.llmOptions || { provider: ModelProvider.TRANSFORMERS },
       (chunk) => {
         output += chunk;
         streamingContent += chunk;
@@ -784,36 +677,8 @@ Create a comprehensive final report. Keep your response under 100 words.`;
       }
     );
   } catch (error) {
-    console.warn('Local LLM failed for aggregator, using fallback:', error);
-    const fallback = `# Final Research Report: ${state.topic}
-
-## Executive Summary
-This report synthesizes the research findings on ${state.topic} based on the analysis conducted.
-
-## Key Findings
-1. **Search Results**: Comprehensive research foundation established
-2. **Learnings**: Multiple perspectives and approaches identified
-3. **Gap Analysis**: Current research direction deemed appropriate
-4. **Proposal**: Research plan developed with clear objectives
-5. **Novelty Assessment**: Proposal shows promise for meaningful contributions
-
-## Research Recommendations
-- **Continue Current Direction**: The proposed research path is well-founded
-- **Focus Areas**: Implementation, evaluation, and real-world application
-- **Next Steps**: Develop detailed methodology and conduct pilot studies
-
-## Conclusion
-The research on ${state.topic} shows strong potential for advancing the field. The proposed approach combines solid theoretical foundations with practical considerations.
-
-*This is a fallback report generated when the local LLM service is unavailable.*`;
-
-    output = fallback;
-    streamingContent = fallback;
-
-    // Send fallback content to UI for real-time display
-    if (callbacks?.onStream) {
-      callbacks.onStream(fallback);
-    }
+    console.error('❌ LLM generation failed for aggregator:', error);
+    throw new Error(`Failed to generate final report: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 
     return {

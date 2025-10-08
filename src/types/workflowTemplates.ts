@@ -11,7 +11,6 @@ export interface WorkflowTemplate {
   // Core configuration - matches current app structure
   agentPrompts: AgentPrompts;
   modelProvider: ModelProvider;
-  localLlmUrl: string;
   enableWebSearch: boolean;
   enableLocalSearch: boolean;
   theme: 'light' | 'dark';

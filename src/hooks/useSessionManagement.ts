@@ -205,7 +205,7 @@ export const useSessionManagement = (
         const data = JSON.parse(json) as SavedRun;
 
         options.onTopicChange(data.topic || '');
-        options.onModelProviderChange(data.modelProvider || ModelProvider.LOCAL);
+        options.onModelProviderChange(data.modelProvider || ModelProvider.OLLAMA);
         options.onWorkflowStateChange(data.workflowState || null);
         options.onCurrentThreadIdChange(data.currentThreadId || null);
         options.onStylizedFactsChange(data.stylizedFacts || []);

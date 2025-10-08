@@ -23,8 +23,8 @@ interface ControlPanelProps {
   iteration: number;
   modelProvider: ModelProvider;
   setModelProvider: (provider: ModelProvider) => void;
-  localLlmUrl: string;
-  setLocalLlmUrl: (url: string) => void;
+  ollamaUrl: string;
+  setOllamaUrl: (url: string) => void;
   enableWebSearch: boolean;
   setEnableWebSearch: (enabled: boolean) => void;
   enableLocalSearch: boolean;
@@ -34,7 +34,7 @@ interface ControlPanelProps {
 
 const ControlPanel: React.FC<ControlPanelProps> = ({
     topic, setTopic, files, setFiles, onStart, onInterrupt, onExport, onExportJson, onCopyLink, onOpenTemplateModal, isLoading, iteration,
-    modelProvider, setModelProvider, localLlmUrl, setLocalLlmUrl, enableWebSearch, setEnableWebSearch, enableLocalSearch, setEnableLocalSearch, isRunComplete
+    modelProvider, setModelProvider, ollamaUrl, setOllamaUrl, enableWebSearch, setEnableWebSearch, enableLocalSearch, setEnableLocalSearch, isRunComplete
 }) => {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -65,28 +65,37 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
                 Gemini API
             </button>
             <button
-                onClick={() => setModelProvider(ModelProvider.LOCAL)}
+                onClick={() => setModelProvider(ModelProvider.OLLAMA)}
                 disabled={isLoading}
-                className={`flex-1 px-4 py-2 text-sm font-medium rounded-r-md transition-colors ${
-                    modelProvider === ModelProvider.LOCAL ? 'bg-blue-600 text-white z-10 ring-2 ring-blue-500' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                className={`flex-1 px-4 py-2 text-sm font-medium transition-colors ${
+                    modelProvider === ModelProvider.OLLAMA ? 'bg-blue-600 text-white z-10 ring-2 ring-blue-500' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
                 }`}
             >
-                Local LLM
+                Ollama
+            </button>
+            <button
+                onClick={() => setModelProvider(ModelProvider.TRANSFORMERS)}
+                disabled={isLoading}
+                className={`flex-1 px-4 py-2 text-sm font-medium rounded-r-md transition-colors ${
+                    modelProvider === ModelProvider.TRANSFORMERS ? 'bg-blue-600 text-white z-10 ring-2 ring-blue-500' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                }`}
+            >
+                Transformers.js
             </button>
         </div>
       </div>
       
-      {modelProvider === ModelProvider.LOCAL && (
+      {modelProvider === ModelProvider.OLLAMA && (
         <div className="animate-fade-in">
-            <label htmlFor="local-llm-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Local OpenAI-Compatible URL
+            <label htmlFor="ollama-url" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Ollama Server URL
             </label>
             <input
-                id="local-llm-url"
+                id="ollama-url"
                 type="text"
-                value={localLlmUrl}
-                onChange={(e) => setLocalLlmUrl(e.target.value)}
-                placeholder="http://localhost:11434/v1/..."
+                value={ollamaUrl}
+                onChange={(e) => setOllamaUrl(e.target.value)}
+                placeholder="http://localhost:11434/v1/chat/completions"
                 className="w-full bg-white dark:bg-gray-900 border border-gray-400 dark:border-gray-600 rounded-md px-3 py-2 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
                 disabled={isLoading}
             />

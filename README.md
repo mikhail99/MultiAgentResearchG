@@ -216,9 +216,24 @@ A sophisticated research tool that uses multiple AI agents to analyze topics thr
 
 ### **Tech Stack**
 - **Frontend**: React 19, TypeScript, Tailwind CSS
-- **AI Integration**: Gemini API, OpenAI-compatible endpoints
+- **AI Integration**: Gemini API, OpenAI-compatible endpoints, @huggingface/transformers (client-side models)
 - **Build Tool**: Vite
 - **Deployment**: Static hosting compatible
+
+### **Client-side AI with @huggingface/transformers**
+This project now includes support for running lightweight AI models directly in the browser using @huggingface/transformers. This enables:
+- Offline AI capabilities
+- Reduced latency for simple tasks
+- Privacy-focused processing (no data sent to external servers)
+- Fallback option when API keys are not available
+
+The Transformers.js service has been enhanced with:
+- True streaming support for real-time text generation
+- Improved type safety and error handling
+- Structured response parsing for reliable JSON output
+- Resource cleanup methods for better memory management
+- Updated to the latest version (3.7.5) for better performance and model support
+- Using Qwen3 0.6B model for improved text generation quality
 
 ### **Project Structure**
 ```

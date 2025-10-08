@@ -1,7 +1,7 @@
 // LangGraph.js with web environment support
 import { StateGraph, START, END, Annotation, MemorySaver } from "@langchain/langgraph/web";
 import { WorkflowState } from '../types/workflow_LG';
-import { ProcessStatus } from '../types';
+import { ProcessStatus, ModelProvider } from '../types';
 import { createInitialState, shouldRestart, shouldContinue } from './workflowService_LG';
 import type { NodeCallbacks } from './workflowService_LG';
 
@@ -160,7 +160,7 @@ async function createLangGraphWorkflow() {
 // Create and cache the compiled workflow
 let compiledWorkflow: any = null;
 
-async function getCompiledWorkflow(callbacks?: { onStatus?: (status: string) => void; onStream?: (chunk: string) => void; prompts?: Record<string, string> }) {
+async function getCompiledWorkflow(callbacks?: { onStatus?: (status: string) => void; onStream?: (chunk: string) => void; prompts?: Record<string, string>; llmOptions?: { provider: ModelProvider; url?: string } }) {
   if (!compiledWorkflow || callbacks) {
     // Set the callbacks for the current execution
     if (callbacks) {
@@ -183,6 +183,7 @@ export interface WorkflowRunOptions {
   config?: {
     recursionLimit?: number;
     maxRestarts?: number;
+    llmOptions?: { provider: ModelProvider; url?: string };
   };
   prompts?: Record<string, string>;
   initialState?: WorkflowState;
@@ -226,6 +227,7 @@ export class LangGraphWebService {
           options.onChunk({ currentStep: status } as Partial<WorkflowState>);
         }
       },
+      llmOptions: options.config?.llmOptions || { provider: ModelProvider.TRANSFORMERS },
       onStream: (chunk: string) => {
         // Handle memory updates
         if (chunk.includes('[MEMORY_UPDATE]')) {
@@ -395,6 +397,7 @@ export class LangGraphWebService {
             options.onChunk({ currentStep: status } as Partial<WorkflowState>);
           }
         },
+        llmOptions: options.config?.llmOptions || { provider: ModelProvider.TRANSFORMERS },
         onStream: (chunk: string) => {
           // Handle memory updates
           if (chunk.includes('[MEMORY_UPDATE]')) {

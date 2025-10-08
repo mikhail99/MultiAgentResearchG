@@ -176,7 +176,6 @@ File Contents:
 ---`
     },
     modelProvider: ModelProvider.GEMINI,
-    localLlmUrl: 'http://localhost:11434/v1/chat/completions',
     enableWebSearch: true,
     enableLocalSearch: true,
     theme: 'light',
@@ -319,7 +318,6 @@ File Contents:
 ---`
     },
     modelProvider: ModelProvider.GEMINI,
-    localLlmUrl: 'http://localhost:11434/v1/chat/completions',
     enableWebSearch: true,
     enableLocalSearch: true,
     theme: 'light',
@@ -376,7 +374,6 @@ export const useWorkflowTemplates = () => {
     currentState: {
       agentPrompts: AgentPrompts;
       modelProvider: ModelProvider;
-      localLlmUrl: string;
       enableWebSearch: boolean;
       enableLocalSearch: boolean;
       theme: 'light' | 'dark';
@@ -393,7 +390,6 @@ export const useWorkflowTemplates = () => {
       version: '1.0',
       agentPrompts: currentState.agentPrompts,
       modelProvider: currentState.modelProvider,
-      localLlmUrl: currentState.localLlmUrl,
       enableWebSearch: currentState.enableWebSearch,
       enableLocalSearch: currentState.enableLocalSearch,
       theme: currentState.theme,

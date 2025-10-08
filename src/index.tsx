@@ -1,3 +1,9 @@
+// Configure Transformers.js for browser environment before any imports
+import('@huggingface/transformers').then(({ env }) => {
+  env.allowRemoteModels = true;
+  env.useBrowserCache = true;
+  env.allowLocalModels = false;
+});
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';

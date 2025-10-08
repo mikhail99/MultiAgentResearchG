@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { AgentName, StylizedFact, LlmOptions, ModelProvider } from '../types';
+import { transformersService } from './transformersService';
 
 if (!process.env.API_KEY) {
   console.warn("API_KEY environment variable not set. Gemini models will not be available.");
@@ -53,8 +54,22 @@ export const generateContentStream = async (
         }
     }
 
-  } else { // Local LLM Streaming
-    if (!options.url) throw new Error("Local LLM URL is not provided.");
+  } else if (options.provider === ModelProvider.TRANSFORMERS) { // Transformers.js
+    try {
+      accumulatedText = await transformersService.generateTextStream(
+        fullPrompt,
+        onChunk,
+        {
+          temperature: 0.5,
+          maxTokens: 1000,
+        }
+      );
+    } catch (e) {
+      console.error("Transformers.js stream error:", e);
+      throw new Error(`Failed to generate streaming response with Transformers.js: ${e}`);
+    }
+  } else { // Ollama (Local LLM)
+    if (!options.url) throw new Error("Ollama URL is required for LOCAL provider.");
     try {
       const response = await fetch(options.url, {
         method: 'POST',
@@ -63,13 +78,13 @@ export const generateContentStream = async (
           model: 'qwen3:4b',
           messages: [{ role: 'user', content: fullPrompt }],
           temperature: 0.5,
-          stream: true, // Enable streaming
+          stream: true,
         }),
       });
 
       if (!response.ok) {
         const errorBody = await response.text();
-        throw new Error(`Local LLM API request failed with status ${response.status}: ${errorBody}`);
+        throw new Error(`Ollama API request failed with status ${response.status}: ${errorBody}`);
       }
 
       if (!response.body) {
@@ -86,9 +101,8 @@ export const generateContentStream = async (
         
         buffer += decoder.decode(value, { stream: true });
         
-        // Process line by line
         const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep the last, possibly incomplete line
+        buffer = lines.pop() || '';
 
         for (const line of lines) {
             if (line.startsWith('data: ')) {
@@ -111,8 +125,8 @@ export const generateContentStream = async (
       }
 
     } catch (e) {
-      console.error("Local LLM stream error:", e);
-      throw new Error(`Failed to stream from local LLM at ${options.url}. Is the server running and CORS configured correctly?`);
+      console.error("Ollama stream error:", e);
+      throw new Error(`Failed to stream from Ollama at ${options.url}. Is the server running and CORS configured correctly?`);
     }
   }
 
@@ -147,8 +161,19 @@ export const generateContent = async (agentName: AgentName, fullPrompt: string, 
     }
     return text;
 
-  } else { // Local LLM
-    if (!options.url) throw new Error("Local LLM URL is not provided.");
+  } else if (options.provider === ModelProvider.TRANSFORMERS) { // Transformers.js
+    try {
+      return await transformersService.generateText(fullPrompt, {
+        temperature: 0.5,
+        maxTokens: 1000,
+        stream: false,
+      });
+    } catch (e) {
+      console.error("Transformers.js generation error:", e);
+      throw new Error(`Failed to generate response with Transformers.js: ${e}`);
+    }
+  } else { // Ollama (Local LLM)
+    if (!options.url) throw new Error("Ollama URL is required for LOCAL provider.");
     try {
       const response = await fetch(options.url, {
         method: 'POST',
@@ -162,16 +187,16 @@ export const generateContent = async (agentName: AgentName, fullPrompt: string, 
       });
       if (!response.ok) {
         const errorBody = await response.text();
-        throw new Error(`Local LLM API request failed with status ${response.status}: ${errorBody}`);
+        throw new Error(`Ollama API request failed with status ${response.status}: ${errorBody}`);
       }
       const data = await response.json();
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw new Error('Invalid response structure from local LLM.');
+        throw new Error('Invalid response structure from Ollama.');
       }
       return data.choices[0].message.content;
     } catch (e) {
-      console.error("Local LLM request error:", e);
-      throw new Error(`Failed to communicate with the local LLM at ${options.url}. Is the server running and CORS configured correctly?`);
+      console.error("Ollama request error:", e);
+      throw new Error(`Failed to communicate with Ollama at ${options.url}. Is the server running and CORS configured correctly?`);
     }
   }
 };
@@ -252,8 +277,30 @@ export const generateFacts = async (finalReport: string, options: LlmOptions): P
       console.error("Failed to parse structured JSON from Gemini for facts:", error);
       return [];
     }
-  } else { // Local LLM
-    if (!options.url) throw new Error("Local LLM URL is not provided.");
+  } else if (options.provider === ModelProvider.TRANSFORMERS) { // Transformers.js
+    const prompt = `
+      Based on the following final report, extract 5 to 7 key "stylized facts".
+      A stylized fact is a broad generalization or an empirical pattern that is widely accepted or representative of the core findings.
+      Return a JSON object with a single key "facts". The value of "facts" should be an array of objects, where each object has a "fact" (string) and a "description" (string).
+      Final Report:
+      ---
+      ${finalReport}
+      ---
+      IMPORTANT: You must respond with only a single JSON object, and nothing else. Do not include any text before or after the JSON.
+    `;
+    try {
+      const result = await transformersService.generateStructuredResponse<{ facts: StylizedFact[] }>(
+        prompt,
+        { facts: [] },
+        { temperature: 0.5, maxTokens: 1000 }
+      );
+      return Array.isArray(result.facts) ? result.facts : [];
+    } catch (e) {
+      console.error("Transformers.js facts generation error:", e);
+      throw new Error(`Failed to generate facts with Transformers.js: ${e}`);
+    }
+  } else { // Ollama (Local LLM)
+    if (!options.url) throw new Error("Ollama URL is required for LOCAL provider.");
     const prompt = `
       Based on the following final report, extract 5 to 7 key "stylized facts". 
       A stylized fact is a broad generalization or an empirical pattern that is widely accepted or representative of the core findings.
@@ -277,20 +324,20 @@ export const generateFacts = async (finalReport: string, options: LlmOptions): P
       });
       if (!response.ok) {
         const errorBody = await response.text();
-        throw new Error(`Local LLM API request failed with status ${response.status}: ${errorBody}`);
+        throw new Error(`Ollama API request failed with status ${response.status}: ${errorBody}`);
       }
       const data = await response.json();
       if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-        throw new Error('Invalid response structure from local LLM.');
+        throw new Error('Invalid response structure from Ollama.');
       }
       const resultText = data.choices[0].message.content;
       const jsonStr = resultText.substring(resultText.indexOf('{'), resultText.lastIndexOf('}') + 1);
       const parsed = JSON.parse(jsonStr);
       return Array.isArray(parsed.facts) ? parsed.facts : [];
     } catch (e) {
-        console.error("Failed to parse structured JSON from Local LLM for facts:", e);
+        console.error("Failed to parse structured JSON from Ollama for facts:", e);
         const errorMessage = e instanceof Error ? e.message : String(e);
-        throw new Error(`Failed to communicate with the local LLM at ${options.url}. Is the server running and CORS configured correctly? Details: ${errorMessage}`);
+        throw new Error(`Failed to communicate with Ollama at ${options.url}. Is the server running and CORS configured correctly? Details: ${errorMessage}`);
     }
   }
 };
@@ -334,8 +381,30 @@ export const generateQuestions = async (finalReport: string, options: LlmOptions
         console.error("Failed to parse structured JSON from Gemini for questions:", error);
         return [];
       }
-    } else { // Local LLM
-      if (!options.url) throw new Error("Local LLM URL is not provided.");
+    } else if (options.provider === ModelProvider.TRANSFORMERS) { // Transformers.js
+      const prompt = `
+        Based on the following final report, generate 5 insightful and thought-provoking "stylized questions".
+        These questions should stimulate further research, challenge assumptions, or explore the boundaries of the topic.
+        Return a JSON object with a single key "questions", which is an array of strings.
+        Final Report:
+        ---
+        ${finalReport}
+        ---
+        IMPORTANT: You must respond with only a single JSON object, and nothing else. Do not include any text before or after the JSON.
+      `;
+      try {
+        const result = await transformersService.generateStructuredResponse<{ questions: string[] }>(
+          prompt,
+          { questions: [] },
+          { temperature: 0.5, maxTokens: 1000 }
+        );
+        return Array.isArray(result.questions) ? result.questions : [];
+      } catch (e) {
+        console.error("Transformers.js questions generation error:", e);
+        throw new Error(`Failed to generate questions with Transformers.js: ${e}`);
+      }
+    } else { // Ollama (Local LLM)
+      if (!options.url) throw new Error("Ollama URL is required for LOCAL provider.");
       const prompt = `
         Based on the following final report, generate 5 insightful and thought-provoking "stylized questions".
         These questions should stimulate further research, challenge assumptions, or explore the boundaries of the topic.
@@ -359,20 +428,20 @@ export const generateQuestions = async (finalReport: string, options: LlmOptions
         });
         if (!response.ok) {
           const errorBody = await response.text();
-          throw new Error(`Local LLM API request failed with status ${response.status}: ${errorBody}`);
+          throw new Error(`Ollama API request failed with status ${response.status}: ${errorBody}`);
         }
         const data = await response.json();
         if (!data.choices || !data.choices[0] || !data.choices[0].message) {
-          throw new Error('Invalid response structure from local LLM.');
+          throw new Error('Invalid response structure from Ollama.');
         }
         const resultText = data.choices[0].message.content;
         const jsonStr = resultText.substring(resultText.indexOf('{'), resultText.lastIndexOf('}') + 1);
         const parsed = JSON.parse(jsonStr);
         return Array.isArray(parsed.questions) ? parsed.questions : [];
       } catch (e) {
-          console.error("Failed to parse structured JSON from Local LLM for questions:", e);
+          console.error("Failed to parse structured JSON from Ollama for questions:", e);
           const errorMessage = e instanceof Error ? e.message : String(e);
-          throw new Error(`Failed to communicate with the local LLM at ${options.url}. Is the server running and CORS configured correctly? Details: ${errorMessage}`);
+          throw new Error(`Failed to communicate with Ollama at ${options.url}. Is the server running and CORS configured correctly? Details: ${errorMessage}`);
       }
     }
 };

@@ -99,7 +99,7 @@ export class AMemService {
     content: string,
     topic: string,
     iteration: number,
-    modelProvider: ModelProvider = ModelProvider.LOCAL
+    modelProvider: ModelProvider = ModelProvider.OLLAMA
   ): Promise<MemoryNote> {
     try {
       console.log(`📝 Constructing memory note for ${agentName}...`);
@@ -161,7 +161,7 @@ export class AMemService {
   async generateLinks(
     newNote: MemoryNote,
     existingNotes: MemoryNote[],
-    modelProvider: ModelProvider = ModelProvider.LOCAL
+    modelProvider: ModelProvider = ModelProvider.OLLAMA
   ): Promise<MemoryLink[]> {
     // Ensure existingNotes is an array
     const safeExistingNotes = Array.isArray(existingNotes) ? existingNotes : [];
@@ -229,7 +229,7 @@ export class AMemService {
   async evolveMemories(
     newNote: MemoryNote,
     connectedNotes: MemoryNote[],
-    modelProvider: ModelProvider = ModelProvider.LOCAL
+    modelProvider: ModelProvider = ModelProvider.OLLAMA
   ): Promise<MemoryEvolutionAction[]> {
     if (connectedNotes.length === 0) {
       console.log('ℹ️ No connected notes to evolve');

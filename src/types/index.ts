@@ -24,7 +24,8 @@ export enum AgentName {
 
 export enum ModelProvider {
     GEMINI = 'GEMINI',
-    LOCAL = 'LOCAL'
+    OLLAMA = 'OLLAMA',
+    TRANSFORMERS = 'TRANSFORMERS',
 }
 
 export interface StylizedFact {
@@ -55,7 +56,7 @@ export interface AgentStates {
 
 export interface LlmOptions {
     provider: ModelProvider;
-    url: string;
+    url?: string; // Required for Ollama, optional for others
 }
 
 export type AgentPrompts = {

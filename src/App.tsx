@@ -109,8 +109,8 @@ export default function App_LG() {
   const [isWorkflowRunning, setIsWorkflowRunning] = useState<boolean>(false);
 
   // Model and tool settings
-  const [modelProvider, setModelProvider] = useState<ModelProvider>(ModelProvider.LOCAL);
-  const [localLlmUrl, setLocalLlmUrl] = useState<string>('http://localhost:11434/v1/chat/completions');
+  const [modelProvider, setModelProvider] = useState<ModelProvider>(ModelProvider.TRANSFORMERS);
+  const [ollamaUrl, setOllamaUrl] = useState<string>('http://localhost:11434/v1/chat/completions');
   const [toolServiceAvailable, setToolServiceAvailable] = useState<boolean>(false);
   const [enableWebSearch, setEnableWebSearch] = useState<boolean>(true);
   const [enableLocalSearch, setEnableLocalSearch] = useState<boolean>(true);
@@ -431,6 +431,7 @@ export default function App_LG() {
         },
         config: {
           recursionLimit: 50,
+          llmOptions: llmOptions,
         },
         prompts: agentPrompts,
       };
@@ -596,7 +597,9 @@ export default function App_LG() {
       await generateContentStream(
         AgentName.LEARNINGS,
         factsPrompt,
-        { provider: modelProvider, url: localLlmUrl },
+        modelProvider === ModelProvider.OLLAMA
+          ? { provider: modelProvider, url: ollamaUrl }
+          : { provider: modelProvider },
         (chunk) => {
           factsBuffer += chunk;
           setStylizedFacts(parseFactsFromBuffer(factsBuffer));
@@ -619,7 +622,9 @@ export default function App_LG() {
       await generateContentStream(
         AgentName.LEARNINGS,
         questionsPrompt,
-        { provider: modelProvider, url: localLlmUrl },
+        modelProvider === ModelProvider.OLLAMA
+          ? { provider: modelProvider, url: ollamaUrl }
+          : { provider: modelProvider },
         (chunk) => {
           questionsBuffer += chunk;
           setStylizedQuestions(parseQuestionsFromBuffer(questionsBuffer));
@@ -684,7 +689,6 @@ export default function App_LG() {
     trackUsage(template.id);
     setAgentPromptsWithPersistence(template.agentPrompts);
     setModelProvider(template.modelProvider);
-    setLocalLlmUrl(template.localLlmUrl);
     setEnableWebSearch(template.enableWebSearch);
     setEnableLocalSearch(template.enableLocalSearch);
     // Note: Theme is managed by useTheme hook, template theme application would need different approach
@@ -697,7 +701,6 @@ export default function App_LG() {
     const templateId = createTemplate(name, description, category, {
       agentPrompts, // This will include the current custom prompts
       modelProvider,
-      localLlmUrl,
       enableWebSearch,
       enableLocalSearch,
       theme,
@@ -862,7 +865,9 @@ ${questionsText}
 
   // Computed values
   const isLoading = isWorkflowRunning;
-  const llmOptions: LlmOptions = { provider: modelProvider, url: localLlmUrl };
+  const llmOptions: LlmOptions = modelProvider === ModelProvider.OLLAMA
+    ? { provider: modelProvider, url: ollamaUrl }
+    : { provider: modelProvider };
 
   return (
     <ErrorBoundary>
@@ -914,8 +919,8 @@ ${questionsText}
                 iteration={iteration}
                 modelProvider={modelProvider}
                 setModelProvider={setModelProvider}
-                localLlmUrl={localLlmUrl}
-                setLocalLlmUrl={setLocalLlmUrl}
+                ollamaUrl={ollamaUrl}
+                setOllamaUrl={setOllamaUrl}
                 enableWebSearch={enableWebSearch}
                 setEnableWebSearch={setEnableWebSearch}
                 enableLocalSearch={enableLocalSearch}
@@ -1038,7 +1043,6 @@ ${questionsText}
           currentPrompts={agentPrompts}
           currentSettings={{
             modelProvider,
-            localLlmUrl,
             enableWebSearch,
             enableLocalSearch,
             theme,
